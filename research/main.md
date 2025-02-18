@@ -109,32 +109,44 @@ If the number of public inputs of the circuit is $M$, the verification key consi
 
 As we're using the **BLS12-381** elliptic curve, each element in $\mathbb{G}_1$ can be compressed to 48 bytes, and the ones in $\mathbb{G}_2$ to 96 bytes. Therefore, the verification key size is $96 \cdot 3  + 48 \cdot (M + 1)$ bytes.
 
-#### Verifier complexity and proof size
+#### Proof size
+The proof consists of:
+- 2 elliptic curve points in $\mathbb{G}_1$,
+- 1 elliptic curve point in $\mathbb{G}_2$.
+
+Therefore, the size of a compressed groth16 proof over **BLS12-381** is $48\cdot 2 + 96 = 192$ bytes. Note that the only constructors of `G1Element` and `G2Element` in Aiken are `bls12_381_G1_uncompress` and `bls12_381_G2_uncompress` that take 48 and 96-byte strings as input. The **BLS12-381** built-in functions take as arguments objects of type `G1Element` and `G2Element`. This means that elements must be stored compressed.
+
+#### Verifier complexity
 Proof verification is relatively fast, and all the operations needed for verification are supported by the Plutus **BLS12-381** builtins:
+
 - $M$ scalar multiplications in $G_1$ (`bls12_381_g1_scalar_mul`)
 - $M$ group additions in $G_1$ (`bls12_381_g1_add`)
 - 4 Miller loops (`bls12_381_miller_loop`)
 - 2 multiplications in the extension field (`bls12_381_mul_miller_loop_result`)
 - 1 check that two elements in the extension field represent the same coset (`bls12_381_final_verify`)
 
-The proof consists of:
-- 2 elliptic curve points in $\mathbb{G}_1$,
-- 1 elliptic curve point in $\mathbb{G}_2$.
-
-Therefore, the size of a compressed groth16 proof over **BLS12-381** is $48\cdot 2 + 96 = 192$ bytes. Note that the only constructors of `G1Element` and `G2Element` in Aiken are `bls12_381_G1_uncompress` and `bls12_381_G2_uncompress` that take 48 and 96-byte strings as input. The **BLS12-381** built-in functions take as arguments objects of type `G1Element` and `G2Element`.
+Note that, apart from the number of public inputs $M$, the verifier complexity is independent of the size of the circuit. This is also true for Plonk, as we'll see in the next section.
 
 ### Plonk
 [Plonk](https://eprint.iacr.org/2019/953.pdf) is a popular zk-SNARK known for its flexibility and efficiency. In this context, we'll analyze Plonk with KZG over the **BLS12-381** curve. Unlike Groth16, it doesn't require a new trusted setup for each circuit. Although new circuits need a specific verification key, this key can be generated without the need of a trusted ceremony. This makes it more practical for many applications while still relying on a structured reference string (SRS) via the KZG commitment scheme.
 
 Plonk's trusted setup can also be produced with an MPC ceremony like in Groth16's case. As long as at least one participant discards their secret, the setup remains secure. This can mitigate concerns about trust assumptions.
 
-#### Proof size
+#### Verification key size
 In Plonk, verification keys and proof sizes are independent of the number of public inputs. The verification key consists of:
 
 - $9$ elliptic curve points on $\mathbb{G}_1$.
 - $2$ elliptic curve points on $\mathbb{G}_2$.
 
 Total verification key size: $96 \cdot 2 + 48 \cdot 9 = 624$ bytes.
+
+#### Proof size
+The proof consists of:
+
+- 9 elliptic curve points in $\mathbb{G}_1$,
+- 6 scalar field elements.
+
+Total proof size: $48 \cdot 9 + 32 \cdot 6 = 624$ bytes, independent of $M$.
 
 #### Verifier complexity
 The exact complexity of the Plonk verifier varies depending on the tricks and optimizations used. But, if the circuit has $M$ public inputs, then the verification of a proof involves approximately the following operations:
@@ -145,15 +157,7 @@ The exact complexity of the Plonk verifier varies depending on the tricks and op
 - 1 check that two elements in the extension field represent the same coset (`bls12_381_final_verify`)
 - $O(M)$ operations on the scalar field. These are usually negligible compared to the above.
 
-Pairings and elliptic curve operations are supported by their corresponding plutus **BLS12-381** builtins, shown between brackets.
-
-The proof consists of:
-
-- 9 elliptic curve points in $\mathbb{G}_1$,
-- 6 scalar field elements.
-
-Total proof size: $48 \cdot 9 + 32 \cdot 6 = 624$ bytes, independent of $M$.
-
+Pairings and elliptic curve operations are supported by their corresponding plutus **BLS12-381** builtins, shown between brackets. Again, the complexity does not depend on the circuit size apart from the number of public inputs $M$. This is not a big deal because there are tricks to reduce the number of public inputs to a constant. For example, one can check in the circuit that some part of the witness stores the $M$ parameters by hashing them to a single public input. Although this will increase the off-chain prover complexity.
 
 ### Verification costs in Cardano
 A rough estimate of how these operations translate to Cardano's cost model can be found in this [document](https://hackmd.io/@_XlWbpTTRNaI4BeB7d8qig/Bk4nCkWaj), related to [CIP-0381](https://cips.cardano.org/cip/CIP-0381) where the BLS12-381 builtins where suggested.
