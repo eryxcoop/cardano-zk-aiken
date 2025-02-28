@@ -16,7 +16,7 @@ import {
     // hash of the public key of the wallet, to be used in the datum
     const signerHash = deserializeAddress(walletAddress).pubKeyHash;
     // redeemer value to unlock the funds
-    const message = 8; // ya está consumido
+    const message = 12; // ya está consumido
    
     // get the utxo from the script address of the locked funds
     const txHashFromDesposit = process.argv[2];

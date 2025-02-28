@@ -4,10 +4,10 @@ import {
   MeshTxBuilder,
   MeshWallet,
   serializePlutusScript,
-  UTxO,
-  applyParamsToScript
+  UTxO
 } from "@meshsdk/core";
-import blueprint from "./plutus.json" with { type: "json" };
+import { applyParamsToScript } from "@meshsdk/core-csl"
+import blueprint from "./plutus.json";
 
 const blockchainProvider = new BlockfrostProvider(process.env.BLOCKFROST_PROJECT_ID ?? "");
  

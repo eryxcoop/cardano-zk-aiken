@@ -24,7 +24,7 @@ async function main() {
   await txBuilder
     .txOut(scriptAddr, assets) // send assets to the script address
     //.txOutDatumHashValue(mConStr0([7])) // provide the datum where `"constructor": 0`
-    .txOutInlineDatumValue(mConStr0([11]))
+    .txOutInlineDatumValue(mConStr0([12]))
     .changeAddress(walletAddress) // send change back to the wallet address
     .selectUtxosFrom(utxos)
     .complete();

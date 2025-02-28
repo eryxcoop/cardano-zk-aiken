@@ -1,14 +1,10 @@
 use aiken/collection/list
-use cardano/transaction.{OutputReference, Transaction, InlineDatum, Output, Input}
+use cardano/transaction.{OutputReference, Transaction, InlineDatum, Output, Input, Redeemer}
 use cardano/address.{Address, Script}
 use cardano/assets.{from_lovelace}
  
  pub type Datum {
    count: Int,
- }
-
- pub type Redeemer {
-   count: Int
  }
 
 validator counter {
@@ -18,7 +14,6 @@ validator counter {
     own_ref: OutputReference,
     self: Transaction,
   ) {
-
 
     let Transaction { inputs, outputs, .. } = self
  
@@ -46,7 +41,7 @@ validator counter {
 }
 
 test test_counter() {
-  let utxo_datum = Datum { count: 7 }
+  let utxo_datum = Datum { count: 11 }
 
   let utxo_reference = OutputReference { transaction_id: "", output_index: 0 }
 
@@ -64,7 +59,7 @@ test test_counter() {
     reference_script: None
     }
 
-  let new_datum = Datum { count: 8 }
+  let new_datum = Datum { count: 12}
 
   let new_utxo = Output { 
     address: test_address,
