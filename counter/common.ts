@@ -43,31 +43,31 @@ export function getTxBuilder() {
     });
     }
    
-    export async function getUtxoByTxHashAndAddress(txHash: string, address: string): Promise<UTxO> {
-      // Fetch the UTxOs related to the provided transaction hash
-      const utxos = await blockchainProvider.fetchUTxOs(txHash);
-    
-      // If no UTxOs are found, throw an error
-      if (utxos.length === 0) {
-        throw new Error("UTxO not found");
-      }
-    
-      // Filter the UTxOs to find the one matching the given address
-      const matchingUtxos = utxos.filter((utxo) => utxo.output.address === address);
-    
-      // If no UTxO matches the address, throw an error
-      if (matchingUtxos.length === 0) {
-        throw new Error(`UTxO not found for address: ${address}`);
-      }
-    
-      // If more than one UTxO matches the address, throw an error
-      if (matchingUtxos.length > 1) {
-        throw new Error(`Multiple UTxOs found for address: ${address}`);
-      }
-    
-      // Return the matching UTxO
-      return matchingUtxos[0];
-    }
+export async function getUtxoByTxHashAndAddress(txHash: string, address: string): Promise<UTxO> {
+  // Fetch the UTxOs related to the provided transaction hash
+  const utxos = await blockchainProvider.fetchUTxOs(txHash);
+
+  // If no UTxOs are found, throw an error
+  if (utxos.length === 0) {
+    throw new Error("UTxO not found");
+  }
+
+  // Filter the UTxOs to find the one matching the given address
+  const matchingUtxos = utxos.filter((utxo) => utxo.output.address === address);
+
+  // If no UTxO matches the address, throw an error
+  if (matchingUtxos.length === 0) {
+    throw new Error(`UTxO not found for address: ${address}`);
+  }
+
+  // If more than one UTxO matches the address, throw an error
+  if (matchingUtxos.length > 1) {
+    throw new Error(`Multiple UTxOs found for address: ${address}`);
+  }
+
+  // Return the matching UTxO
+  return matchingUtxos[0];
+}
     
 
   // reusable function to get a UTxO by transaction hash
