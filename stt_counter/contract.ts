@@ -63,7 +63,7 @@ class ContractInterface {
              .mintingScript(this.scriptCbor)
              .mintRedeemerValue(mConStr0(['mesh']))
              // .txOut(this.scriptAddr, assets)
-             // .txOutInlineDatumValue(mConStr0([0]))
+             .txOutInlineDatumValue(mConStr0([0]))
              .changeAddress(walletAddress)
              .selectUtxosFrom([this.originatingUTxO])
              .txInCollateral(

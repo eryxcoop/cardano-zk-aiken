@@ -7,7 +7,7 @@ use cardano/transaction.{InlineDatum, OutputReference, Transaction}
  
 validator counter_stt(utxo_ref: OutputReference) {
   mint(_redeemer: Data, policy_id: PolicyId, self: Transaction) {
-    let Transaction { inputs, mint, .. } = self
+    let Transaction { inputs, outputs, mint, .. } = self
  
     expect [Pair(_asset_name, quantity)] =
       mint |> assets.tokens(policy_id) |> dict.to_pairs()
@@ -15,15 +15,14 @@ validator counter_stt(utxo_ref: OutputReference) {
     let is_output_consumed =
       list.any(inputs, fn(input) { input.output_reference == utxo_ref })
  
-    //expect Some(nft_output) =
-    //  list.find(
-    //    outputs,
-    //    fn(output) { list.has(policies(output.value), policy_id) },
-    //  )
-    //expect InlineDatum(datum) = nft_output.datum
-    //expect counter: Int = datum
-    //is_output_consumed? && 
-    (1 == quantity)? 
+    expect Some(nft_output) =
+      list.find(
+        outputs,
+        fn(output) { list.has(policies(output.value), policy_id) },
+      )
+    // expect InlineDatum(datum) = nft_output.datum
+    // expect counter: Int = datum
+    is_output_consumed? && (1 == quantity)? 
     //&& counter == 0
   }
 

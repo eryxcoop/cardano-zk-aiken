@@ -5,7 +5,7 @@ import {
   MeshWallet,
   serializePlutusScript,
   UTxO,
-  txOutRef
+  outputReference
 } from "@meshsdk/core";
 import { applyParamsToScript } from "@meshsdk/core-csl"
 import blueprint from "./plutus.json";
@@ -26,7 +26,7 @@ export const wallet = new MeshWallet({
 export function getScript(utxo: UTxO) {
     const scriptCbor = applyParamsToScript(
       blueprint.validators[0].compiledCode,
-      [txOutRef(utxo.input.txHash, utxo.input.outputIndex)],
+      [outputReference(utxo.input.txHash, utxo.input.outputIndex)],
       "JSON"
     );
    
