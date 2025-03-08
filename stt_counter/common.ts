@@ -7,7 +7,7 @@ import {
   UTxO,
   outputReference
 } from "@meshsdk/core";
-import { applyParamsToScript } from "@meshsdk/core-csl"
+import { applyParamsToScript, resolveScriptRef } from "@meshsdk/core-csl"
 import blueprint from "./plutus.json";
 
 const blockchainProvider = new BlockfrostProvider(process.env.BLOCKFROST_PROJECT_ID ?? "");
@@ -34,7 +34,7 @@ export function getScript(utxo: UTxO) {
       { code: scriptCbor, version: "V3" },
     ).address;
    
-    return { scriptCbor, scriptAddr };
+    return {scriptCbor, scriptAddr };
 }
 
 // reusable function to get a transaction builder

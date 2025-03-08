@@ -1,4 +1,4 @@
-import { Asset, deserializeAddress, mConStr0, stringToHex, Transaction, UTxO } from "@meshsdk/core";
+import { Asset, deserializeAddress, mConStr0, resolvePlutusScriptHash, resolveScriptHash, stringToHex, Transaction, UTxO } from "@meshsdk/core";
 import { getScript, getTxBuilder, getUtxoByTxHashAndAddress, wallet } from "./common";
 import { sign } from "crypto";
 
@@ -41,6 +41,7 @@ class ContractInterface {
   constructor(originatingUTxO: UTxO) {
     const {scriptAddr, scriptCbor} = getScript(originatingUTxO);
     this.scriptAddr = scriptAddr;
+    console.log(this.scriptAddr)
     this.scriptCbor = scriptCbor;
     this.originatingUTxO = originatingUTxO;
   }
@@ -51,7 +52,9 @@ class ContractInterface {
 
     while (attempts > 0) {
          try {
-           const assets = [{ unit: "lovelace", quantity: amount.toString() }];
+           const policyID = resolveScriptHash(this.scriptCbor, "V3");
+           const assetNameInHex = stringToHex("tuki");
+           const assets = [{ unit: "lovelace", quantity: amount.toString() }, { unit: policyID + assetNameInHex, quantity: "1"}];
            const walletAddress = (await wallet.getUsedAddresses())[0];
            const collateral = (await wallet.getCollateral())[0];
            console.log(collateral)
@@ -59,10 +62,10 @@ class ContractInterface {
            const txBuilder = getTxBuilder();
            await txBuilder
              .mintPlutusScriptV3()
-             .mint("1", this.scriptAddr, stringToHex("tuki"))
+             .mint("1", policyID, assetNameInHex)
              .mintingScript(this.scriptCbor)
              .mintRedeemerValue(mConStr0(['mesh']))
-             // .txOut(this.scriptAddr, assets)
+             .txOut(this.scriptAddr, assets)
              .txOutInlineDatumValue(mConStr0([0]))
              .changeAddress(walletAddress)
              .selectUtxosFrom([this.originatingUTxO])
