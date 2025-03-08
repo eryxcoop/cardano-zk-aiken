@@ -3,7 +3,6 @@ import ContractInterface, { createOriginatingUTxO } from "./contract";
 
 async function main() {
     console.log("creating initial utxo")
-    await getUtxoByTxHash(await createOriginatingUTxO(50 * 1000000));
     const originatingUTxO = await getUtxoByTxHash(await createOriginatingUTxO(50 * 1000000));
     console.log("deploying")
     const contract = new ContractInterface(originatingUTxO);

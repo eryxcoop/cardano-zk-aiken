@@ -41,7 +41,6 @@ class ContractInterface {
   constructor(originatingUTxO: UTxO) {
     const {scriptAddr, scriptCbor} = getScript(originatingUTxO);
     this.scriptAddr = scriptAddr;
-    console.log(this.scriptAddr)
     this.scriptCbor = scriptCbor;
     this.originatingUTxO = originatingUTxO;
   }
@@ -57,7 +56,6 @@ class ContractInterface {
            const assets = [{ unit: "lovelace", quantity: amount.toString() }, { unit: policyID + assetNameInHex, quantity: "1"}];
            const walletAddress = (await wallet.getUsedAddresses())[0];
            const collateral = (await wallet.getCollateral())[0];
-           console.log(collateral)
 
            const txBuilder = getTxBuilder();
            await txBuilder
@@ -70,16 +68,15 @@ class ContractInterface {
              .changeAddress(walletAddress)
              .selectUtxosFrom([this.originatingUTxO])
              .txInCollateral(
-                this.originatingUTxO.input.txHash,
-                this.originatingUTxO.input.outputIndex,
-                [this.originatingUTxO.output.amount[0]],
-                this.originatingUTxO.output.address
+                collateral.input.txHash,
+                collateral.input.outputIndex,
+                collateral.output.amount,
+                collateral.output.address
              )
              .complete();
      
            const unsignedTx = txBuilder.txHex;
            const signedTx = await wallet.signTx(unsignedTx);
-           console.log(signedTx.toString())
            txHash = await wallet.submitTx(signedTx);
            console.log(`Locked ${amount} lovelace into the contract at Tx ID: ${txHash}`);
            break;

@@ -20,10 +20,9 @@ validator counter_stt(utxo_ref: OutputReference) {
         outputs,
         fn(output) { list.has(policies(output.value), policy_id) },
       )
-    // expect InlineDatum(datum) = nft_output.datum
-    // expect counter: Int = datum
-    is_output_consumed? && (1 == quantity)? 
-    //&& counter == 0
+    expect InlineDatum(datum) = nft_output.datum
+    expect counter: Int = datum
+    is_output_consumed? && (1 == quantity)? && counter == 0
   }
 
   // "Create the spending part to handle the STT"
