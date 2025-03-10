@@ -152,6 +152,7 @@ class ContractInterface {
   async next_step() {
     const utxos = await wallet.getUtxos();
     const currentStateUTxO = await this.getCurrentStateUTxO();
+    const currentCounter = Number(currentStateUTxO?.output.plutusData ?? "0");
     console.log(currentStateUTxO);
     const assets = [
       { unit: "lovelace", quantity: "10000000" },
@@ -173,7 +174,7 @@ class ContractInterface {
       .txInRedeemerValue(mConStr0([""]))
       .txInInlineDatumPresent()
       .txOut(this.scriptAddr, assets)
-      .txOutInlineDatumValue(1)
+      .txOutInlineDatumValue(currentCounter + 1)
       .changeAddress(walletAddress)
       .txInCollateral(
         collateral.input.txHash,
