@@ -142,47 +142,52 @@ class ContractInterface {
     return txHash;
   }
 
+  async getCurrentStateUTxO() {
+    const utxos = await getUTxOsByAddress(this.scriptAddr);
+    return utxos.find((utxo) =>
+      utxo.output.amount.some((asset) => asset.unit == this.contractStateNFT())
+    );
+  }
+
   async next_step() {
-    const utxos = getUTxOsByAddress(this.scriptAddr);
-    console.log(utxos);
-    //     console.log("Making step from ", currentCounterValue, " to ", currentCounterValue + 1);
-    //     const utxos = await wallet.getUtxos();
-    //     const walletAddress = (await wallet.getUsedAddresses())[0];
-    //     const collateral = (await wallet.getCollateral())[0];
-    //     const scriptUtxo = await getUtxoByTxHashAndAddress(currentStateTxHash, this.scriptAddr);
-    //     const nextCounterValue = currentCounterValue + 1;
-    //     const txBuilder = getTxBuilder();
-    //     await txBuilder
-    //       .spendingPlutusScript("V3")
-    //       .txIn(
-    //         scriptUtxo.input.txHash,
-    //         scriptUtxo.input.outputIndex,
-    //         scriptUtxo.output.amount,
-    //         scriptUtxo.output.address
-    //       )
-    //       .txInScript(this.scriptCbor)
-    //       .txInRedeemerValue(mConStr0([""]))
-    //       .txInInlineDatumPresent()
-    //       .txOut(
-    //         scriptUtxo.output.address,
-    //         scriptUtxo.output.amount
-    //       )
-    //       .txOutInlineDatumValue(mConStr0([nextCounterValue]))
-    //       .changeAddress(walletAddress)
-    //       .txInCollateral(
-    //         collateral.input.txHash,
-    //         collateral.input.outputIndex,
-    //         collateral.output.amount,
-    //         collateral.output.address
-    //       )
-    //       .selectUtxosFrom(utxos)
-    //       .complete();
-    //     const unsignedTx = txBuilder.txHex;
-    //     const signedTx = await wallet.signTx(unsignedTx);
-    //     const txHash = await wallet.submitTx(signedTx);
-    //     await this.waitForTransaction(txHash);
-    //     console.log(`New counter value is: `, nextCounterValue);
-    //     return {nextCounterValue, txHash};
+    const utxos = await wallet.getUtxos();
+    const currentStateUTxO = await this.getCurrentStateUTxO();
+    console.log(currentStateUTxO);
+    const assets = [
+      { unit: "lovelace", quantity: "10000000" },
+      { unit: this.contractStateNFT(), quantity: "1" },
+    ];
+    const walletAddress = (await wallet.getUsedAddresses())[0];
+    const collateral = (await wallet.getCollateral())[0];
+
+    const txBuilder = getTxBuilder();
+    await txBuilder
+      .spendingPlutusScript("V3")
+      .txIn(
+        currentStateUTxO?.input.txHash ?? "",
+        currentStateUTxO?.input.outputIndex ?? 0,
+        currentStateUTxO?.output.amount,
+        currentStateUTxO?.output.address
+      )
+      .txInScript(this.scriptCbor)
+      .txInRedeemerValue(mConStr0([""]))
+      .txInInlineDatumPresent()
+      .txOut(this.scriptAddr, assets)
+      .txOutInlineDatumValue(1)
+      .changeAddress(walletAddress)
+      .txInCollateral(
+        collateral.input.txHash,
+        collateral.input.outputIndex,
+        collateral.output.amount,
+        collateral.output.address
+      )
+      .selectUtxosFrom(utxos)
+      .complete()
+    const unsignedTx = txBuilder.txHex;
+    const signedTx = await wallet.signTx(unsignedTx);
+    const txHash = await wallet.submitTx(signedTx);
+    
+    await waitForTransaction(txHash);
   }
 }
 
