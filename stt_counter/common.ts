@@ -5,13 +5,15 @@ import {
   MeshWallet,
   serializePlutusScript,
   UTxO,
-  outputReference
+  outputReference,
 } from "@meshsdk/core";
-import { applyParamsToScript, resolveScriptRef } from "@meshsdk/core-csl"
+import { applyParamsToScript, resolveScriptRef } from "@meshsdk/core-csl";
 import blueprint from "./plutus.json";
 
-const blockchainProvider = new BlockfrostProvider(process.env.BLOCKFROST_PROJECT_ID ?? "");
- 
+const blockchainProvider = new BlockfrostProvider(
+  process.env.BLOCKFROST_PROJECT_ID ?? ""
+);
+
 // wallet for signing transactions
 export const wallet = new MeshWallet({
   networkId: 0,
@@ -24,28 +26,32 @@ export const wallet = new MeshWallet({
 });
 
 export function getScript(utxo: UTxO) {
-    const scriptCbor = applyParamsToScript(
-      blueprint.validators[0].compiledCode,
-      [outputReference(utxo.input.txHash, utxo.input.outputIndex)],
-      "JSON"
-    );
-   
-    const scriptAddr = serializePlutusScript(
-      { code: scriptCbor, version: "V3" },
-    ).address;
-   
-    return {scriptCbor, scriptAddr };
+  const scriptCbor = applyParamsToScript(
+    blueprint.validators[0].compiledCode,
+    [outputReference(utxo.input.txHash, utxo.input.outputIndex)],
+    "JSON"
+  );
+
+  const scriptAddr = serializePlutusScript({
+    code: scriptCbor,
+    version: "V3",
+  }).address;
+
+  return { scriptCbor, scriptAddr };
 }
 
 // reusable function to get a transaction builder
 export function getTxBuilder() {
-    return new MeshTxBuilder({
-      fetcher: blockchainProvider,
-      submitter: blockchainProvider,
-    });
-    }
-   
-export async function getUtxoByTxHashAndAddress(txHash: string, address: string): Promise<UTxO> {
+  return new MeshTxBuilder({
+    fetcher: blockchainProvider,
+    submitter: blockchainProvider,
+  });
+}
+
+export async function getUtxoByTxHashAndAddress(
+  txHash: string,
+  address: string
+): Promise<UTxO> {
   // Fetch the UTxOs related to the provided transaction hash
   const utxos = await blockchainProvider.fetchUTxOs(txHash);
 
@@ -70,13 +76,16 @@ export async function getUtxoByTxHashAndAddress(txHash: string, address: string)
   // Return the matching UTxO
   return matchingUtxos[0];
 }
-    
 
-  // reusable function to get a UTxO by transaction hash
+// reusable function to get a UTxO by transaction hash
 export async function getUtxoByTxHash(txHash: string): Promise<UTxO> {
-    const utxos = await blockchainProvider.fetchUTxOs(txHash);
-    if (utxos.length === 0) {
-      throw new Error("UTxO not found");
-    }
-    return utxos[0];
-    }
+  const utxos = await blockchainProvider.fetchUTxOs(txHash);
+  if (utxos.length === 0) {
+    throw new Error("UTxO not found");
+  }
+  return utxos[0];
+}
+
+export async function getUTxOsByAddress(address: string): Promise<UTxO[]> {
+  return await blockchainProvider.fetchAddressUTxOs(address);
+}

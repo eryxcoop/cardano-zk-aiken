@@ -12,9 +12,11 @@ import {
   getScript,
   getTxBuilder,
   getUtxoByTxHashAndAddress,
+  getUTxOsByAddress,
   wallet,
 } from "./common";
 import { sign } from "crypto";
+import * as fs from "fs";
 
 export async function createInitialUTxO(amount) {
   const assets = [{ unit: "lovelace", quantity: amount.toString() }];
@@ -55,6 +57,23 @@ class ContractInterface {
     public stateNFTPolicyID: string,
     public stateNFTNameInHex: string
   ) {}
+
+  save(fileName: string) {
+    const json = JSON.stringify(this, null, 2);
+    fs.writeFileSync("contract_interface.json", json, "utf-8");
+  }
+
+  static load(filePath: string): ContractInterface {
+    const json = fs.readFileSync(filePath, "utf-8");
+    const data = JSON.parse(json);
+    return new ContractInterface(
+      data.scriptAddr,
+      data.scriptCbor,
+      data.initialUTxO, // Ensure this is in the correct UTxO format
+      data.stateNFTPolicyID,
+      data.stateNFTNameInHex
+    );
+  }
 
   static fromInitialUTxO(initialUTxO: UTxO) {
     const { scriptAddr, scriptCbor } = getScript(initialUTxO);
@@ -124,7 +143,8 @@ class ContractInterface {
   }
 
   async next_step() {
-    //  const nftUTxO =
+    const utxos = getUTxOsByAddress(this.scriptAddr);
+    console.log(utxos);
     //     console.log("Making step from ", currentCounterValue, " to ", currentCounterValue + 1);
     //     const utxos = await wallet.getUtxos();
     //     const walletAddress = (await wallet.getUsedAddresses())[0];
