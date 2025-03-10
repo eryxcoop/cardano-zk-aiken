@@ -89,9 +89,9 @@ class ContractInterface {
           .mintPlutusScriptV3()
           .mint("1", this.stateNFTPolicyID, this.stateNFTNameInHex)
           .mintingScript(this.scriptCbor)
-          .mintRedeemerValue(mConStr0([""]))
+          .mintRedeemerValue("")
           .txOut(this.scriptAddr, assets)
-          .txOutInlineDatumValue(mConStr0([0]))
+          .txOutInlineDatumValue(0)
           .changeAddress(walletAddress)
           .selectUtxosFrom([this.initialUTxO])
           .txInCollateral(
