@@ -1,21 +1,14 @@
 import {
-  Asset,
-  deserializeAddress,
-  mConStr0,
-  resolvePlutusScriptHash,
   resolveScriptHash,
   stringToHex,
-  Transaction,
   UTxO,
 } from "@meshsdk/core";
 import {
   getScript,
   getTxBuilder,
-  getUtxoByTxHashAndAddress,
   getUTxOsByAddress,
   wallet,
 } from "./common";
-import { sign } from "crypto";
 import * as fs from "fs";
 
 export async function createInitialUTxO(amount) {
@@ -33,7 +26,9 @@ export async function createInitialUTxO(amount) {
   const unsignedTx = await txBuilder.txHex;
   const signedTx = await wallet.signTx(unsignedTx);
   const txHash = await wallet.submitTx(signedTx);
-  await waitForTransaction(txHash);
+    if (txHash !== undefined) {
+      await waitForTransaction(txHash);
+    }
   return txHash;
 }
 
@@ -69,7 +64,7 @@ class ContractInterface {
     return new ContractInterface(
       data.scriptAddr,
       data.scriptCbor,
-      data.initialUTxO, // Ensure this is in the correct UTxO format
+      data.initialUTxO,
       data.stateNFTPolicyID,
       data.stateNFTNameInHex
     );
@@ -138,57 +133,81 @@ class ContractInterface {
           );
       }
     }
-    await waitForTransaction(txHash);
+    if (txHash !== undefined) {
+      await waitForTransaction(txHash);
+    }
     return txHash;
   }
 
-  async getCurrentStateUTxO() {
+  async getCurrentStateUTxO(): Promise<UTxO> {
     const utxos = await getUTxOsByAddress(this.scriptAddr);
-    return utxos.find((utxo) =>
+    const utxo = utxos.find((utxo) =>
       utxo.output.amount.some((asset) => asset.unit == this.contractStateNFT())
     );
+    if (utxo === undefined) {
+      throw new Error("No UTxO with StateNFT was found.");
+    }
+
+    return utxo;
   }
 
   async next_step() {
-    const utxos = await wallet.getUtxos();
-    const currentStateUTxO = await this.getCurrentStateUTxO();
-    const currentCounter = Number(currentStateUTxO?.output.plutusData ?? "0");
-    console.log(currentStateUTxO);
-    const assets = [
-      { unit: "lovelace", quantity: "10000000" },
-      { unit: this.contractStateNFT(), quantity: "1" },
-    ];
-    const walletAddress = (await wallet.getUsedAddresses())[0];
-    const collateral = (await wallet.getCollateral())[0];
+    let txHash;
+    let attempts = 10;
 
-    const txBuilder = getTxBuilder();
-    await txBuilder
-      .spendingPlutusScript("V3")
-      .txIn(
-        currentStateUTxO?.input.txHash ?? "",
-        currentStateUTxO?.input.outputIndex ?? 0,
-        currentStateUTxO?.output.amount,
-        currentStateUTxO?.output.address
-      )
-      .txInScript(this.scriptCbor)
-      .txInRedeemerValue(mConStr0([""]))
-      .txInInlineDatumPresent()
-      .txOut(this.scriptAddr, assets)
-      .txOutInlineDatumValue(currentCounter + 1)
-      .changeAddress(walletAddress)
-      .txInCollateral(
-        collateral.input.txHash,
-        collateral.input.outputIndex,
-        collateral.output.amount,
-        collateral.output.address
-      )
-      .selectUtxosFrom(utxos)
-      .complete()
-    const unsignedTx = txBuilder.txHex;
-    const signedTx = await wallet.signTx(unsignedTx);
-    const txHash = await wallet.submitTx(signedTx);
-    
-    await waitForTransaction(txHash);
+    while (attempts > 0) {
+      try {
+        const utxos = await wallet.getUtxos();
+        const currentStateUTxO = await this.getCurrentStateUTxO();
+        const currentCounter = parseInt(
+          currentStateUTxO.output.plutusData ?? "0",
+          16
+        );
+        console.log(currentStateUTxO);
+        const assets = currentStateUTxO.output.amount;
+        const walletAddress = (await wallet.getUsedAddresses())[0];
+        const collateral = (await wallet.getCollateral())[0];
+
+        const txBuilder = getTxBuilder();
+        await txBuilder
+          .spendingPlutusScript("V3")
+          .txIn(
+            currentStateUTxO.input.txHash,
+            currentStateUTxO.input.outputIndex,
+            currentStateUTxO.output.amount,
+            currentStateUTxO.output.address
+          )
+          .txInScript(this.scriptCbor)
+          .txInRedeemerValue("")
+          .txInInlineDatumPresent()
+          .txOut(this.scriptAddr, assets)
+          .txOutInlineDatumValue(currentCounter + 1)
+          .changeAddress(walletAddress)
+          .txInCollateral(
+            collateral.input.txHash,
+            collateral.input.outputIndex,
+            collateral.output.amount,
+            collateral.output.address
+          )
+          .selectUtxosFrom(utxos)
+          .complete();
+        const unsignedTx = txBuilder.txHex;
+        const signedTx = await wallet.signTx(unsignedTx);
+        txHash = await wallet.submitTx(signedTx);
+        break;
+      } catch (error) {
+        console.error("Transaction failed, retrying...");
+        attempts--;
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        if (attempts === 0)
+          throw new Error(
+            "Failed to submit transaction after multiple attempts"
+          );
+      }
+    }
+    if (txHash !== undefined) {
+      await waitForTransaction(txHash);
+    }
   }
 }
 

@@ -5,23 +5,19 @@ import * as fs from "fs";
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function main() {
-    // console.log("creating initial utxo")
-    // const originatingUTxO = await getUtxoByTxHash(await createInitialUTxO(50 * 1000000));
+    console.log("creating initial utxo")
+    const originatingUTxO = await getUtxoByTxHash(await createInitialUTxO(50 * 1000000));
 
-    // const contract = ContractInterface.fromInitialUTxO(originatingUTxO);
-    // contract.save("contract_interface.json");
-
-    const contract = ContractInterface.load("contract_interface.json");
-
-    // console.log("deploying")
-    // await contract.deploy(10 * 1000000);
-    
-    await contract.next_step();
-    sleep(5000);
-    await contract.next_step();
-    sleep(5000);
-    await contract.next_step();
+    const contract = ContractInterface.fromInitialUTxO(originatingUTxO);
     contract.save("contract_interface.json");
+
+    console.log("deploying")
+    await contract.deploy(10 * 1000000);
+    
+    //const contract = ContractInterface.load("contract_interface.json");
+    await contract.next_step();
+    await contract.next_step();
+    await contract.next_step();
 }
 
 main();
