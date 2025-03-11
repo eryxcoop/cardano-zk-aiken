@@ -15,4 +15,6 @@ name = "aiken-lang/stdlib"
 version = "v2.2.0"
 source = "github"
 
-[config]
+[config.default.owner]
+bytes = "b72a206a8e6196652c89b1459b507c0caabc9f6b9c7c2b245fc40f67"
+encoding = "hex"

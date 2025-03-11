@@ -6,6 +6,7 @@ import {
   serializePlutusScript,
   UTxO,
   outputReference,
+  deserializeAddress
 } from "@meshsdk/core";
 import { applyParamsToScript, resolveScriptRef } from "@meshsdk/core-csl";
 import blueprint from "./plutus.json";
@@ -88,4 +89,9 @@ export async function getUtxoByTxHash(txHash: string): Promise<UTxO> {
 
 export async function getUTxOsByAddress(address: string): Promise<UTxO[]> {
   return await blockchainProvider.fetchAddressUTxOs(address);
+}
+
+export async function getSignerHash() {
+  const walletAddress = (await wallet.getUsedAddresses())[0];
+  return deserializeAddress(walletAddress).pubKeyHash;
 }

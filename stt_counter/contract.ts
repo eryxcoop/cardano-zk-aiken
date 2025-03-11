@@ -1,5 +1,5 @@
 import { resolveScriptHash, stringToHex, UTxO } from "@meshsdk/core";
-import { getScript, getTxBuilder, getUTxOsByAddress, wallet } from "./common";
+import { getScript, getSignerHash, getTxBuilder, getUTxOsByAddress, wallet } from "./common";
 import * as fs from "fs";
 
 export async function createInitialUTxO(amount) {
@@ -168,6 +168,7 @@ class ContractInterface {
           .txInInlineDatumPresent()
           .txOut(this.scriptAddr, assets)
           .txOutInlineDatumValue(currentCounter + 1)
+          .requiredSignerHash(await getSignerHash())
           .changeAddress(walletAddress)
           .txInCollateral(
             collateral.input.txHash,

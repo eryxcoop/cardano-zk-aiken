@@ -1,9 +1,10 @@
 use aiken/collection/dict
 use aiken/collection/list
+use aiken/crypto.{VerificationKeyHash}
 use cardano/address.{Script}
 use cardano/assets.{PolicyId, policies}
 use cardano/transaction.{InlineDatum, OutputReference, Transaction}
-// use config
+use config
  
 validator counter_stt(utxo_ref: OutputReference) {
   mint(_redeemer: Data, policy_id: PolicyId, self: Transaction) {
@@ -42,9 +43,9 @@ validator counter_stt(utxo_ref: OutputReference) {
       list.find(inputs, fn(input) { input.output_reference == own_ref })
     expect Script(own_script_hash) = own_input.output.address.payment_credential
  
-    // // Checking if the transaction is signed by the operator.
-    // let is_signed_by_operator =
-    //   list.has(self.extra_signatories, config.operator)
+    // Checking if the transaction is signed by the operator.
+    let owner: VerificationKeyHash = config.owner
+    let is_signed_by_owner = list.has(self.extra_signatories, owner)
  
     // One input should hold the STT, with the expected format.
     expect Some(stt_input) =
@@ -66,7 +67,6 @@ validator counter_stt(utxo_ref: OutputReference) {
     expect stt_input.output.address == stt_output.address
  
     // Final validations
-    // is_signed_by_operator? &&
-    (counter_output == counter_input + 1)?
+    is_signed_by_owner? && (counter_output == counter_input + 1)?
   }
 }
