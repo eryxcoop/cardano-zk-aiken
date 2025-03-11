@@ -12,7 +12,7 @@ async function main() {
     contract.save("contract_interface.json");
 
     console.log("deploying")
-    await contract.deploy(10 * 1000000);
+    await contract.deploy();
     
     //const contract = ContractInterface.load("contract_interface.json");
     await contract.next_step();

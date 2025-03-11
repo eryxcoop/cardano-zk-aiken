@@ -1,14 +1,5 @@
-import {
-  resolveScriptHash,
-  stringToHex,
-  UTxO,
-} from "@meshsdk/core";
-import {
-  getScript,
-  getTxBuilder,
-  getUTxOsByAddress,
-  wallet,
-} from "./common";
+import { resolveScriptHash, stringToHex, UTxO } from "@meshsdk/core";
+import { getScript, getTxBuilder, getUTxOsByAddress, wallet } from "./common";
 import * as fs from "fs";
 
 export async function createInitialUTxO(amount) {
@@ -26,9 +17,9 @@ export async function createInitialUTxO(amount) {
   const unsignedTx = await txBuilder.txHex;
   const signedTx = await wallet.signTx(unsignedTx);
   const txHash = await wallet.submitTx(signedTx);
-    if (txHash !== undefined) {
-      await waitForTransaction(txHash);
-    }
+  if (txHash !== undefined) {
+    await waitForTransaction(txHash);
+  }
   return txHash;
 }
 
@@ -85,16 +76,13 @@ class ContractInterface {
     return this.stateNFTPolicyID + this.stateNFTNameInHex;
   }
 
-  async deploy(amount) {
+  async deploy() {
     let txHash;
     let attempts = 10;
 
     while (attempts > 0) {
       try {
-        const assets = [
-          { unit: "lovelace", quantity: amount.toString() },
-          { unit: this.contractStateNFT(), quantity: "1" },
-        ];
+        const assets = [{ unit: this.contractStateNFT(), quantity: "1" }];
         const walletAddress = (await wallet.getUsedAddresses())[0];
         const collateral = (await wallet.getCollateral())[0];
 
@@ -119,9 +107,7 @@ class ContractInterface {
         const unsignedTx = txBuilder.txHex;
         const signedTx = await wallet.signTx(unsignedTx);
         txHash = await wallet.submitTx(signedTx);
-        console.log(
-          `Locked ${amount} lovelace into the contract at Tx ID: ${txHash}`
-        );
+        console.log(`Contract deployed at Tx ID: ${txHash}`);
         break;
       } catch (error) {
         console.error("Transaction failed, retrying...", error);
@@ -164,7 +150,7 @@ class ContractInterface {
           16
         );
         console.log(currentStateUTxO);
-        const assets = currentStateUTxO.output.amount;
+        const assets = [{ unit: this.contractStateNFT(), quantity: "1" }];
         const walletAddress = (await wallet.getUsedAddresses())[0];
         const collateral = (await wallet.getCollateral())[0];
 
