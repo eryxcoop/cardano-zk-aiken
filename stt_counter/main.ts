@@ -1,8 +1,5 @@
 import { getUtxoByTxHash, wallet } from "./common";
 import ContractInterface, { createInitialUTxO } from "./contract";
-import * as fs from "fs";
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function main() {
     console.log("creating initial utxo")
