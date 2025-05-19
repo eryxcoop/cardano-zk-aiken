@@ -11,7 +11,7 @@ validator primes_verificator {
     _datum: Option<Data>,
     _redeemer: Option<Data>,
     _own_ref: OutputReference,
-    _self: Transaction,
+    _self: Transaction, 
   ) {
     let vk: SnarkVerificationKey =
     SnarkVerificationKey {
