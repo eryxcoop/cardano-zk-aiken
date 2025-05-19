@@ -1,34 +1,45 @@
-def decimal_strings_to_hex(data):
-    """
-    Convierte una lista de listas de strings decimales a un string hexadecimal.
-    
-    Args:
-        data (list[list[str]]): Lista de listas con strings que representan decimales.
+import json
+from py_ecc.bls12_381.bls12_381_curve import FQ, FQ2
+from py_ecc.bls.point_compression import (
+    compress_G1,
+    compress_G2
+    )
+from eth_utils import encode_hex
 
-    Returns:
-        str: Representación hexadecimal del número construido al concatenar todos los strings.
-    """
-    # Aplanar la lista de listas en una sola lista
-    flat_list = [item for sublist in data for item in sublist]
+def g1_from_dec(coords):
+    x, y = map(int, coords)
+    return (FQ(x), FQ(y))
 
-    # Concatenar los strings como si fueran dígitos
-    decimal_string = ''.join(flat_list)
+def g2_from_dec(coords):
+    (x0, x1), (y0, y1) = coords
+    return (FQ2([int(x0), int(x1)]), FQ2([int(y0), int(y1)]))
 
-    # Convertir el string a entero decimal
-    decimal_number = int(decimal_string)
+# Cargar el verification_key.json exportado por snarkjs
+with open("verification_key.json") as f:
+    vk = json.load(f)
 
-    # Convertir a hexadecimal
-    hex_string = hex(decimal_number)
+# Procesar cada parte
+alpha_g1 = g1_from_dec(vk["vk_alpha_1"])
+beta_g2 = g2_from_dec(vk["vk_beta_2"])
+gamma_g2 = g2_from_dec(vk["vk_gamma_2"])
+delta_g2 = g2_from_dec(vk["vk_delta_2"])
+ic_points = [g1_from_dec(p) for p in vk["IC"]]
 
-    return hex_string
+# Comprimir a hexadecimal
+compressed_vk = {
+    "vk_alpha_1": encode_hex(compress_G1(alpha_g1))[2:],  # sin "0x"
+    "vk_beta_2": encode_hex(compress_G2(beta_g2))[2:],
+    "vk_gamma_2": encode_hex(compress_G2(gamma_g2))[2:],
+    "vk_delta_2": encode_hex(compress_G2(delta_g2))[2:],
+    "vkIC": [encode_hex(compress_G1(p))[2:] for p in ic_points]
+}
 
-# Ejemplo de uso
-lista = [
-  [
-  "906632857760023531645503951339882088205787817173276500915769102387296842114679272227848424151070031898469938058437",
-  "1904188708159344054082931783797378035061162915446794498830735860801564016938807696363319341958139678318666238701243",
-  "1"
- ]
- ]
-resultado = decimal_strings_to_hex(lista)
-print(resultado)  # ejemplo: '0x1234567890'
+# Imprimir para pegar en Aiken
+print('vkAlpha: #"' + compressed_vk["vk_alpha_1"] + '"')
+print('vkBeta:  #"' + compressed_vk["vk_beta_2"] + '"')
+print('vkGamma: #"' + compressed_vk["vk_gamma_2"] + '"')
+print('vkDelta: #"' + compressed_vk["vk_delta_2"] + '"')
+print("vkIC: [")
+for h in compressed_vk["vkIC"]:
+    print(f'  #"{h}",')
+print("]")
