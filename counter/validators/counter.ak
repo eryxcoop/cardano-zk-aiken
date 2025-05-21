@@ -1,11 +1,13 @@
 use aiken/collection/list
-use cardano/transaction.{OutputReference, Transaction, InlineDatum, Output, Input, Redeemer}
 use cardano/address.{Address, Script}
 use cardano/assets.{from_lovelace}
- 
- pub type Datum {
-   count: Int,
- }
+use cardano/transaction.{
+  InlineDatum, Input, Output, OutputReference, Redeemer, Transaction,
+}
+
+pub type Datum {
+  count: Int,
+}
 
 validator counter {
   spend(
@@ -14,29 +16,26 @@ validator counter {
     own_ref: OutputReference,
     self: Transaction,
   ) {
-
     let Transaction { inputs, outputs, .. } = self
- 
     expect Some(Datum { count: old_count }) = old_datum
-    
-    expect Some(own_input) = 
-      list.find(
-        inputs,
-        fn(input) {input.output_reference == own_ref}   
-      )
+    expect Some(own_input) =
+      list.find(inputs, fn(input) { input.output_reference == own_ref })
 
+    // busca un nuevo utxo que tenga el mismo script/validador con un nuevo estado
+    // el address es el hash del script/validador
     expect Some(output) =
       list.find(
         outputs,
-        fn(output) {output.address == own_input.output.address}
-        )
+        fn(output) { output.address == own_input.output.address },
+      )
 
     expect InlineDatum(maybe_new_datum) = output.datum
-    expect new_datum: Datum = maybe_new_datum    
+    expect new_datum: Datum = maybe_new_datum
 
-    let new_datum_must_be_next = new_datum.count == old_count + 1
- 
-    new_datum_must_be_next?
+    verificar_prueba(circuito, proof)
+  }
+  else(_) {
+    fail
   }
 }
 
@@ -45,31 +44,31 @@ test test_counter() {
 
   let utxo_reference = OutputReference { transaction_id: "", output_index: 0 }
 
-  let test_address = Address {
-    payment_credential: Script(""),
-    stake_credential: None
-    }
+  let test_address =
+    Address { payment_credential: Script(""), stake_credential: None }
 
   let test_value = from_lovelace(1000)
 
-  let utxo_output = Output { 
-    address: test_address,
-    datum: InlineDatum(utxo_datum),
-    value: test_value,
-    reference_script: None
+  let utxo_output =
+    Output {
+      address: test_address,
+      datum: InlineDatum(utxo_datum),
+      value: test_value,
+      reference_script: None,
     }
 
-  let new_datum = Datum { count: 12}
+  let new_datum = Datum { count: 12 }
 
-  let new_utxo = Output { 
-    address: test_address,
-    datum: InlineDatum(new_datum),
-    value: test_value,
-    reference_script: None 
+  let new_utxo =
+    Output {
+      address: test_address,
+      datum: InlineDatum(new_datum),
+      value: test_value,
+      reference_script: None,
     }
 
-  let input_utxo = Input { output_reference: utxo_reference, output: utxo_output }
-
+  let input_utxo =
+    Input { output_reference: utxo_reference, output: utxo_output }
 
   counter.spend(
     Some(utxo_datum),
@@ -78,7 +77,7 @@ test test_counter() {
     Transaction {
       ..transaction.placeholder,
       inputs: [input_utxo],
-      outputs: [new_utxo]
-    }
+      outputs: [new_utxo],
+    },
   )
 }
