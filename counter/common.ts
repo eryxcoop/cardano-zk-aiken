@@ -70,7 +70,7 @@ export async function getUtxoByTxHashAndAddress(txHash: string, address: string)
 }
     
 
-  // reusable function to get a UTxO by transaction hash
+// reusable function to get a UTxO by transaction hash
 export async function getUtxoByTxHash(txHash: string): Promise<UTxO> {
     const utxos = await blockchainProvider.fetchUTxOs(txHash);
     if (utxos.length === 0) {

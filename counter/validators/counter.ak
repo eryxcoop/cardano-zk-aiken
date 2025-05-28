@@ -32,9 +32,9 @@ validator counter {
     expect InlineDatum(maybe_new_datum) = output.datum
     expect new_datum: Datum = maybe_new_datum
 
-    verificar_prueba(circuito, proof)
-  }
-  else(_) {
+    let new_datum_must_be_next = new_datum.count == old_count + 1
+    new_datum_must_be_next?
+  } else(_) {
     fail
   }
 }
