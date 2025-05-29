@@ -42,16 +42,18 @@ fn assert_factors_are_correct(number: Int, factor1: Int, factor2: Int) -> Bool {
 }
 
 fn is_prime(n: Int) -> Bool {
-  if n <= 1 {
-    False
-  } else if n == 2 {
-    True
-  } else {
-    if n % 2 == 0 {
-      False
+  if n > 1 {
+    if n != 2 {
+      if n % 2 == 1 {
+        is_prime_recursive(n, 3)
+      } else {
+       False
+      }
     } else {
-      is_prime_recursive(n, 3)
+      True
     }
+  } else {
+    False
   }
 }
 
