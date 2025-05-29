@@ -35,25 +35,25 @@ validator two_prime_factors_number_succinctness {
 }
 
 fn assert_factors_are_correct(number: Int, factor1: Int, factor2: Int) -> Bool {
-  let pk5: Proof =
-    Proof {
-      piA: #"8affeb5a4d56ed4542482953f056c7460b8cf8d8aef045dfa0e35b4154a4ffb5cc711392b4fd4d9c60de8d04d83d1de8",
-      piB: #"a180ea97f0bc51742ec735ccecbd2e2020164e1f9c6bda53886cf0d186dfc98746e5ae26b04c40584c378d2ed12d515119ba4e7e6088d72c2ecaaadc7b7e9b331b66cf8ff02e1b72d6bcaa75a099ee36debaff0834145c5a18f064a8af7d8745",
-      piC: #"a469ce4446a62067c62b398eb09483728aa418d720148e2ea5d25bc57f49c391af538967bf393c5d0b27a97b0dd92b48",
-    }
+   let pk5: Proof =
+     Proof {
+       piA: #"949135c16bda90ad1633a73dc349e3bfa5791d81f66c3bc2de11c58230fff2b24a8c736d72f6e77ad466354c0245a3d9",
+       piB: #"8cb4dfcf31b1a950656af753975bc46a76c7ff38f9f024e77e93478c92f9d65a5a6c36ecdb566be81b19a37f6240b9a70f295405af43470931b462ca27189ae51e4aceb38ab457e0c19392dccc1d35cc12f61fec33988f49447c1ddac36e46d2",
+       piC: #"99a38d427161b538c189cbb7720aa1b6a84afb7e3824caad44a5e54bb91d4bd1b292ce8e08a7697c89aa2bf2ccc6e739",
+     }
 
   let pk7: Proof =
     Proof {
-      piA: #"84b59f8b3876e9d8b3d39bf8c2f20d206cc955aefde35c6e55b520c07a6706480926e8efb7ab41621fdc5412e2a14aeb",
-      piB: #"86618d30b140bf643ad32199a444602d2296e8c3ed82afcd231587a690b98f92f4e38643584a3363084e049c22a68193001d0b73d2d46cc108ae44a00738f2a886f19c7df8a07f6c244617ce0d99c6b2bec70a3f4a666bec64e0d81bc66c4d7b",
-      piC: #"84cf820dfba581507bf89fd3a8c13ac028f4d99662dd9398751d3ff318997d437eec7e7194dfa85748fcf011abd12340",
+      piA: #"87b2ffc6ee3e3fad918e629a122cecc7709d758c9d67568ac64e2546d420dedd964911d5ffafb0883381eb12d38e6c99",
+      piB: #"84c05d2bc38a0b2229df9471ed92cfa13a2681a1824b4c67c78b3f518447754cd1ec011de7fbcc9f2e0cd3bec8c9b4a212f0b9bb5a29e3097c1de1a62e6aec5d8058b4c2651be334930d59c2ab74a8ffbcce2a625075c103cdf9927bf1e3f2ad",
+      piC: #"b6377a604c9e218a004e29c54250e925c84715b762fe3b55e8a98f638f64d9934562f3175f86c021b3caf42ab04e55af",
     }
 
   let factor1_is_prime = is_prime(factor1, pk5)
-  //let factor2_is_prime = is_prime(factor2, pk7)
+  let factor2_is_prime = is_prime(factor2, pk7)
   let factors_are_correct = number == factor1 * factor2
 
-  factor1_is_prime && factors_are_correct
+  factor1_is_prime? && factor2_is_prime? && factors_are_correct?
 }
 
 fn is_prime(n: Int, proof: Proof) -> Bool {
@@ -63,7 +63,8 @@ fn is_prime(n: Int, proof: Proof) -> Bool {
       vkAlpha: #"85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5",
       vkBeta: #"b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f",
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
-      vkDelta: #"a63b9d52a2d9aa48de3ca66dbc829237ad894e770061a862f4418b91634ff1ca886fc0459f0733f0d654022d944123dc0303596b645473be3a95a733503cd857caa22e6ac93457f75cb834bd5a02438081606069def574d3f145a6a1b7a9b1c0",
+      // Delta cambia
+      vkDelta: #"a7f309cf308acfa962e775200834fd498d2b7ea89b33a3d8545cdc5ac95f457c26ead2a93fda089efb17b0f77e7103cf03b7157352bf7150fe5009cc63780b2dfcfc92c7b5b0842fce059e895e3bd90a52b69acfad1959a5284b6fb418217e85",
       vkAlphaBeta: [],
       vkIC: [
         #"96d1c50c8c2dcc5910e43087c81c785175d093399ecb6516e6dade27ac06202d36a7fbb0e446146dad9c7319c084c43a",
