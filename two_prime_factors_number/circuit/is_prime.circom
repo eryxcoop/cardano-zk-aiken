@@ -1,6 +1,6 @@
 pragma circom 2.1.6;
 
-include "../node_modules/circomlib/circuits/multiplexer.circom";
+include "node_modules/circomlib/circuits/multiplexer.circom";
 
 template IsPrime() {
     signal input n;         // 2–97

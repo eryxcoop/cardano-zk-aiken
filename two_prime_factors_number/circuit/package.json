@@ -14,8 +14,6 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@meshsdk/core": "^1.8.12", 
-    "tsx": "^4.19.3",
     "circomlib": "^2.0.5"
   }
 }

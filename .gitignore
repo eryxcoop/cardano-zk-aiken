@@ -4,3 +4,6 @@ build/
 plutus.json
 *.addr
 *.sk
+ceremony.ptau
+proof.json
+public.json
