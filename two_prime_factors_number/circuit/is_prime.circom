@@ -3,10 +3,12 @@ pragma circom 2.1.6;
 include "node_modules/circomlib/circuits/multiplexer.circom";
 
 template IsPrime() {
-    signal input n;         // 2–97
+    signal input n;         // 0–97
 
+    var size = 98;
     // vector hard-codeado  (1 = prime, 0 = composite)
-    var table[96] = [
+    var table[size] = [
+        /*0*/0, /*1*/0,
         /*2*/1, /*3*/1, /*4*/0, /*5*/1, /*6*/0, /*7*/1,
         /*8*/0, /*9*/0, /*10*/0, /*11*/1, /*12*/0, /*13*/1,
         /*14*/0, /*15*/0, /*16*/0, /*17*/1, /*18*/0, /*19*/1,
@@ -25,10 +27,9 @@ template IsPrime() {
         /*92*/0, /*93*/0, /*94*/0, /*95*/0, /*96*/0, /*97*/1
     ];
 
-    // (n-2) es índice
-    component sel = Multiplexer(1, 96);
-    sel.sel <== n - 2;
-    for (var i=0; i<96; i++) {
+    component sel = Multiplexer(1, size);
+    sel.sel <== n;
+    for (var i = 0; i < size; i++) {
         sel.inp[i][0] <== table[i];
     }
     sel.out[0] === 1;

@@ -29,23 +29,29 @@ function compile() {
 
 }
 
+function prove() {
+  node ${OUTPUT_PATH}${CIRCUIT_NAME}_js/generate_witness.js ${OUTPUT_PATH}${CIRCUIT_NAME}_js/${CIRCUIT_NAME}.wasm ${INPUT_PATH}  ${OUTPUT_PATH}witness.wtns
+  snarkjs groth16 prove ${OUTPUT_PATH}${CIRCUIT_NAME}_final.zkey ${OUTPUT_PATH}witness.wtns ${OUTPUT_PATH}proof.json ${OUTPUT_PATH}public.json
+}
+
+function verify() {
+  snarkjs groth16 verify ${OUTPUT_PATH}verification_key.json ${OUTPUT_PATH}public.json ${OUTPUT_PATH}proof.json
+}
+
 case "$1" in
     -c )
       compile
       ;;
     -p )
-
-      # Generates witness
-      node ${OUTPUT_PATH}${CIRCUIT_NAME}_js/generate_witness.js ${OUTPUT_PATH}${CIRCUIT_NAME}_js/${CIRCUIT_NAME}.wasm ${INPUT_PATH}  ${OUTPUT_PATH}witness.wtns
-      snarkjs groth16 prove ${OUTPUT_PATH}${CIRCUIT_NAME}_final.zkey ${OUTPUT_PATH}witness.wtns ${OUTPUT_PATH}proof.json ${OUTPUT_PATH}public.json
+      prove
       ;;
     -v )
-      snarkjs groth16 verify ${OUTPUT_PATH}verification_key.json ${OUTPUT_PATH}public.json ${OUTPUT_PATH}proof.json
+      verify
       ;;
     -cpv )
       compile
-      snarkjs groth16 prove ${OUTPUT_PATH}${CIRCUIT_NAME}_final.zkey ${OUTPUT_PATH}witness.wtns ${OUTPUT_PATH}proof.json ${OUTPUT_PATH}public.json
-      snarkjs groth16 verify ${OUTPUT_PATH}verification_key.json ${OUTPUT_PATH}public.json ${OUTPUT_PATH}proof.json
+      prove
+      verify
       ;;
 esac
 
