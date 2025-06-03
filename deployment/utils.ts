@@ -13,7 +13,7 @@ import {
 import { applyParamsToScript } from "@meshsdk/core-csl";
 
 export const blockchainProvider = new BlockfrostProvider(process.env.BLOCKFROST_PROJECT_ID);
- 
+
 // wallet for signing transactions
 export const wallet = new MeshWallet({
   networkId: 0,
@@ -26,7 +26,9 @@ export const wallet = new MeshWallet({
 });
  
 export function getScript(validatorIndex: number, plutusJson: string) {
-  const blueprint = require(plutusJson)
+  const jsonString = fs.readFileSync(plutusJson, 'utf-8');
+  const blueprint = JSON.parse(jsonString);
+
   const scriptCbor = applyParamsToScript(
     blueprint.validators[validatorIndex].compiledCode,
     []
