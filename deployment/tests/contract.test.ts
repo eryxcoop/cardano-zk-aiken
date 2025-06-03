@@ -2,14 +2,14 @@ import { blockchainProvider, Contract, getUtxoByTxHash } from "../utils";
 
 describe('Contract Deployment', () => {
   test('Happy path', async () => {
-    const contract = new Contract("./two_prime_factors.json");
-
-    const deployTxHash = await contract.deployWithDatum(0);
-    await waitUntilDeployed(deployTxHash);
-
     let deployed_successfully = false;
+    let validatorIndex = 0;
+    const contract = new Contract("./tests/groth16_examples.json");
+
+    const deployTxHash = await contract.deployWithoutDatum(validatorIndex);
+    await waitUntilDeployed(deployTxHash);
     try {
-      const spendTxHash = await contract.spend(0, deployTxHash);
+      await contract.spend(validatorIndex, deployTxHash);
       deployed_successfully = true;
     } catch {}
 

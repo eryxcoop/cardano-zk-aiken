@@ -3,8 +3,8 @@ use cardano/transaction.{OutputReference, Transaction}
 
 validator multiplication_verificator {
   spend(
-    _datum: Option<Data>,
-    _redeemer: Option<Data>,
+    _datum: Option<Void>,
+    _redeemer: Option<Void>,
     _own_ref: OutputReference,
     _self: Transaction,
   ) {

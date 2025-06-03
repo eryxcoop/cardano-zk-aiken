@@ -8,6 +8,8 @@ import {
   mConStr0,
   Asset,
   deserializeAddress,
+  mConStr1,
+  mNone,
 } from "@meshsdk/core";
 
 import { applyParamsToScript } from "@meshsdk/core-csl";
@@ -75,13 +77,12 @@ export class Contract {
   }
 
   async spend(validatorIndex: number, txHashFromDeposit: string): Promise<string> {
-  
+    const hasRedeemer = false;
     const utxos = await wallet.getUtxos();
     const walletAddress = (await wallet.getUsedAddresses())[0];
     const collateral = (await wallet.getCollateral())[0];
 
-    const redeemer = { alternative: 0, fields: [7, 5] };
-
+    
     const { scriptCbor } = getScript(validatorIndex, this.compiledContractPath);
 
     // hash of the public key of the wallet, to be used in the datum
@@ -92,7 +93,7 @@ export class Contract {
 
     // build transaction with MeshTxBuilder
     const txBuilder = getTxBuilder();
-    await txBuilder
+    txBuilder
       .spendingPlutusScript("V3") // we used plutus v3
       .txIn(
         scriptUtxo.input.txHash,
@@ -100,10 +101,16 @@ export class Contract {
         scriptUtxo.output.amount,
         scriptUtxo.output.address
       )
-      .txInScript(scriptCbor)
-      .txInRedeemerValue(mConStr0([7, 5]), "Mesh", { mem: 98242, steps: 4018841489 }) // provide the required redeemer value `Hello, World!`
+      .txInScript(scriptCbor);
+    if (hasRedeemer) {
+      const redeemer = mConStr0([7, 5]);
+      const budget = { mem: 98242, steps: 4018841489 };
+      txBuilder.txInRedeemerValue(redeemer, "Mesh", budget)
+    } else {
+      txBuilder.txInRedeemerValue(mNone())
+    }
       //.txInDatumValue(mConStr0([signerHash])) // only the owner of the wallet can unlock the funds
-      .txInInlineDatumPresent()
+    await txBuilder.txInInlineDatumPresent()
       .requiredSignerHash(signerHash)
       .changeAddress(walletAddress)
       .txInCollateral(
@@ -170,4 +177,4 @@ export class Contract {
     
     return txHashPromise;
   }
-BLOCKFROST_PROJECT_ID}
+}
