@@ -74,7 +74,7 @@ export class Contract {
     return this.deploy(false, validatorIndex)
   }
 
-  async spend(validatorIndex: number, txHashFromDeposit: string) {
+  async spend(validatorIndex: number, txHashFromDeposit: string): Promise<string> {
   
     const utxos = await wallet.getUtxos();
     const walletAddress = (await wallet.getUsedAddresses())[0];
@@ -102,7 +102,6 @@ export class Contract {
       )
       .txInScript(scriptCbor)
       .txInRedeemerValue(mConStr0([7, 5]), "Mesh", { mem: 98242, steps: 4018841489 }) // provide the required redeemer value `Hello, World!`
-
       //.txInDatumValue(mConStr0([signerHash])) // only the owner of the wallet can unlock the funds
       .txInInlineDatumPresent()
       .requiredSignerHash(signerHash)
@@ -122,8 +121,13 @@ export class Contract {
     // maxTxExMem: '16000000',
     // maxTxExSteps: '10000000000',
     const signedTx = await wallet.signTx(unsignedTx);
-    const txHash = await wallet.submitTx(signedTx);
-    console.log(`1 tADA unlocked from the contract at Tx ID: ${txHash}`);
+    const txHashPromise = wallet.submitTx(signedTx);
+
+    txHashPromise.then((txHash) => {
+      console.log(`1 tADA unlocked from the contract at Tx ID: ${txHash}`);
+    });
+
+    return txHashPromise;
   }
 
   private async deploy(hasDatum: boolean, validatorIndex: number): Promise<string> {
@@ -166,4 +170,4 @@ export class Contract {
     
     return txHashPromise;
   }
-}
+BLOCKFROST_PROJECT_ID}
