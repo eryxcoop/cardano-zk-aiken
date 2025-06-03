@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import { readFileSync } from "node:fs";
 import {
   BlockfrostProvider,
   MeshTxBuilder,
@@ -11,6 +11,7 @@ import {
 } from "@meshsdk/core";
 
 import { applyParamsToScript } from "@meshsdk/core-csl";
+import { resolve } from "node:path";
 
 export const blockchainProvider = new BlockfrostProvider(process.env.BLOCKFROST_PROJECT_ID);
 
@@ -21,12 +22,12 @@ export const wallet = new MeshWallet({
   submitter: blockchainProvider,
   key: {
     type: "root",
-    bech32: fs.readFileSync("me.sk").toString(),
+    bech32: readFileSync("me.sk").toString(),
   },
 });
  
 export function getScript(validatorIndex: number, plutusJson: string) {
-  const jsonString = fs.readFileSync(plutusJson, 'utf-8');
+  const jsonString = readFileSync(plutusJson, 'utf-8');
   const blueprint = JSON.parse(jsonString);
 
   const scriptCbor = applyParamsToScript(
@@ -65,12 +66,12 @@ export class Contract {
     this.compiledContractPath = compiledContractPath;
   }
 
-  async deployWithDatum(validatorIndex: number) {
-    this.deploy(true, validatorIndex)
+  async deployWithDatum(validatorIndex: number): Promise<string> {
+    return this.deploy(true, validatorIndex)
   }
 
-  async deployWithoutDatum(validatorIndex: number) {
-    this.deploy(false, validatorIndex)
+  async deployWithoutDatum(validatorIndex: number): Promise<string> {
+    return this.deploy(false, validatorIndex)
   }
 
   async spend(validatorIndex: number, txHashFromDeposit: string) {
@@ -125,7 +126,7 @@ export class Contract {
     console.log(`1 tADA unlocked from the contract at Tx ID: ${txHash}`);
   }
 
-  private async deploy(hasDatum: boolean, validatorIndex: number) {
+  private async deploy(hasDatum: boolean, validatorIndex: number): Promise<string> {
     const assets: Asset[] = [
       {
         unit: "lovelace",
@@ -155,7 +156,14 @@ export class Contract {
     const unsignedTx = txBuilder.txHex;
 
     const signedTx = await wallet.signTx(unsignedTx);
-    const txHash = await wallet.submitTx(signedTx);
-    console.log(`1 tADA locked into the contract at Tx ID: ${txHash}`);
+    const txHashPromise = wallet.submitTx(signedTx);
+
+    txHashPromise.then(
+      (txHash) => {
+        console.log(`1 tADA locked into the contract at Tx ID: ${txHash}`);
+      }
+    );
+    
+    return txHashPromise;
   }
 }

@@ -1,13 +1,17 @@
 {
   "name": "deployment",
   "version": "1.0.0",
-  
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@meshsdk/core": "^1.8.12", 
+    "@meshsdk/core": "^1.8.12",
     "tsx": "^4.19.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.4"
   }
 }
