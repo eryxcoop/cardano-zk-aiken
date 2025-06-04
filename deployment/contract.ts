@@ -54,24 +54,23 @@ export class Contract {
     return deployedTxHashPromise;
   }
 
-  private async buildTxWithSpendUTxO(scriptUtxo: UTxO, validatorIndex: number, redeemer: Data, redeemerBudget?: { mem: number; steps: number; } | undefined) {
-    const walletAddress = await this.walletAddress();
+  private async buildTxWithSpendUTxO(onchainScriptUtxo: UTxO, validatorIndex: number, redeemer: Data, redeemerBudget?: { mem: number; steps: number; } | undefined) {
     const collateral = await this.getWalletCollateral();
 
     const txBuilder = this.blockchainProvider.newTxBuilder();
     await txBuilder
       .spendingPlutusScript("V3") // we used plutus v3
       .txIn(
-        scriptUtxo.input.txHash,
-        scriptUtxo.input.outputIndex,
-        scriptUtxo.output.amount,
-        scriptUtxo.output.address
+        onchainScriptUtxo.input.txHash,
+        onchainScriptUtxo.input.outputIndex,
+        onchainScriptUtxo.output.amount,
+        onchainScriptUtxo.output.address
       )
       .txInScript(this.getValidatorCbor(validatorIndex))
-      .txInRedeemerValue(redeemer)
+      .txInRedeemerValue(redeemer, "Mesh")
       .txInInlineDatumPresent()
       .requiredSignerHash(await this.hashedWalletPublicKey())
-      .changeAddress(walletAddress)
+      .changeAddress(await this.walletAddress())
       .txInCollateral(
         collateral.input.txHash,
         collateral.input.outputIndex,
