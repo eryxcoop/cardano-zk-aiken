@@ -1,5 +1,6 @@
-import { Data, mNone, mOption, mSome } from "@meshsdk/core";
-import { BlockchainProvider, Contract, mVoid } from "../contract";
+import { Data } from "@meshsdk/core";
+import { Contract, mVoid } from "../contract";
+import { BlockchainProvider } from "../blockchain_provider";
 
 describe('Contract Deployment', () => {
   let scriptPath: string;
@@ -35,14 +36,8 @@ async function testDeploymentWith(scriptPath: string, validatorIndex: number, da
 }
 
 async function waitUntilDeployed(deployTxHash: string) {
-  let is_deployed = false;
-  while (!is_deployed) {
-    try {
-      const blockchainProvider = new BlockchainProvider();
-      await blockchainProvider.isTxHashDeployed(deployTxHash);
-      is_deployed = true;
-    } catch {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+  const blockchainProvider = new BlockchainProvider();
+  while (!await blockchainProvider.isTxDeployed(deployTxHash)) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
   };
 }
