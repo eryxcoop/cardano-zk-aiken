@@ -7,6 +7,7 @@ import {
   deserializeAddress,
   Data,
   mConStr0,
+  UTxO,
 } from "@meshsdk/core";
 
 import { applyParamsToScript } from "@meshsdk/core-csl";
@@ -41,13 +42,22 @@ export class Contract {
   }
 
   async spend(validatorIndex: number, txHashFromDeposit: string, redeemer: Data, redeemerBudget?: { mem: number, steps: number }): Promise<string> {
-    const walletAddress = await this.walletAddress();
-
-    const collateral = (await this.wallet.getCollateral())[0];
-    // get the utxo from the script address of the locked funds
     const scriptUtxo = await this.blockchainProvider.getFirstUtxoFromTx(txHashFromDeposit);
 
-    // build transaction with MeshTxBuilder
+    const txHash = await this.buildTxWithSpendUTxO(scriptUtxo, validatorIndex, redeemer, redeemerBudget);
+    const deployedTxHashPromise = this.deployTx(txHash);
+
+    deployedTxHashPromise.then((txHash) => {
+      console.log(`1 tADA unlocked from the contract at Tx ID: ${txHash}`);
+    });
+
+    return deployedTxHashPromise;
+  }
+
+  private async buildTxWithSpendUTxO(scriptUtxo: UTxO, validatorIndex: number, redeemer: Data, redeemerBudget?: { mem: number; steps: number; } | undefined) {
+    const walletAddress = await this.walletAddress();
+    const collateral = await this.getWalletCollateral();
+
     const txBuilder = this.blockchainProvider.newTxBuilder();
     await txBuilder
       .spendingPlutusScript("V3") // we used plutus v3
@@ -59,7 +69,6 @@ export class Contract {
       )
       .txInScript(this.getValidatorCbor(validatorIndex))
       .txInRedeemerValue(redeemer)
-      //.txInDatumValue(mConStr0([signerHash])) // only the owner of the wallet can unlock the funds
       .txInInlineDatumPresent()
       .requiredSignerHash(await this.hashedWalletPublicKey())
       .changeAddress(walletAddress)
@@ -71,14 +80,11 @@ export class Contract {
       )
       .selectUtxosFrom(await this.wallet.getUtxos())
       .complete();
+    return txBuilder.txHex;
+  }
 
-    const deployedTxHashPromise = this.deployTx(txBuilder.txHex);
-
-    deployedTxHashPromise.then((txHash) => {
-      console.log(`1 tADA unlocked from the contract at Tx ID: ${txHash}`);
-    });
-
-    return deployedTxHashPromise;
+  private async getWalletCollateral() {
+    return (await this.wallet.getCollateral())[0];
   }
 
   private loadContractFrom(compiledContractPath: string) {
