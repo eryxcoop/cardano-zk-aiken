@@ -5,15 +5,16 @@ import {
   MeshWallet,
   serializePlutusScript,
   UTxO,
-  mConStr0,
   Asset,
   deserializeAddress,
-  mConStr1,
-  mNone,
+  MConStr,
+  MOption,
+  Data,
+  mConStr0,
 } from "@meshsdk/core";
 
 import { applyParamsToScript } from "@meshsdk/core-csl";
-import { resolve } from "node:path";
+export const mVoid = () => mConStr0([]);
 
 export const blockchainProvider = new BlockfrostProvider(process.env.BLOCKFROST_PROJECT_ID);
 
@@ -28,21 +29,6 @@ export const wallet = new MeshWallet({
   },
 });
  
-export function getScript(validatorIndex: number, plutusJson: string) {
-  const jsonString = readFileSync(plutusJson, 'utf-8');
-  const blueprint = JSON.parse(jsonString);
-
-  const scriptCbor = applyParamsToScript(
-    blueprint.validators[validatorIndex].compiledCode,
-    []
-  );
- 
-  const scriptAddr = serializePlutusScript(
-    { code: scriptCbor, version: "V3" },
-  ).address;
- 
-  return { scriptCbor, scriptAddr };
-}
  
 // reusable function to get a transaction builder
 export function getTxBuilder() {
@@ -68,22 +54,48 @@ export class Contract {
     this.compiledContractPath = compiledContractPath;
   }
 
-  async deployWithDatum(validatorIndex: number): Promise<string> {
-    return this.deploy(true, validatorIndex)
+  async deploy(validatorIndex: number, datum: Data): Promise<string> {
+    const assets: Asset[] = [
+      {
+        unit: "lovelace",
+        quantity: "10000000",
+      },
+    ];
+
+    // get utxo and wallet address
+    const utxos = await wallet.getUtxos();
+    const walletAddress = (await wallet.getUsedAddresses())[0];
+
+    const { scriptAddr } = this.getScript(validatorIndex, this.compiledContractPath);
+
+    // build transaction with MeshTxBuilder
+    const txBuilder = getTxBuilder();
+    await txBuilder
+      .txOut(scriptAddr, assets) // send assets to the script address
+      .txOutInlineDatumValue(datum)
+      .changeAddress(walletAddress) // send change back to the wallet address
+      .selectUtxosFrom(utxos)
+      .complete();
+    const unsignedTx = txBuilder.txHex;
+
+    const signedTx = await wallet.signTx(unsignedTx);
+    const txHashPromise = wallet.submitTx(signedTx);
+
+    txHashPromise.then(
+      (txHash) => {
+        console.log(`1 tADA locked into the contract at Tx ID: ${txHash}`);
+      }
+    );
+    
+    return txHashPromise;
   }
 
-  async deployWithoutDatum(validatorIndex: number): Promise<string> {
-    return this.deploy(false, validatorIndex)
-  }
-
-  async spend(validatorIndex: number, txHashFromDeposit: string): Promise<string> {
-    const hasRedeemer = false;
+  async spend(validatorIndex: number, txHashFromDeposit: string, redeemer: Data): Promise<string> {
     const utxos = await wallet.getUtxos();
     const walletAddress = (await wallet.getUsedAddresses())[0];
     const collateral = (await wallet.getCollateral())[0];
 
-    
-    const { scriptCbor } = getScript(validatorIndex, this.compiledContractPath);
+    const { scriptCbor } = this.getScript(validatorIndex, this.compiledContractPath);
 
     // hash of the public key of the wallet, to be used in the datum
     const signerHash = deserializeAddress(walletAddress).pubKeyHash;
@@ -91,9 +103,10 @@ export class Contract {
     // get the utxo from the script address of the locked funds
     const scriptUtxo = await getUtxoByTxHash(txHashFromDeposit);
 
+    const budget = { mem: 7489, steps: 2303111 };
     // build transaction with MeshTxBuilder
     const txBuilder = getTxBuilder();
-    txBuilder
+    await txBuilder
       .spendingPlutusScript("V3") // we used plutus v3
       .txIn(
         scriptUtxo.input.txHash,
@@ -101,16 +114,10 @@ export class Contract {
         scriptUtxo.output.amount,
         scriptUtxo.output.address
       )
-      .txInScript(scriptCbor);
-    if (hasRedeemer) {
-      const redeemer = mConStr0([7, 5]);
-      const budget = { mem: 98242, steps: 4018841489 };
-      txBuilder.txInRedeemerValue(redeemer, "Mesh", budget)
-    } else {
-      txBuilder.txInRedeemerValue(mNone())
-    }
+      .txInScript(scriptCbor)
+      .txInRedeemerValue(redeemer)
       //.txInDatumValue(mConStr0([signerHash])) // only the owner of the wallet can unlock the funds
-    await txBuilder.txInInlineDatumPresent()
+      .txInInlineDatumPresent()
       .requiredSignerHash(signerHash)
       .changeAddress(walletAddress)
       .txInCollateral(
@@ -137,44 +144,19 @@ export class Contract {
     return txHashPromise;
   }
 
-  private async deploy(hasDatum: boolean, validatorIndex: number): Promise<string> {
-    const assets: Asset[] = [
-      {
-        unit: "lovelace",
-        quantity: "10000000",
-      },
-    ];
+  private getScript(validatorIndex: number, plutusJson: string) {
+    const jsonString = readFileSync(plutusJson, 'utf-8');
+    const blueprint = JSON.parse(jsonString);
 
-    // get utxo and wallet address
-    const utxos = await wallet.getUtxos();
-    const walletAddress = (await wallet.getUsedAddresses())[0];
-
-    const { scriptAddr } = getScript(validatorIndex, this.compiledContractPath);
-
-    // build transaction with MeshTxBuilder
-    const txBuilder = getTxBuilder();
-    txBuilder.txOut(scriptAddr, assets); // send assets to the script address
-
-    if (hasDatum) {
-      //.txOutDatumHashValue(mConStr0([5*7])) // provide the datum where `"constructor": 0`
-      txBuilder.txOutInlineDatumValue(mConStr0([35]));
-    }
-
-    await txBuilder
-      .changeAddress(walletAddress) // send change back to the wallet address
-      .selectUtxosFrom(utxos)
-      .complete();
-    const unsignedTx = txBuilder.txHex;
-
-    const signedTx = await wallet.signTx(unsignedTx);
-    const txHashPromise = wallet.submitTx(signedTx);
-
-    txHashPromise.then(
-      (txHash) => {
-        console.log(`1 tADA locked into the contract at Tx ID: ${txHash}`);
-      }
+    const scriptCbor = applyParamsToScript(
+      blueprint.validators[validatorIndex].compiledCode,
+      []
     );
-    
-    return txHashPromise;
+  
+    const scriptAddr = serializePlutusScript(
+      { code: scriptCbor, version: "V3" },
+    ).address;
+  
+    return { scriptCbor, scriptAddr };
   }
 }

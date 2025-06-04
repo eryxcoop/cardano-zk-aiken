@@ -1,4 +1,6 @@
-import { Contract} from "./utils";
+import { mConStr0 } from "@meshsdk/core";
+import { Contract, mVoid } from "./contract";
+
 
 async function main() {
   const compiledContractPath = process.argv[2];
@@ -6,7 +8,7 @@ async function main() {
   
   const contract = new Contract(compiledContractPath);
   // these are the assets we want to lock into the contract
-  await contract.deployWithoutDatum(validatorIndex);
+  await contract.deploy(validatorIndex, mVoid());
 }
- 
+
 main();

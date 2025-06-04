@@ -1,4 +1,4 @@
-import { Contract } from "./utils";
+import { Contract, mVoid } from "./contract";
 
 async function main() {
   const compiledContractPath = process.argv[2];
@@ -7,7 +7,7 @@ async function main() {
   
   const contract = new Contract(compiledContractPath);
   // get utxo, collateral and address from wallet
-  await contract.spend(validatorIndex, txHashFromDeposit);
+  await contract.spend(validatorIndex, txHashFromDeposit, mVoid());
 }
  
 main();

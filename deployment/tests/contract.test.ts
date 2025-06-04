@@ -1,15 +1,31 @@
-import { blockchainProvider, Contract, getUtxoByTxHash } from "../utils";
+import { mNone, mOption, mSome } from "@meshsdk/core";
+import { blockchainProvider, Contract, getUtxoByTxHash, mVoid } from "../contract";
 
 describe('Contract Deployment', () => {
-  test('Happy path', async () => {
+  test('Happy path with datum and redeemer', async () => {
     let deployed_successfully = false;
     let validatorIndex = 0;
-    const contract = new Contract("./tests/groth16_examples.json");
+    const contract = new Contract("./tests/plutus.json");
 
-    const deployTxHash = await contract.deployWithoutDatum(validatorIndex);
+    const deployTxHash = await contract.deploy(validatorIndex, 42);
     await waitUntilDeployed(deployTxHash);
     try {
-      await contract.spend(validatorIndex, deployTxHash);
+      await contract.spend(validatorIndex, deployTxHash, 42);
+      deployed_successfully = true;
+    } catch {}
+
+    expect(deployed_successfully).toBe(true);
+  }, 100000);
+
+  test.skip('Happy path without datum and redeemer', async () => {
+    let deployed_successfully = false;
+    let validatorIndex = 2;
+    const contract = new Contract("./tests/plutus.json");
+
+    const deployTxHash = await contract.deploy(validatorIndex, mVoid());
+    await waitUntilDeployed(deployTxHash);
+    try {
+      await contract.spend(validatorIndex, deployTxHash, mVoid());
       deployed_successfully = true;
     } catch {}
 
