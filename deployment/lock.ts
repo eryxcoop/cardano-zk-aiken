@@ -8,7 +8,7 @@ async function main() {
   
   const contract = new Contract(compiledContractPath);
   // these are the assets we want to lock into the contract
-  await contract.deploy(validatorIndex, mVoid());
+  await contract.deploy(validatorIndex, m());
 }
 
 main();

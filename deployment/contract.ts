@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { PathOrFileDescriptor, readFileSync } from "node:fs";
 import {
   BlockfrostProvider,
   MeshTxBuilder,
@@ -14,72 +14,74 @@ import {
 } from "@meshsdk/core";
 
 import { applyParamsToScript } from "@meshsdk/core-csl";
+
 export const mVoid = () => mConStr0([]);
 
-export const blockchainProvider = new BlockfrostProvider(process.env.BLOCKFROST_PROJECT_ID);
-
-// wallet for signing transactions
-export const wallet = new MeshWallet({
-  networkId: 0,
-  fetcher: blockchainProvider,
-  submitter: blockchainProvider,
-  key: {
-    type: "root",
-    bech32: readFileSync("me.sk").toString(),
-  },
-});
- 
- 
-// reusable function to get a transaction builder
-export function getTxBuilder() {
-  return new MeshTxBuilder({
-    fetcher: blockchainProvider,
-    submitter: blockchainProvider,
-  });
-}
- 
-// reusable function to get a UTxO by transaction hash
-export async function getUtxoByTxHash(txHash: string): Promise<UTxO> {
-  const utxos = await blockchainProvider.fetchUTxOs(txHash);
-  if (utxos.length === 0) {
-    throw new Error("UTxO not found");
+export class BlockchainProvider {
+  blockchainProvider: BlockfrostProvider;
+  
+  constructor() {
+    this.blockchainProvider = new BlockfrostProvider(process.env.BLOCKFROST_PROJECT_ID);
   }
-  return utxos[0];
+
+  async isTxHashDeployed(txHash: string): Promise<UTxO[]> {
+    return this.blockchainProvider.fetchUTxOs(txHash);
+  }
+
+  async getUtxoByTxHash(txHash: string): Promise<UTxO> {
+    const utxos = await this.blockchainProvider.fetchUTxOs(txHash);
+    if (utxos.length === 0) {
+      throw new Error("UTxO not found");
+    }
+    return utxos[0];
+  }
+
+  getWallet(walletKeyPath: PathOrFileDescriptor) {
+    return new MeshWallet({
+      networkId: 0,
+      fetcher: this.blockchainProvider,
+      submitter: this.blockchainProvider,
+      key: {
+        type: "root",
+        bech32: readFileSync(walletKeyPath).toString(),
+      },
+    });
+  }
+
+  newTxBuilder() {
+    return new MeshTxBuilder({
+      fetcher: this.blockchainProvider,
+      submitter: this.blockchainProvider,
+    });
+  }
 }
+
+ 
+
 
 export class Contract {
-  compiledContractPath: string;
+  compiledScript: any;
+  blockchainProvider: BlockchainProvider;
+  wallet: MeshWallet;
+  txBuilder: MeshTxBuilder;
 
   constructor(compiledContractPath: string) {
-    this.compiledContractPath = compiledContractPath;
+    this.blockchainProvider = new BlockchainProvider();
+    this.compiledScript = this.loadScriptFrom(compiledContractPath);
+    this.txBuilder = this.blockchainProvider.newTxBuilder();
+    this.wallet = this.blockchainProvider.getWallet("me.sk");
   }
 
   async deploy(validatorIndex: number, datum: Data): Promise<string> {
-    const assets: Asset[] = [
-      {
-        unit: "lovelace",
-        quantity: "10000000",
-      },
-    ];
-
-    // get utxo and wallet address
-    const utxos = await wallet.getUtxos();
-    const walletAddress = (await wallet.getUsedAddresses())[0];
-
-    const { scriptAddr } = this.getScript(validatorIndex, this.compiledContractPath);
-
-    // build transaction with MeshTxBuilder
-    const txBuilder = getTxBuilder();
+    const txBuilder = this.blockchainProvider.newTxBuilder();
     await txBuilder
-      .txOut(scriptAddr, assets) // send assets to the script address
+      .txOut(this.getValidatorAddress(validatorIndex), this.oneADA()) // send assets to the script address
       .txOutInlineDatumValue(datum)
-      .changeAddress(walletAddress) // send change back to the wallet address
-      .selectUtxosFrom(utxos)
+      .changeAddress(await this.walletAddress()) // send change back to the wallet address
+      .selectUtxosFrom(await this.wallet.getUtxos())
       .complete();
-    const unsignedTx = txBuilder.txHex;
 
-    const signedTx = await wallet.signTx(unsignedTx);
-    const txHashPromise = wallet.submitTx(signedTx);
+    const txHashPromise = this.deployTx(txBuilder.txHex);
 
     txHashPromise.then(
       (txHash) => {
@@ -91,21 +93,21 @@ export class Contract {
   }
 
   async spend(validatorIndex: number, txHashFromDeposit: string, redeemer: Data): Promise<string> {
-    const utxos = await wallet.getUtxos();
-    const walletAddress = (await wallet.getUsedAddresses())[0];
-    const collateral = (await wallet.getCollateral())[0];
+    const utxos = await this.wallet.getUtxos();
+    const walletAddress = (await this.wallet.getUsedAddresses())[0];
+    const collateral = (await this.wallet.getCollateral())[0];
 
-    const { scriptCbor } = this.getScript(validatorIndex, this.compiledContractPath);
+    const scriptCbor = this.getValidatorCbor(validatorIndex);
 
     // hash of the public key of the wallet, to be used in the datum
     const signerHash = deserializeAddress(walletAddress).pubKeyHash;
 
     // get the utxo from the script address of the locked funds
-    const scriptUtxo = await getUtxoByTxHash(txHashFromDeposit);
+    const scriptUtxo = await this.blockchainProvider.getUtxoByTxHash(txHashFromDeposit);
 
     const budget = { mem: 7489, steps: 2303111 };
     // build transaction with MeshTxBuilder
-    const txBuilder = getTxBuilder();
+    const txBuilder = this.blockchainProvider.newTxBuilder();
     await txBuilder
       .spendingPlutusScript("V3") // we used plutus v3
       .txIn(
@@ -134,8 +136,8 @@ export class Contract {
     // console.log(evaluatedTx)
     // maxTxExMem: '16000000',
     // maxTxExSteps: '10000000000',
-    const signedTx = await wallet.signTx(unsignedTx);
-    const txHashPromise = wallet.submitTx(signedTx);
+    const signedTx = await this.wallet.signTx(unsignedTx);
+    const txHashPromise = this.wallet.submitTx(signedTx);
 
     txHashPromise.then((txHash) => {
       console.log(`1 tADA unlocked from the contract at Tx ID: ${txHash}`);
@@ -144,19 +146,43 @@ export class Contract {
     return txHashPromise;
   }
 
-  private getScript(validatorIndex: number, plutusJson: string) {
-    const jsonString = readFileSync(plutusJson, 'utf-8');
-    const blueprint = JSON.parse(jsonString);
+  private loadScriptFrom(compiledContractPath: string) {
+    const jsonString = readFileSync(compiledContractPath, 'utf-8');
+    return JSON.parse(jsonString);
+  }
 
-    const scriptCbor = applyParamsToScript(
-      blueprint.validators[validatorIndex].compiledCode,
+
+  private oneADA(): Asset[] {
+    return [
+      {
+        unit: "lovelace",
+        quantity: "10000000",
+      },
+    ];
+  }
+
+  private async deployTx(unsignedTx: string): Promise<string> {
+    const signedTx = await this.wallet.signTx(unsignedTx);
+    return this.wallet.submitTx(signedTx);
+  }
+
+  private async walletAddress() {
+    return (await this.wallet.getUsedAddresses())[0];
+  }
+
+  private getValidatorAddress(validatorIndex: number) {
+    const scriptCbor = this.getValidatorCbor(validatorIndex);
+
+    const scriptAddr = serializePlutusScript(
+      { code: scriptCbor, version: "V3" }
+    ).address;
+    return scriptAddr;
+  }
+
+  private getValidatorCbor(validatorIndex: number) {
+    return applyParamsToScript(
+      this.compiledScript.validators[validatorIndex].compiledCode,
       []
     );
-  
-    const scriptAddr = serializePlutusScript(
-      { code: scriptCbor, version: "V3" },
-    ).address;
-  
-    return { scriptCbor, scriptAddr };
   }
 }
