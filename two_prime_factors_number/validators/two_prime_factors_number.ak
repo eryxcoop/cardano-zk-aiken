@@ -4,10 +4,6 @@ use cardano/transaction.{
   InlineDatum, Input, Output, OutputReference, Transaction,
 }
 
-pub type Datum {
-  two_prime_factors_number: Int,
-}
-
 pub type Redeemer {
   factor1: Int,
   factor2: Int,
@@ -15,14 +11,14 @@ pub type Redeemer {
 
 validator two_prime_factors_number {
   spend(
-    datum: Option<Datum>,
+    datum: Option<Int>,
     redeemer: Redeemer,
     _own_ref: OutputReference,
     _self: Transaction,
   ) {
-    expect Some(datum) = datum
+    expect Some(two_prime_factors_number) = datum
     assert_factors_are_correct(
-      datum.two_prime_factors_number,
+      two_prime_factors_number,
       redeemer.factor1,
       redeemer.factor2,
     )?
@@ -47,7 +43,7 @@ fn is_prime(n: Int) -> Bool {
       if n % 2 == 1 {
         is_prime_recursive(n, 3)
       } else {
-       False
+        False
       }
     } else {
       True
@@ -68,8 +64,6 @@ fn is_prime_recursive(n: Int, i: Int) -> Bool {
 }
 
 test test_factorization() {
-  let utxo_datum = Datum { two_prime_factors_number: 35 }
-
   let utxo_reference = OutputReference { transaction_id: "", output_index: 0 }
 
   let test_address =
@@ -80,13 +74,12 @@ test test_factorization() {
   let utxo_output =
     Output {
       address: test_address,
-      datum: InlineDatum(utxo_datum),
+      datum: InlineDatum(35),
       value: test_value,
       reference_script: None,
     }
 
-  let input_utxo =
-    Input { output_reference: utxo_reference, output: utxo_output }
+  let input_utxo = Input { output_reference: utxo_reference, output: utxo_output }
 
   two_prime_factors_number.spend(
     Some(utxo_datum),

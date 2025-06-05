@@ -58,8 +58,8 @@ export class Contract {
     const collateral = await this.getWalletCollateral();
 
     const txBuilder = this.blockchainProvider.newTxBuilder();
-    await txBuilder
-      .spendingPlutusScript("V3") // we used plutus v3
+    txBuilder
+      .spendingPlutusScript("V3")
       .txIn(
         onchainScriptUtxo.input.txHash,
         onchainScriptUtxo.input.outputIndex,
@@ -67,7 +67,6 @@ export class Contract {
         onchainScriptUtxo.output.address
       )
       .txInScript(this.getValidatorCbor(validatorIndex))
-      .txInRedeemerValue(redeemer, "Mesh")
       .txInInlineDatumPresent()
       .requiredSignerHash(await this.hashedWalletPublicKey())
       .changeAddress(await this.walletAddress())
@@ -77,13 +76,21 @@ export class Contract {
         collateral.output.amount,
         collateral.output.address
       )
-      .selectUtxosFrom(await this.wallet.getUtxos())
-      .complete();
+      .selectUtxosFrom(await this.wallet.getUtxos());
+    if (redeemerBudget !== undefined) {
+      txBuilder.txInRedeemerValue(redeemer, "Mesh", redeemerBudget);
+    } else {
+      txBuilder.txInRedeemerValue(redeemer);
+    }
+    await txBuilder.complete();
     return txBuilder.txHex;
   }
 
-  private async getWalletCollateral() {
-    return (await this.wallet.getCollateral())[0];
+  async getWalletCollateral(): Promise<UTxO> {
+    const collaterals = await this.wallet.getCollateral();
+    console.log(collaterals);
+    console.log(collaterals[0]["output"].amount);
+    return (collaterals)[0];
   }
 
   private loadContractFrom(compiledContractPath: string) {
@@ -119,7 +126,7 @@ export class Contract {
     return [
       {
         unit: "lovelace",
-        quantity: "10000000",
+        quantity: "1000000",
       },
     ];
   }
@@ -127,9 +134,9 @@ export class Contract {
   private async buildTxWithScriptUTxO(validatorIndex: number, datum: Data): Promise<string> {
     const txBuilder = this.blockchainProvider.newTxBuilder();
     await txBuilder
-      .txOut(this.getValidatorAddress(validatorIndex), this.oneADA()) // send assets to the script address
+      .txOut(this.getValidatorAddress(validatorIndex), this.oneADA())
       .txOutInlineDatumValue(datum)
-      .changeAddress(await this.walletAddress()) // send change back to the wallet address
+      .changeAddress(await this.walletAddress())
       .selectUtxosFrom(await this.wallet.getUtxos())
       .complete();
     return txBuilder.txHex;

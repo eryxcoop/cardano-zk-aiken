@@ -6,8 +6,7 @@ async function main() {
   const txHashFromDeposit = process.argv[4];
   
   const contract = new Contract(compiledContractPath);
-  // get utxo, collateral and address from wallet
-  await contract.spend(validatorIndex, txHashFromDeposit, mVoid());
+  contract.getWalletCollateral();
 }
  
 main();

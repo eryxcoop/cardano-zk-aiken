@@ -18,7 +18,7 @@ validator without_datum_and_redeemer {
 test without_datum_and_redeemer_test() {
   let placeholder_utxo = OutputReference { transaction_id: "", output_index: 0 }
   without_datum_and_redeemer.spend(
-    None,
+    Some(Void),
     Void,
     placeholder_utxo,
     transaction.placeholder,
