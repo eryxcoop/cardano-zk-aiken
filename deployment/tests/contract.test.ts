@@ -41,16 +41,17 @@ async function testDeploymentWith(scriptPath: string, validatorIndex: number, da
   const deployTxHash = await contract.deploy(validatorIndex, datum);
   await waitUntilDeployed(deployTxHash);
   try {
-    await contract.spend(validatorIndex, deployTxHash, redeemer, redeemerBudget);
+    const spendTxHash = await contract.spend(validatorIndex, deployTxHash, redeemer, redeemerBudget);
     deployed_successfully = true;
-  } catch { }
+    await waitUntilDeployed(spendTxHash)
+  } catch {}
 
   expect(deployed_successfully).toBe(true);
 }
 
 async function waitUntilDeployed(deployTxHash: string) {
   const blockchainProvider = new BlockchainProvider();
-  while (!await blockchainProvider.isTxDeployed(deployTxHash)) {
+  while (!await blockchainProvider.hasTxBeenImpactedOnBlockchain(deployTxHash)) {
     await new Promise(resolve => setTimeout(resolve, 1000));
   };
 }

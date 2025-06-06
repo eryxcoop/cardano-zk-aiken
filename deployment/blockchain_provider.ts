@@ -2,15 +2,15 @@ import { BlockfrostProvider, MeshTxBuilder, MeshWallet, UTxO } from "@meshsdk/co
 import { PathOrFileDescriptor, readFileSync } from "node:fs";
 
 export class BlockchainProvider {
-  blockchainProvider: BlockfrostProvider;
+  blockfrostProvider: BlockfrostProvider;
   
   constructor() {
-    this.blockchainProvider = new BlockfrostProvider(process.env.BLOCKFROST_PROJECT_ID);
+    this.blockfrostProvider = new BlockfrostProvider(process.env.BLOCKFROST_PROJECT_ID);
   }
 
-  async isTxDeployed(txHash: string): Promise<boolean> {
+  async hasTxBeenImpactedOnBlockchain(txHash: string): Promise<boolean> {
     try {
-      await this.blockchainProvider.fetchUTxOs(txHash);
+      const fetchedUTxOS = await this.blockfrostProvider.fetchUTxOs(txHash);
       return true;
     } catch {
       return false;
@@ -18,18 +18,34 @@ export class BlockchainProvider {
   }
 
   async getFirstUtxoFromTx(txHash: string): Promise<UTxO> {
-    const utxos = await this.blockchainProvider.fetchUTxOs(txHash);
+    const utxos = await this.blockfrostProvider.fetchUTxOs(txHash);
     if (utxos.length === 0) {
       throw new Error("UTxO not found");
     }
     return utxos[0];
   }
 
+  async getUtxoByTxHashAndAddress(txHash: string, address: string): Promise<UTxO> {
+    const utxos = await this.blockfrostProvider.fetchUTxOs(txHash);
+  
+    if (utxos.length === 0) {
+      throw new Error("UTxO not found");
+    }
+  
+    const matchingUtxos = utxos.filter((utxo) => utxo.output.address === address);
+  
+    if (matchingUtxos.length === 0 || matchingUtxos.length > 1) {
+      throw new Error(`UTxO not found for address: ${address}`);
+    }
+  
+    return matchingUtxos[0];
+  }
+
   getWalletUsing(walletKeyPath: PathOrFileDescriptor) {
     return new MeshWallet({
       networkId: 0,
-      fetcher: this.blockchainProvider,
-      submitter: this.blockchainProvider,
+      fetcher: this.blockfrostProvider,
+      submitter: this.blockfrostProvider,
       key: {
         type: "root",
         bech32: readFileSync(walletKeyPath).toString(),
@@ -39,8 +55,8 @@ export class BlockchainProvider {
 
   newTxBuilder() {
     return new MeshTxBuilder({
-      fetcher: this.blockchainProvider,
-      submitter: this.blockchainProvider,
+      fetcher: this.blockfrostProvider,
+      submitter: this.blockfrostProvider,
     });
   }
 }

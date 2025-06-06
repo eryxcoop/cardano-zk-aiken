@@ -9,7 +9,6 @@ import {
   mConStr0,
   UTxO,
 } from "@meshsdk/core";
-
 import { applyParamsToScript } from "@meshsdk/core-csl";
 import { BlockchainProvider } from "./blockchain_provider";
 
@@ -42,7 +41,8 @@ export class Contract {
   }
 
   async spend(validatorIndex: number, txHashFromDeposit: string, redeemer: Data, redeemerBudget?: { mem: number, steps: number }): Promise<string> {
-    const scriptUtxo = await this.blockchainProvider.getFirstUtxoFromTx(txHashFromDeposit);
+    const validatorAddr = this.getValidatorAddress(validatorIndex)
+    const scriptUtxo = await this.blockchainProvider.getUtxoByTxHashAndAddress(txHashFromDeposit, validatorAddr);
 
     const txHash = await this.buildTxWithSpendUTxO(scriptUtxo, validatorIndex, redeemer, redeemerBudget);
     const deployedTxHashPromise = this.deployTx(txHash);
