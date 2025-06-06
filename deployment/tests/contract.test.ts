@@ -12,13 +12,13 @@ describe('Contract Deployment', () => {
     const datum = 42;
     const redeemer = 42;
     await testDeploymentWith(scriptPath, 0, datum, redeemer);
-  }, 100000);
+  }, 1500000);
 
   test.skip('Happy path without datum and redeemer', async () => {
     const datum = mVoid();
     const redeemer = mVoid();
     await testDeploymentWith(scriptPath, 2, datum, redeemer);
-  }, 100000);
+  }, 150000);
 
   test.skip('Happy path with manual budget', async () => {
     const datum = mVoid();
@@ -31,7 +31,7 @@ describe('Contract Deployment', () => {
     const redeemerBudget = { mem: 90742, steps: 4017641489 };
     await testDeploymentWith("./tests/two_prime_factors_number.json", 0, datum, redeemer, redeemerBudget);
     */
-  }, 200000);
+  }, 150000);
 });
 
 async function testDeploymentWith(scriptPath: string, validatorIndex: number, datum: Data, redeemer: Data, redeemerBudget?: {mem: number, steps: number}) {

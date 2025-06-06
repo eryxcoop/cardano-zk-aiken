@@ -18,12 +18,10 @@ export class Contract {
   compiledValidators: any;
   blockchainProvider: BlockchainProvider;
   wallet: MeshWallet;
-  txBuilder: MeshTxBuilder;
 
   constructor(compiledContractPath: string) {
     this.blockchainProvider = new BlockchainProvider();
     this.compiledValidators = this.loadContractFrom(compiledContractPath);
-    this.txBuilder = this.blockchainProvider.newTxBuilder();
     this.wallet = this.blockchainProvider.getWalletUsing("me.sk");
   }
 
@@ -55,7 +53,7 @@ export class Contract {
   }
 
   private async buildTxWithSpendUTxO(onchainScriptUtxo: UTxO, validatorIndex: number, redeemer: Data, redeemerBudget?: { mem: number; steps: number; } | undefined) {
-    const collateral = await this.getWalletCollateral();
+    const collateral = await this.getWalletCollateral(onchainScriptUtxo.input.txHash);
 
     const txBuilder = this.blockchainProvider.newTxBuilder();
     txBuilder
@@ -77,6 +75,7 @@ export class Contract {
         collateral.output.address
       )
       .selectUtxosFrom(await this.wallet.getUtxos());
+
     if (redeemerBudget !== undefined) {
       txBuilder.txInRedeemerValue(redeemer, "Mesh", redeemerBudget);
     } else {
@@ -86,11 +85,16 @@ export class Contract {
     return txBuilder.txHex;
   }
 
-  async getWalletCollateral(): Promise<UTxO> {
-    const collaterals = await this.wallet.getCollateral();
-    console.log(collaterals);
-    console.log(collaterals[0]["output"].amount);
-    return (collaterals)[0];
+  async getWalletCollateral(lastTxDeployedHash: string): Promise<UTxO> {
+    while(!await this.hasCollateralTxBeenSynchronizedTo(lastTxDeployedHash)) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    return (await this.wallet.getCollateral())[0];
+  }
+
+  async hasCollateralTxBeenSynchronizedTo(scriptTxHash: string): Promise<boolean> {
+    const collaterals: UTxO[] = await this.wallet.getCollateral();
+    return collaterals.some((collateral: UTxO) => collateral.input.txHash === scriptTxHash)
   }
 
   private loadContractFrom(compiledContractPath: string) {
