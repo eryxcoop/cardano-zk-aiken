@@ -35,20 +35,28 @@ describe('Contract Deployment', () => {
 });
 
 async function testDeploymentWith(scriptPath: string, validatorIndex: number, datum: Data, redeemer: Data, redeemerBudget?: {mem: number, steps: number}) {
-  let deployed_successfully = false;
   const contract = new Contract(scriptPath);
 
-  const deployTxHash = await contract.deploy(validatorIndex, datum);
-  await waitUntilDeployed(deployTxHash);
-  await waitUntilWalletUTxOsHaveBeenUpdated(contract, deployTxHash);
+  const deployedTxHash = await contract.deploy(validatorIndex, datum);
 
-  try {
-    const spendTxHash = await contract.spend(validatorIndex, deployTxHash, redeemer, redeemerBudget);
-    deployed_successfully = true;
-    await waitUntilDeployed(spendTxHash)
-  } catch {}
+  await waitUntilDeployed(deployedTxHash);
+  await waitUntilWalletUTxOsHaveBeenUpdated(contract, deployedTxHash);
+
+  const deployed_successfully = await try_execution(async () => {
+    const spendTxHash = await contract.spend(validatorIndex, deployedTxHash, redeemer, redeemerBudget);
+    await waitUntilDeployed(spendTxHash);
+  });
 
   expect(deployed_successfully).toBe(true);
+}
+
+async function try_execution(closure: () => Promise<void>): Promise<boolean> {
+  try {
+    await closure();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function waitUntilWalletUTxOsHaveBeenUpdated(contract: Contract, deployTxHash: string) {

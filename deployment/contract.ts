@@ -27,33 +27,39 @@ export class Contract {
 
   async deploy(validatorIndex: number, datum: Data): Promise<string> {
     const txHash = await this.buildTxWithScriptUTxO(validatorIndex, datum);
-    const deployedTxHashPromise = this.deployTx(txHash);
+    const deployedTxHash = await this.deployTx(txHash);
 
-    deployedTxHashPromise.then(
-      (txHash) => {
-        console.log(`1 tADA locked into the contract at Tx ID: ${txHash}`);
-      }
-    );
+    console.log(`1 tADA locked into the contract at Tx ID: ${deployedTxHash}`);
     
-    return deployedTxHashPromise;
+    return deployedTxHash;
   }
 
   async spend(validatorIndex: number, txHashFromDeposit: string, redeemer: Data, redeemerBudget?: { mem: number, steps: number }): Promise<string> {
     const validatorAddr = this.getValidatorAddress(validatorIndex)
     const scriptUtxo = await this.blockchainProvider.getUtxoByTxHashAndAddress(txHashFromDeposit, validatorAddr);
     
-    const collateral = await this.getWalletCollateral();
-    const txHash = await this.buildTxWithSpendUTxO(collateral, scriptUtxo, validatorIndex, redeemer, redeemerBudget);
-    const deployedTxHashPromise = this.deployTx(txHash);
+    const collateralTryCount = 5;
+    for (let i = 0; i < collateralTryCount; i++) {
+      try {
+        const txHash = await this.buildTxWithSpendUTxO(scriptUtxo, validatorIndex, redeemer, redeemerBudget);
+        const deployedTxHash = await this.deployTx(txHash);
+      
+        console.log(`1 tADA unlocked from the contract at Tx ID: ${deployedTxHash}`);
 
-    deployedTxHashPromise.then((txHash) => {
-      console.log(`1 tADA unlocked from the contract at Tx ID: ${txHash}`);
-    });
+        return deployedTxHash;
+      } catch (error) {
+        if (error.search(/InsufficientCollateral/) === -1) {
+          throw("Spend failed");
+        }
+      }
+    }
 
-    return deployedTxHashPromise;
+    throw(`Spend failed after ${collateralTryCount} times trying to get unspend collaterals`);
   }
 
-  private async buildTxWithSpendUTxO(collateral: UTxO, onchainScriptUtxo: UTxO, validatorIndex: number, redeemer: Data, redeemerBudget?: { mem: number; steps: number; } | undefined) {
+  private async buildTxWithSpendUTxO(onchainScriptUtxo: UTxO, validatorIndex: number, redeemer: Data, redeemerBudget?: { mem: number; steps: number; } | undefined) {
+    const collateral = await this.getWalletCollateral();
+
     const txBuilder = this.blockchainProvider.newTxBuilder();
     txBuilder
       .spendingPlutusScript("V3")
