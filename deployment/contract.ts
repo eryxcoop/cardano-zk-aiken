@@ -41,8 +41,9 @@ export class Contract {
   async spend(validatorIndex: number, txHashFromDeposit: string, redeemer: Data, redeemerBudget?: { mem: number, steps: number }): Promise<string> {
     const validatorAddr = this.getValidatorAddress(validatorIndex)
     const scriptUtxo = await this.blockchainProvider.getUtxoByTxHashAndAddress(txHashFromDeposit, validatorAddr);
-
-    const txHash = await this.buildTxWithSpendUTxO(scriptUtxo, validatorIndex, redeemer, redeemerBudget);
+    
+    const collateral = await this.getWalletCollateral();
+    const txHash = await this.buildTxWithSpendUTxO(collateral, scriptUtxo, validatorIndex, redeemer, redeemerBudget);
     const deployedTxHashPromise = this.deployTx(txHash);
 
     deployedTxHashPromise.then((txHash) => {
@@ -52,9 +53,7 @@ export class Contract {
     return deployedTxHashPromise;
   }
 
-  private async buildTxWithSpendUTxO(onchainScriptUtxo: UTxO, validatorIndex: number, redeemer: Data, redeemerBudget?: { mem: number; steps: number; } | undefined) {
-    const collateral = await this.getWalletCollateral(onchainScriptUtxo.input.txHash);
-
+  private async buildTxWithSpendUTxO(collateral: UTxO, onchainScriptUtxo: UTxO, validatorIndex: number, redeemer: Data, redeemerBudget?: { mem: number; steps: number; } | undefined) {
     const txBuilder = this.blockchainProvider.newTxBuilder();
     txBuilder
       .spendingPlutusScript("V3")
@@ -85,13 +84,11 @@ export class Contract {
     return txBuilder.txHex;
   }
 
-  async getWalletCollateral(lastTxDeployedHash: string): Promise<UTxO> {
-    while(!await this.hasCollateralTxBeenSynchronizedTo(lastTxDeployedHash)) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+  private async getWalletCollateral(): Promise<UTxO> {
     return (await this.wallet.getCollateral())[0];
   }
 
+  // coupled, only for test
   async hasCollateralTxBeenSynchronizedTo(scriptTxHash: string): Promise<boolean> {
     const collaterals: UTxO[] = await this.wallet.getCollateral();
     return collaterals.some((collateral: UTxO) => collateral.input.txHash === scriptTxHash)

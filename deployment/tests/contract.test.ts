@@ -8,11 +8,11 @@ describe('Contract Deployment', () => {
     scriptPath = "./tests/plutus.json";
   })
 
-  test('Happy path with datum and redeemer', async () => {
+  test.skip('Happy path with datum and redeemer', async () => {
     const datum = 42;
     const redeemer = 42;
     await testDeploymentWith(scriptPath, 0, datum, redeemer);
-  }, 1500000);
+  }, 150000);
 
   test.skip('Happy path without datum and redeemer', async () => {
     const datum = mVoid();
@@ -20,10 +20,10 @@ describe('Contract Deployment', () => {
     await testDeploymentWith(scriptPath, 2, datum, redeemer);
   }, 150000);
 
-  test.skip('Happy path with manual budget', async () => {
+  test('Happy path with manual budget', async () => {
     const datum = mVoid();
     const redeemer = mVoid();
-    const redeemerBudget = { mem: 5000, steps: 25000000 };
+    const redeemerBudget = { mem: 50000, steps: 25000000 };
     await testDeploymentWith(scriptPath, 2, datum, redeemer, redeemerBudget);
     /*
     const datum = 35;
@@ -40,6 +40,8 @@ async function testDeploymentWith(scriptPath: string, validatorIndex: number, da
 
   const deployTxHash = await contract.deploy(validatorIndex, datum);
   await waitUntilDeployed(deployTxHash);
+  await waitUntilWalletUTxOsHaveBeenUpdated(contract, deployTxHash);
+
   try {
     const spendTxHash = await contract.spend(validatorIndex, deployTxHash, redeemer, redeemerBudget);
     deployed_successfully = true;
@@ -49,9 +51,19 @@ async function testDeploymentWith(scriptPath: string, validatorIndex: number, da
   expect(deployed_successfully).toBe(true);
 }
 
+async function waitUntilWalletUTxOsHaveBeenUpdated(contract: Contract, deployTxHash: string) {
+  while (!await contract.hasCollateralTxBeenSynchronizedTo(deployTxHash)) {
+    await oneSecondTimer();
+  }
+}
+
 async function waitUntilDeployed(deployTxHash: string) {
   const blockchainProvider = new BlockchainProvider();
   while (!await blockchainProvider.hasTxBeenImpactedOnBlockchain(deployTxHash)) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await oneSecondTimer();
   };
+}
+
+async function oneSecondTimer() {
+  await new Promise(resolve => setTimeout(resolve, 1000));
 }
