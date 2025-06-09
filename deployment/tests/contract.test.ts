@@ -32,16 +32,16 @@ describe('Contract Deployment', () => {
     await testDeploymentWith(scriptPath, 2, datum, redeemer, redeemerBudget);
   }, 150000);
 
-  async function testDeploymentWith(scriptPath: string, validatorIndex: number, datum: Data, redeemer: Data, redeemerBudget?: {mem: number, steps: number}) {
+  async function testDeploymentWith(scriptPath: string, validatorScriptIndex: number, datum: Data, redeemer: Data, redeemerBudget?: {mem: number, steps: number}) {
     const contract = new Contract(scriptPath, blockchainProvider, wallet);
 
-    const deployedTxHash = await contract.deploy(validatorIndex, datum);
+    const deployedTxHash = await contract.deploy(validatorScriptIndex, datum);
 
     await waitUntilDeployed(deployedTxHash);
     await waitUntilWalletUTxOsHaveBeenUpdated(deployedTxHash);
 
     const deployed_successfully = await try_execution(async () => {
-      const spendTxHash = await contract.spend(validatorIndex, deployedTxHash, redeemer, redeemerBudget);
+      const spendTxHash = await contract.spend(validatorScriptIndex, deployedTxHash, redeemer, redeemerBudget);
       await waitUntilDeployed(spendTxHash);
     });
 

@@ -15,18 +15,18 @@ import { BlockchainProvider } from "./blockchain_provider";
 export const mVoid = () => mConStr0([]);
 
 export class Contract {
-  compiledValidators: any;
+  compiledValidatorScripts: any;
   blockchainProvider: BlockchainProvider;
   wallet: MeshWallet;
 
   constructor(compiledContractPath: string, blockchainProvider: BlockchainProvider, wallet: MeshWallet) {
     this.blockchainProvider = blockchainProvider;
-    this.compiledValidators = this.loadContractFrom(compiledContractPath);
+    this.compiledValidatorScripts = this.loadContractFrom(compiledContractPath);
     this.wallet = wallet;
   }
 
-  async deploy(validatorIndex: number, datum: Data): Promise<string> {
-    const txHash = await this.buildTxWithScriptUTxO(validatorIndex, datum);
+  async deploy(validatorScriptIndex: number, datum: Data): Promise<string> {
+    const txHash = await this.buildTxWithScriptUTxO(validatorScriptIndex, datum);
     const deployedTxHash = await this.deployTx(txHash);
 
     console.log(`1 tADA locked into the contract at Tx ID: ${deployedTxHash}`);
@@ -34,14 +34,14 @@ export class Contract {
     return deployedTxHash;
   }
 
-  async spend(validatorIndex: number, txHashFromDeposit: string, redeemer: Data, redeemerBudget?: { mem: number, steps: number }): Promise<string> {
-    const validatorAddr = this.getValidatorAddress(validatorIndex)
-    const scriptUtxo = await this.blockchainProvider.getUtxoByTxHashAndAddress(txHashFromDeposit, validatorAddr);
+  async spend(validatorScriptIndex: number, txHashFromDeposit: string, redeemer: Data, redeemerBudget?: { mem: number, steps: number }): Promise<string> {
+    const validatorScriptAddr = this.getValidatorScriptAddress(validatorScriptIndex)
+    const scriptUtxo = await this.blockchainProvider.getUtxoByTxHashAndAddress(txHashFromDeposit, validatorScriptAddr);
     
     const collateralTryCount = 5;
     for (let i = 0; i < collateralTryCount; i++) {
       try {
-        const txHash = await this.buildTxWithSpendUTxO(scriptUtxo, validatorIndex, redeemer, redeemerBudget);
+        const txHash = await this.buildTxWithSpendUTxO(scriptUtxo, validatorScriptIndex, redeemer, redeemerBudget);
         const deployedTxHash = await this.deployTx(txHash);
       
         console.log(`1 tADA unlocked from the contract at Tx ID: ${deployedTxHash}`);
@@ -57,7 +57,7 @@ export class Contract {
     throw(`Spend failed after ${collateralTryCount} times trying to get unspend collaterals`);
   }
 
-  private async buildTxWithSpendUTxO(onchainScriptUtxo: UTxO, validatorIndex: number, redeemer: Data, redeemerBudget?: { mem: number; steps: number; } | undefined) {
+  private async buildTxWithSpendUTxO(onchainScriptUtxo: UTxO, validatorScriptIndex: number, redeemer: Data, redeemerBudget?: { mem: number; steps: number; } | undefined) {
     const collateral = await this.getWalletCollateral();
 
     const txBuilder = this.blockchainProvider.newTxBuilder();
@@ -69,7 +69,7 @@ export class Contract {
         onchainScriptUtxo.output.amount,
         onchainScriptUtxo.output.address
       )
-      .txInScript(this.getValidatorCbor(validatorIndex))
+      .txInScript(this.getValidatorScriptCbor(validatorScriptIndex))
       .txInInlineDatumPresent()
       .requiredSignerHash(await this.hashedWalletPublicKey())
       .changeAddress(await this.walletAddress())
@@ -107,8 +107,8 @@ export class Contract {
     return deserializeAddress(await this.walletAddress()).pubKeyHash;
   }
 
-  private getValidatorAddress(validatorIndex: number) {
-    const scriptCbor = this.getValidatorCbor(validatorIndex);
+  private getValidatorScriptAddress(validatorScriptIndex: number) {
+    const scriptCbor = this.getValidatorScriptCbor(validatorScriptIndex);
 
     const scriptAddr = serializePlutusScript(
       { code: scriptCbor, version: "V3" }
@@ -116,9 +116,9 @@ export class Contract {
     return scriptAddr;
   }
 
-  private getValidatorCbor(validatorIndex: number) {
+  private getValidatorScriptCbor(validatorScriptIndex: number) {
     return applyParamsToScript(
-      this.compiledValidators.validators[validatorIndex].compiledCode,
+      this.compiledValidatorScripts.validators[validatorScriptIndex].compiledCode,
       []
     );
   }
@@ -132,10 +132,10 @@ export class Contract {
     ];
   }
 
-  private async buildTxWithScriptUTxO(validatorIndex: number, datum: Data): Promise<string> {
+  private async buildTxWithScriptUTxO(validatorScriptIndex: number, datum: Data): Promise<string> {
     const txBuilder = this.blockchainProvider.newTxBuilder();
     await txBuilder
-      .txOut(this.getValidatorAddress(validatorIndex), this.oneADA())
+      .txOut(this.getValidatorScriptAddress(validatorScriptIndex), this.oneADA())
       .txOutInlineDatumValue(datum)
       .changeAddress(await this.walletAddress())
       .selectUtxosFrom(await this.wallet.getUtxos())
