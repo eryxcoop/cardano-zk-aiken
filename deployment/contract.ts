@@ -19,10 +19,10 @@ export class Contract {
   blockchainProvider: BlockchainProvider;
   wallet: MeshWallet;
 
-  constructor(compiledContractPath: string) {
-    this.blockchainProvider = new BlockchainProvider();
+  constructor(compiledContractPath: string, blockchainProvider: BlockchainProvider, wallet: MeshWallet) {
+    this.blockchainProvider = blockchainProvider;
     this.compiledValidators = this.loadContractFrom(compiledContractPath);
-    this.wallet = this.blockchainProvider.getWalletUsing("me.sk");
+    this.wallet = wallet;
   }
 
   async deploy(validatorIndex: number, datum: Data): Promise<string> {
@@ -92,12 +92,6 @@ export class Contract {
 
   private async getWalletCollateral(): Promise<UTxO> {
     return (await this.wallet.getCollateral())[0];
-  }
-
-  // coupled, only for test
-  async hasCollateralTxBeenSynchronizedTo(scriptTxHash: string): Promise<boolean> {
-    const collaterals: UTxO[] = await this.wallet.getCollateral();
-    return collaterals.some((collateral: UTxO) => collateral.input.txHash === scriptTxHash)
   }
 
   private loadContractFrom(compiledContractPath: string) {
