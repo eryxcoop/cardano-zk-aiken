@@ -49,7 +49,7 @@ export class Contract {
         return deployedTxHash;
       } catch (error) {
         if (error.search(/InsufficientCollateral/) === -1) {
-          throw("Spend failed");
+          throw("Spend failed: "+ error);
         }
       }
     }

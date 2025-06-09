@@ -1,3 +1,4 @@
+import { mConStr0 } from "@meshsdk/core";
 import { BlockchainProvider } from "./blockchain_provider";
 import { Contract, mVoid } from "./contract";
 
@@ -9,6 +10,7 @@ async function main() {
   const wallet = blockchain_provider.getWalletUsing('me.sk');
   
   const contract = new Contract(compiledContractPath, blockchain_provider, wallet);
+  contract.spend(validatorScriptIndex, txHashFromDeposit, mConStr0([5, 7]), {mem: 97246, steps: 4018447759})
 }
  
 main();

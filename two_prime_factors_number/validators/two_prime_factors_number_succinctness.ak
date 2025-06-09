@@ -5,28 +5,25 @@ use cardano/transaction.{
   InlineDatum, Input, Output, OutputReference, Transaction,
 }
 
-pub type Datum {
-  two_prime_factors_number: Int,
-}
-
 pub type Redeemer {
   factor1: Int,
   factor2: Int,
+  proof: List<Proof>,
 }
 
 validator two_prime_factors_number_succinctness {
   spend(
-    datum: Option<Datum>,
+    datum: Option<Int>,
     redeemer: Redeemer,
     _own_ref: OutputReference,
     _self: Transaction,
   ) {
-    expect Some(datum) = datum
-    assert_factors_are_correct(
-      datum.two_prime_factors_number,
-      redeemer.factor1,
-      redeemer.factor2,
-    )?
+    expect Some(two_prime_factors_number) = datum
+    let (_,result) = assert_factors_are_correct(
+      two_prime_factors_number,
+      redeemer
+    )
+    result?
   }
 
   else(_) {
@@ -34,7 +31,10 @@ validator two_prime_factors_number_succinctness {
   }
 }
 
-fn assert_factors_are_correct(number: Int, factor1: Int, factor2: Int) -> Bool {
+fn assert_factors_are_correct(redeemer: Redeemer, number: Int) -> (Redeemer, Bool) {
+  let factor1 = redeemer.factor1
+  let factor2 = redeemer.factor2
+
    let pk5: Proof =
      Proof {
        piA: #"949135c16bda90ad1633a73dc349e3bfa5791d81f66c3bc2de11c58230fff2b24a8c736d72f6e77ad466354c0245a3d9",
@@ -49,16 +49,16 @@ fn assert_factors_are_correct(number: Int, factor1: Int, factor2: Int) -> Bool {
       piC: #"b6377a604c9e218a004e29c54250e925c84715b762fe3b55e8a98f638f64d9934562f3175f86c021b3caf42ab04e55af",
     }
 
-  let factor1_is_prime = is_prime(factor1, pk5)
-  let factor2_is_prime = is_prime(factor2, pk7)
+  let (redeemer, factor1_is_prime) = is_prime(redeemer, factor1)
+  let (redeemer, factor2_is_prime) = is_prime(redeemer, factor2)
   let factors_are_correct = number == factor1 * factor2
 
-  factor1_is_prime? && factor2_is_prime? && factors_are_correct?
+  (redeemer, factor1_is_prime? && factor2_is_prime? && factors_are_correct?)
 }
 
-fn is_prime(n: Int, proof: Proof) -> Bool {
+fn is_prime(redeemer: Redeemer, n: Int) -> (Redeemer, Bool) {
   let vk: SnarkVerificationKey =
-    SnarkVerificationKey {
+    SnarkVerificationKey {  
       nPublic: 1,
       vkAlpha: #"85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5",
       vkBeta: #"b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f",
@@ -74,11 +74,11 @@ fn is_prime(n: Int, proof: Proof) -> Bool {
 
   let public_values: List<Int> = [n]
 
-  groth_verify(vk, proof, public_values)
+  (redeemer, groth_verify(vk, proof, public_values))
 }
 
 test test_factorization() {
-  let utxo_datum = Datum { two_prime_factors_number: 35 }
+  let utxo_datum = 35
 
   let utxo_reference = OutputReference { transaction_id: "", output_index: 0 }
 

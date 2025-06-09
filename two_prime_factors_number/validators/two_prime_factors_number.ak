@@ -82,7 +82,7 @@ test test_factorization() {
   let input_utxo = Input { output_reference: utxo_reference, output: utxo_output }
 
   two_prime_factors_number.spend(
-    Some(utxo_datum),
+    Some(35),
     Redeemer { factor1: 5, factor2: 7 },
     utxo_reference,
     Transaction { ..transaction.placeholder, inputs: [input_utxo], outputs: [] },
