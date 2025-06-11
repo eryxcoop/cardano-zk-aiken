@@ -1,4 +1,4 @@
-import { Data, mConStr0, MeshWallet, UTxO } from "@meshsdk/core";
+import { byteString, Data, mConStr0, MeshWallet, mStringToPlutusBSArray, UTxO } from "@meshsdk/core";
 import { Contract, mVoid } from "../contract";
 import { BlockchainProvider } from "../blockchain_provider";
 
@@ -15,26 +15,32 @@ describe('Contract Deployment', () => {
   test.skip('Happy path with datum and redeemer', async () => {
     const datum = 42;
     const redeemer = 42;
-    await testDeploymentWith(scriptPath, 2, datum, redeemer);
+    await testDeploymentWith(scriptPath, 4, datum, redeemer);
   }, 150000);
 
   test.skip('Happy path without datum and redeemer', async () => {
     const datum = mVoid();
     const redeemer = mVoid();
 
-    await testDeploymentWith(scriptPath, 4, datum, redeemer);
+    await testDeploymentWith(scriptPath, 6, datum, redeemer);
   }, 150000);
 
   test.skip('Happy path with manual budget', async () => {
     const datum = mVoid();
     const redeemer = mVoid();
     const redeemerBudget = { mem: 50000, steps: 25000000 };
-    await testDeploymentWith(scriptPath, 4, datum, redeemer, redeemerBudget);
+    await testDeploymentWith(scriptPath, 6, datum, redeemer, redeemerBudget);
   }, 150000);
 
-  test('Happy path with lists', async () => {
+  test.skip('Happy path with lists', async () => {
     const datum = mVoid();
     const redeemer = [1,2,3];
+    await testDeploymentWith(scriptPath, 2, datum, redeemer);
+  }, 150000);
+
+  test('Happy path with bytearray', async () => {
+    const datum = mVoid();
+    const redeemer = "cafe";
     await testDeploymentWith(scriptPath, 0, datum, redeemer);
   }, 150000);
 
