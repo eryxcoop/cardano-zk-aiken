@@ -19,13 +19,13 @@ pub type ZK<redeemer_type> {
 validator two_prime_factors_number_succinctness {
   spend(
     datum: Option<Int>,
-    redeemer: ZK<Redeemer>,
+    zk_redeemer: ZK<Redeemer>,
     _own_ref: OutputReference,
     _self: Transaction,
   ) {
     expect Some(two_prime_factors_number) = datum
     let (_, result) =
-      assert_factors_are_correct(redeemer, two_prime_factors_number)
+      assert_factors_are_correct(zk_redeemer, two_prime_factors_number)
     result?
   }
 
@@ -38,7 +38,7 @@ fn assert_factors_are_correct(
   zk_redeemer: ZK<Redeemer>,
   number: Int,
 ) -> (ZK<Redeemer>, Bool) {
-  let ZK(redeemer, _proofs) = zk_redeemer
+  let redeemer = zk_redeemer.redeemer
   let factor1 = redeemer.factor1
   let factor2 = redeemer.factor2
 
