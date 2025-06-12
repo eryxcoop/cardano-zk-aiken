@@ -16,7 +16,7 @@ pub type ZK<redeemer_type> {
   proofs: List<Proof>,
 }
 
-validator two_prime_factors_number_succinctness {
+validator two_prime_factors_number_partial_succinctness {
   spend(
     datum: Option<Int>,
     zk_redeemer: ZK<Redeemer>,
@@ -110,7 +110,7 @@ test test_factorization() {
       piC: #"b6377a604c9e218a004e29c54250e925c84715b762fe3b55e8a98f638f64d9934562f3175f86c021b3caf42ab04e55af",
     }
   let proofs = [pk5, pk7]
-  two_prime_factors_number_succinctness.spend(
+  two_prime_factors_number_partial_succinctness.spend(
     Some(utxo_datum),
     ZK { proofs, redeemer: Redeemer { factor1: 5, factor2: 7 } },
     utxo_reference,
