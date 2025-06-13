@@ -35,4 +35,4 @@ template IsPrime() {
     sel.out[0] === 1;
 }
 
-component main {public [n]} = IsPrime();
+//component main {public [n]} = IsPrime();

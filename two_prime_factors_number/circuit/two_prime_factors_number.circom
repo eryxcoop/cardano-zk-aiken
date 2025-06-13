@@ -9,11 +9,11 @@ template TwoPrimeFactorsNumber() {
 
     // chequear factor 1 es prime
     component factor1_is_prime = IsPrime();
-    factor1_is_prime.n === factor1;
+    factor1_is_prime.n <== factor1;
 
     // chequear factor 2 es prime
     component factor2_is_prime = IsPrime();
-    factor2_is_prime.n === factor2;
+    factor2_is_prime.n <== factor2;
 
     n === factor1 * factor2;
 }
