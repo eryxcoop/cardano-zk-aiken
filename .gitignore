@@ -7,3 +7,4 @@ plutus.json
 ceremony.ptau
 proof.json
 public.json
+*.env

@@ -100,7 +100,7 @@ test test_factorization() {
   let proofs = [factors_are_correct]
   two_prime_factors_number_full_succinctness.spend(
     Some(utxo_datum),
-    ZK { proofs, redeemer: Redeemer { factor1: 5, factor2: 7} },
+    ZK { redeemer: Redeemer { factor1: 5, factor2: 7}, proofs: proofs },
     utxo_reference,
     Transaction { ..transaction.placeholder, inputs: [input_utxo], outputs: [] },
   )
