@@ -11,7 +11,7 @@ pub type ZK<redeemer_type> {
   proofs: List<Proof>,
 }
 
-validator two_prime_factors_number_full_succinctness {
+validator two_prime_factors_number_private {
   spend(
     datum: Option<Int>,
     zk_redeemer: ZK<Void>,
@@ -87,9 +87,9 @@ test test_factorization() {
     }
 
   let proofs = [factors_are_correct]
-  two_prime_factors_number_full_succinctness.spend(
+  two_prime_factors_number_private.spend(
     Some(utxo_datum),
-    ZK { proofs, redeemer: Void },
+    ZK { redeemer: Void, proofs: proofs },
     utxo_reference,
     Transaction { ..transaction.placeholder, inputs: [input_utxo], outputs: [] },
   )
