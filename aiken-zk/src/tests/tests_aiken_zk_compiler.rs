@@ -3,8 +3,8 @@ use std::fs;
 use std::env;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
+use std::process::Command;
 use tempfile::{tempdir, TempDir};
-use fs_extra::dir::{copy, CopyOptions};
 
 
 #[test]
@@ -23,14 +23,13 @@ fn test_compiler_can_save_source_code_into_file(){
 
 #[test]
 fn test_compiler_can_compile_the_generated_circom_component(){
-    let _ = create_sandbox_and_set_as_current_directory();
+    let _temp_dir = create_sandbox_and_set_as_current_directory();
     let circom_program_filename = "test.circom".to_string();
     let mut compiler = AikenZkCompiler::from(source_code_addition());
     compiler.save_into_file(circom_program_filename.clone()).unwrap();
 
-    let res = compiler.create_verification_key(circom_program_filename);
+    compiler.create_verification_key(circom_program_filename).unwrap();
 
-    assert!(res.is_ok());
     let stored_vk = fs::read_to_string("build/verification_key.json").expect("No se pudo leer el archivo");
     assert!(stored_vk.contains("protocol"));
 }
@@ -39,19 +38,20 @@ fn create_sandbox_and_set_as_current_directory() -> TempDir {
     let sandbox_path = &sandbox_path();
     let source = Path::new(sandbox_path);
     let temp_dir = tempdir().expect("Could not create temp dir");
-    let mut options = CopyOptions::new();
-    options.copy_inside = true;
-    copy(source, temp_dir.path(), &options).expect("Could not copy template into directory");
     env::set_current_dir(temp_dir.path()).expect("Couldn't move to temp directory");
+    copy_dir_contents(source, temp_dir.path()).expect("Could not copy template into directory");
 
     let perms = fs::Permissions::from_mode(0o777);
     fs::set_permissions(&temp_dir.path(), perms).expect("Failed to set permissions");
+
+    let res = Command::new("pwd").output().unwrap();
+    println!("{:?}", res);
 
     temp_dir
 }
 
 fn sandbox_path() -> String {
-    manifest_path() + "/src/tests/sandbox/"
+    manifest_path() + "/src/tests/sandbox"
 }
 
 fn manifest_path() -> String {
@@ -61,4 +61,20 @@ fn manifest_path() -> String {
 fn source_code_addition() -> String {
     r#"include "templates/addition.circom";
 component main { public [a,b,c] } = Addition();"#.to_string()
+}
+
+fn copy_dir_contents(src: &Path, dst: &Path) -> std::io::Result<()> {
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let entry_path = entry.path();
+        let dst_path = dst.join(entry.file_name());
+
+        if entry_path.is_dir() {
+            fs::create_dir_all(&dst_path)?;
+            copy_dir_contents(&entry_path, &dst_path)?; // recursive copy
+        } else {
+            fs::copy(&entry_path, &dst_path)?;
+        }
+    }
+    Ok(())
 }
