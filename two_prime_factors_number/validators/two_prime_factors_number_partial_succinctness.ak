@@ -23,6 +23,8 @@ validator two_prime_factors_number_partial_succinctness {
     _own_ref: OutputReference,
     _self: Transaction,
   ) {
+   // let zk_redeemer = offchain is_prime(zk_redeemer, 2)
+
     expect Some(two_prime_factors_number) = datum
     let (_, result) =
       assert_factors_are_correct(zk_redeemer, two_prime_factors_number)
@@ -49,7 +51,7 @@ fn assert_factors_are_correct(
   (zk_redeemer, factor1_is_prime? && factor2_is_prime? && factors_are_correct?)
 }
 
-fn is_prime(redeemer: ZK<Redeemer>, n: Int) -> (ZK<Redeemer>, Bool) {
+fn is_prime(zk_redeemer: ZK<Redeemer>, n: Int) -> (ZK<Redeemer>, Bool) {
   let vk: SnarkVerificationKey =
     SnarkVerificationKey {
       nPublic: 1,
@@ -66,14 +68,15 @@ fn is_prime(redeemer: ZK<Redeemer>, n: Int) -> (ZK<Redeemer>, Bool) {
     }
 
   let public_values: List<Int> = [n]
-  expect Some(proof) = list.head(redeemer.proofs)
+  expect Some(proof) = list.head(zk_redeemer.proofs)
   let is_valid = groth_verify(vk, proof, public_values)
 
-  expect Some(proofs) = list.tail(redeemer.proofs)
-  let redeemer = ZK { redeemer: redeemer.redeemer, proofs }
+  expect Some(proofs) = list.tail(zk_redeemer.proofs)
+  let zk_redeemer = ZK { redeemer: zk_redeemer.redeemer, proofs }
 
-  (redeemer, is_valid)
+  (zk_redeemer, is_valid)
 }
+
 
 test test_factorization() {
   let utxo_datum = 35
