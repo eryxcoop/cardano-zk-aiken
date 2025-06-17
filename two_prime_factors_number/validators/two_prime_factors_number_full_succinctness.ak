@@ -38,13 +38,6 @@ fn assert_factors_are_correct(
   zk_redeemer: ZK<Redeemer>,
   number: Int
 ) -> (ZK<Redeemer>, Bool) {
-
-  let (zk_redeemer, factors_are_correct) = factors_are_correct(zk_redeemer, number)
-
-  (zk_redeemer, factors_are_correct?)
-}
-
-fn factors_are_correct(zk_redeemer: ZK<Redeemer>, number: Int) -> (ZK<Redeemer>, Bool) {
   let redeemer = zk_redeemer.redeemer
   let factor1 = redeemer.factor1
   let factor2 = redeemer.factor2
