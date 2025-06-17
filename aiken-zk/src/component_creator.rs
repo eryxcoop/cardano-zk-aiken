@@ -39,7 +39,7 @@ impl ComponentCreator {
         let visibility = if public_inputs_identifiers.len() == 0 {
             "".to_string()
         } else {
-            format!("{{ public: [{}] }} ", public_inputs_identifiers.join(","))
+            format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
         };
         let instantiation =
             "component main ".to_string() + &visibility + &format!("= {}();", template);
@@ -86,7 +86,7 @@ impl ComponentCreator {
                 let visibility = if public_inputs_identifiers.len() == 0 {
                     "".to_string()
                 } else {
-                    format!("{{ public: [{}] }} ", public_inputs_identifiers.join(","))
+                    format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
                 };
                 let instantiation = "component main ".to_string()
                     + &visibility
@@ -121,7 +121,7 @@ impl ComponentCreator {
                 let visibility = if public_inputs_identifiers.len() == 0 {
                     "".to_string()
                 } else {
-                    format!("{{ public: [{}] }} ", public_inputs_identifiers.join(","))
+                    format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
                 };
                 let instantiation = "component main ".to_string() + &visibility + "= If();";
                 import.to_string() + "\n" + &instantiation
