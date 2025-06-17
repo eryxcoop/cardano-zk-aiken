@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-aiken-lang = {version = "1.1.17", path="../aiken/crates/aiken-lang"}
+aiken-lang = {version = "1.1.17"}
 ordinal = "0.3.2"
 num-bigint = "0.4.3"
 
