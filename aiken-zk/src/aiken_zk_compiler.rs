@@ -1,0 +1,22 @@
+use std::io::Error;
+use std::fs;
+
+pub struct AikenZkCompiler {
+    pub circom_source_code: String,
+    pub circom_source_code_path: Option<String>,
+}
+
+impl AikenZkCompiler {
+    pub fn from(circom_source_code: String) -> Self {
+        Self {
+            circom_source_code,
+            circom_source_code_path: None
+        }
+    }
+
+    pub fn save_into_file(&mut self, circom_source_code_path: String) -> Result<(), Error> {
+        fs::write(&circom_source_code_path, &self.circom_source_code)?;
+        self.circom_source_code_path = Some(circom_source_code_path);
+        Ok(())
+    }
+}

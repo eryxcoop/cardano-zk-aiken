@@ -7,6 +7,7 @@ pub mod zk_examples;
 mod tests;
 
 pub mod component_creator;
+pub mod aiken_zk_compiler;
 
 use crate::token_zk::TokenZK;
 use crate::zk_examples::ZkExample;
