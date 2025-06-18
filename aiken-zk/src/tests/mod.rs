@@ -14,6 +14,6 @@ mod tests_circom_compiler;
 mod tests_aiken_zk_compiler;
 
 
-
+mod utils;
 mod token_factory;
 mod aiken_program_factory;
