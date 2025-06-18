@@ -17,7 +17,7 @@ impl AikenZkCompiler {
     fn replace_keyword_with_function_call(aiken_src: &str, token: &Token, span: &Span) -> String {
         let mut aiken_zk_src = String::from(aiken_src);
         let public_identifiers = Self::extract_public_identifiers_from_token(token);
-        let replacement = format!("zk_verify_or_fail(redeemer, {:?})", &public_identifiers);
+        let replacement = format!("zk_verify_or_fail(redeemer, [{}])", public_identifiers.join(", "));
         aiken_zk_src.replace_range(span.start..span.end, &replacement);
         aiken_zk_src
     }
