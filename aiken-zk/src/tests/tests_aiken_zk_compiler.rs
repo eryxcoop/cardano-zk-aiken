@@ -5,9 +5,10 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
 use tempfile::{tempdir, TempDir};
-
+use serial_test::serial;
 
 #[test]
+#[serial]
 fn test_compiler_can_save_source_code_into_file(){
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let source_code = source_code_addition();
@@ -22,6 +23,7 @@ fn test_compiler_can_save_source_code_into_file(){
 }
 
 #[test]
+#[serial]
 fn test_compiler_can_compile_the_generated_circom_component(){
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let circom_program_filename = "test.circom".to_string();
