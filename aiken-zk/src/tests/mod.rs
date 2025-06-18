@@ -1,11 +1,11 @@
 #[cfg(test)]
-mod tests_replacement;
+mod tests_deprecated_replacement;
 
 #[cfg(test)]
-mod tests_tokens;
+mod tests_token_lexing;
 
 #[cfg(test)]
-mod tests_create_components;
+mod tests_create_circom_source_file;
 
 #[cfg(test)]
 mod tests_aiken_zk_compiler;
