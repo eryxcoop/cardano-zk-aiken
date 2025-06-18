@@ -21,6 +21,15 @@ fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_
     );
 }
 
+#[test]
+#[serial]
+fn test_compiler_can_replace_addition_of_mixed_variables_by_the_corresponding_funcion_and_call(){
+    test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(
+        "offchain addition(priv a, b, pub c)",
+        "zk_verify_or_fail(redeemer, [b, c])"
+    );
+}
+
 fn test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(original: &str, replacement: &str){
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let aiken_src = aiken_template_with_keyword(original);
