@@ -36,15 +36,13 @@ impl AikenZkCompiler {
                 [lhs, rhs, res].iter().fold(
                     vec![],
                     |mut acc, &input| match input.visibility.clone() {
-                        Some(InputVisibility::Public) => {
-                                acc.push(Self::extract_identifier_from_token(&input.token));
-                                acc
-                            }
-                        None => {
+                        Some(InputVisibility::Private) => {
+                            acc
+                        }
+                        _ => {
                             acc.push(Self::extract_identifier_from_token(&input.token));
                             acc
                         }
-                        _ => acc
                     },
                 )
             }
