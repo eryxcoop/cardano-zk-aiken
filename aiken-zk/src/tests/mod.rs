@@ -1,7 +1,4 @@
 #[cfg(test)]
-mod tests_deprecated_replacement;
-
-#[cfg(test)]
 mod tests_token_lexing;
 
 #[cfg(test)]
