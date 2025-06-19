@@ -43,8 +43,9 @@ fn test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(orig
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let aiken_src = aiken_template_with_keyword(original);
     let aiken_src_filename = "my_program".to_string();
+    let random_seeds = ("asdasd", "dsadsa");
 
-    let aiken_zk_src = AikenZkCompiler::apply_modifications_to_src_for_token(aiken_src, aiken_src_filename);
+    let aiken_zk_src = AikenZkCompiler::apply_modifications_to_src_for_token(aiken_src, aiken_src_filename, random_seeds);
 
     let expected_aiken_src = aiken_template_with_keyword(replacement);
     assert_eq!(expected_aiken_src, aiken_zk_src);

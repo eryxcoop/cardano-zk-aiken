@@ -25,8 +25,9 @@ fn test_compiler_can_compile_the_generated_circom_component(){
     let circom_program_filename = "test.circom".to_string();
     let mut compiler = CircomCompiler::from(source_code_addition());
     compiler.save_into_file(circom_program_filename.clone()).unwrap();
+    let random_seeds = ("asdasd", "dsadsa");
 
-    compiler.create_verification_key(circom_program_filename).unwrap();
+    compiler.create_verification_key(circom_program_filename, random_seeds).unwrap();
 
     let stored_vk = fs::read_to_string("build/verification_key.json").expect("No se pudo leer el archivo");
     assert!(stored_vk.contains("protocol"));

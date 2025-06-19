@@ -50,7 +50,7 @@ impl AikenZkCompiler {
         }
     }
 
-    pub fn apply_modifications_to_src_for_token(aiken_src: String, aiken_src_filename: String) -> String {
+    pub fn apply_modifications_to_src_for_token(aiken_src: String, aiken_src_filename: String, random_seeds: (&str, &str)) -> String {
         let LexInfo { tokens, .. } = Lexer::new().run(&aiken_src).unwrap();
         let (token, span) = Self::find_offchain_token(tokens);
         let circom_component_src = ComponentCreator::from_token(token.clone()).create();
@@ -58,7 +58,7 @@ impl AikenZkCompiler {
         let mut circom_compiler = CircomCompiler::from(circom_component_src);
         let circom_src_filename_with_extension = aiken_src_filename + ".circom";
         circom_compiler.save_into_file(circom_src_filename_with_extension.clone()).unwrap();
-        circom_compiler.create_verification_key(circom_src_filename_with_extension).unwrap();
+        circom_compiler.create_verification_key(circom_src_filename_with_extension, random_seeds).unwrap();
 
         // Leer vk
         // Comprimir los puntos de curva

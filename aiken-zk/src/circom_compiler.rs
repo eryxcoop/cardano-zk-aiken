@@ -21,12 +21,14 @@ impl CircomCompiler {
         Ok(())
     }
 
-    pub fn create_verification_key(&mut self, circom_program_filename: String) -> Result<(), Error> {
+    pub fn create_verification_key(&mut self, circom_program_filename: String, rand: (&str, &str)) -> Result<(), Error> {
         Command::new("./compile_proof_verify.sh")
             .arg("-c")
             .arg(circom_program_filename)
             .arg("xx")
             .arg("ceremony.ptau")
+            .arg(rand.0)
+            .arg(rand.1)
             .output()?;
 
         Ok(())

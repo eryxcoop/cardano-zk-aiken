@@ -11,6 +11,9 @@ mkdir -p ${OUTPUT_PATH}
 
 CEREMONY_PATH="$4"
 
+RAND_1="$5"
+RAND_2="$6"
+
 function compile() {
 
     # Compiles circuit to wasm
@@ -19,9 +22,9 @@ function compile() {
     # Groth16 setup
     snarkjs groth16 setup ${OUTPUT_PATH}${CIRCUIT_NAME}.r1cs ${CEREMONY_PATH} ${OUTPUT_PATH}${CIRCUIT_NAME}_0000.zkey
 
-    echo "sdkadkaskdas" | snarkjs zkey contribute ${OUTPUT_PATH}${CIRCUIT_NAME}_0000.zkey ${OUTPUT_PATH}${CIRCUIT_NAME}_0001.zkey --name="1st Contributor Name" -v
+    echo $RAND_1 | snarkjs zkey contribute ${OUTPUT_PATH}${CIRCUIT_NAME}_0000.zkey ${OUTPUT_PATH}${CIRCUIT_NAME}_0001.zkey --name="1st Contributor Name" -v
 
-    echo "dasfaefaef" | snarkjs zkey contribute ${OUTPUT_PATH}${CIRCUIT_NAME}_0001.zkey ${OUTPUT_PATH}${CIRCUIT_NAME}_0002.zkey --name="Second contribution Name" -v 
+    echo $RAND_2 | snarkjs zkey contribute ${OUTPUT_PATH}${CIRCUIT_NAME}_0001.zkey ${OUTPUT_PATH}${CIRCUIT_NAME}_0002.zkey --name="Second contribution Name" -v
 
     snarkjs zkey beacon ${OUTPUT_PATH}${CIRCUIT_NAME}_0002.zkey ${OUTPUT_PATH}${CIRCUIT_NAME}_final.zkey 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10 -n="Final Beacon phase2"
 
