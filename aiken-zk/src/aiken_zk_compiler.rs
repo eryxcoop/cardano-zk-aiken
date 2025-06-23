@@ -103,21 +103,23 @@ impl AikenZkCompiler {
 
 
         format!(r#"fn zk_verify_or_fail(
-            zk_redeemer: ZK<Redeemer>,
-            public_inputs: List<Int>
-        ) -> ZK<Redeemer> {{
-            let redeemer = zk_redeemer.redeemer
+        zk_redeemer: ZK<Redeemer>,
+        public_inputs: List<Int>
+    ) -> ZK<Redeemer> {{
+        let redeemer = zk_redeemer.redeemer
 
-            let vk: SnarkVerificationKey =
-                SnarkVerificationKey {{
-                    nPublic: {},
-                    vk_alpha: #"{vkAlpha}",
-                    vk_beta: #"{vkBeta}",
-                    vk_gamma: #"{vkGamma}",
-                    vk_delta: #"{vkDelta}",
-                    vkAlphaBeta: [],
-                    vk_ic: [{formatted_ic}],
-                }}
+        let vk: SnarkVerificationKey =
+            SnarkVerificationKey {{
+                nPublic: {},
+                vkAlpha: #"{vkAlpha}",
+                vkBeta: #"{vkBeta}",
+                vkGamma: #"{vkGamma}",
+                vkDelta: #"{vkDelta}",
+                vkAlphaBeta: [],
+                vkIC: [
+{formatted_ic},
+                ],
+            }}
 
         expect Some(proof) = list.head(zk_redeemer.proofs)
 
