@@ -26,8 +26,7 @@ validator test_validator {{
   }}
 }}
 
-{}
-"#, keyword, verify_declaration)
+{}"#, keyword, verify_declaration)
 }
 
 pub fn verify_declaration(public_input_count: usize) -> String {
