@@ -1,7 +1,11 @@
 use crate::aiken_zk_compiler::Groth16CompressedData;
 
-pub fn aiken_template_with_body_and_verify_definition(keyword: &str, verify_declaration: &str) -> String {
-    format!(r#"
+pub fn aiken_template_with_body_and_verify_definition(
+    keyword: &str,
+    verify_declaration: &str,
+) -> String {
+    format!(
+        r#"
 pub type Redeemer {{
   a: Int,
   b: Int,
@@ -28,18 +32,24 @@ validator test_validator {{
   }}
 }}
 
-{}"#, keyword, verify_declaration)
+{}"#,
+        keyword, verify_declaration
+    )
 }
 
-pub fn verify_declaration(public_input_count: usize, compressed_vk: Groth16CompressedData) -> String {
-
-    let formatted_ic = compressed_vk.IC
+pub fn verify_declaration(
+    public_input_count: usize,
+    compressed_vk: Groth16CompressedData,
+) -> String {
+    let formatted_ic = compressed_vk
+        .IC
         .iter()
         .map(|h| format!("                #\"{h}\""))
         .collect::<Vec<_>>()
         .join(",\n");
 
-    format!(r#"fn zk_verify_or_fail(
+    format!(
+        r#"fn zk_verify_or_fail(
         zk_redeemer: ZK<Redeemer>,
         public_inputs: List<Int>
     ) -> ZK<Redeemer> {{
@@ -67,11 +77,11 @@ pub fn verify_declaration(public_input_count: usize, compressed_vk: Groth16Compr
         expect Some(proofs) = list.tail(zk_redeemer.proofs)
         let zk_redeemer = ZK {{ redeemer: zk_redeemer.redeemer, proofs }}
     }}"#,
-            public_input_count,
-            vkAlpha = compressed_vk.vk_alpha_1,
-            vkBeta = compressed_vk.vk_beta_2,
-            vkGamma = compressed_vk.vk_gamma_2,
-            vkDelta = compressed_vk.vk_delta_2,
-            formatted_ic = formatted_ic,
+        public_input_count,
+        vkAlpha = compressed_vk.vk_alpha_1,
+        vkBeta = compressed_vk.vk_beta_2,
+        vkGamma = compressed_vk.vk_gamma_2,
+        vkDelta = compressed_vk.vk_delta_2,
+        formatted_ic = formatted_ic,
     )
 }

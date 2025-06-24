@@ -1,25 +1,29 @@
-use serial_test::serial;
 use crate::aiken_zk_compiler::{AikenZkCompiler, Groth16CompressedData};
-use crate::tests::aiken_program_factory::{aiken_template_with_body_and_verify_definition, verify_declaration};
+use crate::tests::aiken_program_factory::{
+    aiken_template_with_body_and_verify_definition, verify_declaration,
+};
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
+use serial_test::serial;
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_public_variables_by_the_corresponding_funcion_and_call(){
+fn test_compiler_can_replace_addition_of_public_variables_by_the_corresponding_funcion_and_call() {
     test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(
         "offchain addition(pub a, pub b, pub c)",
         "zk_verify_or_fail(redeemer, [a, b, c])",
-        addition_all_public_vk_compressed(), 3
+        addition_all_public_vk_compressed(),
+        3,
     );
 }
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_funcion_and_call(){
+fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_funcion_and_call() {
     test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(
         "offchain addition(priv a, priv b, priv c)",
         "zk_verify_or_fail(redeemer, [])",
-        addition_all_private_vk_compressed(), 0
+        addition_all_private_vk_compressed(),
+        0,
     );
 }
 
@@ -41,18 +45,31 @@ fn test_compiler_can_replace_addition_of_mixed_variables_and_constants_by_the_co
     );
 }*/
 
-fn test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(original: &str, replacement: &str, vk_compressed_data: Groth16CompressedData, n_public_inputs: usize){
+fn test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(
+    original: &str,
+    replacement: &str,
+    vk_compressed_data: Groth16CompressedData,
+    n_public_inputs: usize,
+) {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let aiken_src = aiken_template_with_body_and_verify_definition(original, "");
     let output_filename = "my_program".to_string();
     let random_seeds = ("asdasd", "dsadsa");
 
-    let aiken_zk_src = AikenZkCompiler::apply_modifications_to_src_for_token(aiken_src, output_filename, random_seeds);
+    let aiken_zk_src = AikenZkCompiler::apply_modifications_to_src_for_token(
+        aiken_src,
+        output_filename,
+        random_seeds,
+    );
 
     let verify_declaration = verify_declaration(n_public_inputs, vk_compressed_data);
-    let expected_aiken_src = aiken_template_with_body_and_verify_definition(replacement, &verify_declaration);
+    let expected_aiken_src =
+        aiken_template_with_body_and_verify_definition(replacement, &verify_declaration);
 
-    assert_eq!(without_delta(expected_aiken_src), without_delta(aiken_zk_src));
+    assert_eq!(
+        without_delta(expected_aiken_src),
+        without_delta(aiken_zk_src)
+    );
 }
 
 fn addition_all_public_vk_compressed() -> Groth16CompressedData {

@@ -1,5 +1,5 @@
-use std::io::Error;
 use std::fs;
+use std::io::Error;
 use std::process::Command;
 
 pub struct CircomCompiler {
@@ -11,7 +11,7 @@ impl CircomCompiler {
     pub fn from(circom_source_code: String) -> Self {
         Self {
             circom_source_code,
-            circom_source_code_path: None
+            circom_source_code_path: None,
         }
     }
 
@@ -21,7 +21,11 @@ impl CircomCompiler {
         Ok(())
     }
 
-    pub fn create_verification_key(&mut self, circom_program_filename: String, rand: (&str, &str)) -> Result<(), Error> {
+    pub fn create_verification_key(
+        &mut self,
+        circom_program_filename: String,
+        rand: (&str, &str),
+    ) -> Result<(), Error> {
         Command::new("./compile_proof_verify.sh")
             .arg("-c")
             .arg(circom_program_filename)

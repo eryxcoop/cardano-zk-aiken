@@ -1,7 +1,7 @@
-use std::{env, fs};
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
-use tempfile::{tempdir, TempDir};
+use std::{env, fs};
+use tempfile::{TempDir, tempdir};
 
 fn copy_dir_contents(src: &Path, dst: &Path) -> std::io::Result<()> {
     for entry in fs::read_dir(src)? {

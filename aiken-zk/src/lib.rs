@@ -6,6 +6,6 @@ pub mod zk_examples;
 #[cfg(test)]
 mod tests;
 
-pub mod component_creator;
-pub mod circom_compiler;
 pub mod aiken_zk_compiler;
+pub mod circom_compiler;
+pub mod component_creator;

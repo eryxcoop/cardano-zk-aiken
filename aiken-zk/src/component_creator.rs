@@ -57,10 +57,19 @@ impl ComponentCreator {
             ZkExample::Subtraction { lhs, rhs, res } => {
                 self.process_three_inputs_for_template(lhs, rhs, res, "subtraction", "Subtraction")
             }
-            ZkExample::Multiplication { lhs, rhs, res } => {
-                self.process_three_inputs_for_template(lhs, rhs, res, "multiplication", "Multiplication")
-            }
-            ZkExample::Fibonacci { fib_0, fib_1, n, res } => {
+            ZkExample::Multiplication { lhs, rhs, res } => self.process_three_inputs_for_template(
+                lhs,
+                rhs,
+                res,
+                "multiplication",
+                "Multiplication",
+            ),
+            ZkExample::Fibonacci {
+                fib_0,
+                fib_1,
+                n,
+                res,
+            } => {
                 let Token::Int { value, base: _ } = &*n.token else {
                     panic!("Not expected kind of token")
                 };
@@ -93,7 +102,12 @@ impl ComponentCreator {
                     + &format!("= Fibonacci({});", value);
                 import.to_string() + "\n" + &instantiation
             }
-            ZkExample::If { condition, assigned, true_branch, false_branch } => {
+            ZkExample::If {
+                condition,
+                assigned,
+                true_branch,
+                false_branch,
+            } => {
                 let public_inputs_identifiers = [
                     (condition, "a"),
                     (assigned, "b"),
