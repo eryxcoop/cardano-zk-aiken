@@ -37,14 +37,16 @@ fn test_compiler_can_replace_addition_of_mixed_variables_by_the_corresponding_fu
     );
 }
 
-/*#[test]
+#[test]
 #[serial]
 fn test_compiler_can_replace_addition_of_mixed_variables_and_constants_by_the_corresponding_funcion_and_call(){
     test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(
         "offchain addition(priv a, 4, pub b)",
-        "zk_verify_or_fail(redeemer, [4, b])"
+        "zk_verify_or_fail(redeemer, [4, b])",
+        addition_mixed_visibility_vk_compressed(), 2
     );
-}*/
+}
+
 fn test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(
     original: &str,
     replacement: &str,
