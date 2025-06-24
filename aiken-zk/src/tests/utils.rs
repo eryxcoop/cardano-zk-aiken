@@ -1,7 +1,6 @@
 use std::{env, fs};
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
-use std::process::Command;
 use tempfile::{tempdir, TempDir};
 
 fn copy_dir_contents(src: &Path, dst: &Path) -> std::io::Result<()> {

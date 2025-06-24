@@ -9,12 +9,12 @@ use aiken_lang::ast::Span;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
-struct Groth16CompressedData {
-    vk_alpha_1: String,
-    vk_beta_2: String,
-    vk_gamma_2: String,
-    vk_delta_2: String,
-    IC: Vec<String>,
+pub struct Groth16CompressedData {
+    pub vk_alpha_1: String,
+    pub vk_beta_2: String,
+    pub vk_gamma_2: String,
+    pub vk_delta_2: String,
+    pub IC: Vec<String>,
 }
 
 pub struct AikenZkCompiler;

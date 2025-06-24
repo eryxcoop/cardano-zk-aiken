@@ -1,5 +1,5 @@
 use serial_test::serial;
-use crate::aiken_zk_compiler::AikenZkCompiler;
+use crate::aiken_zk_compiler::{AikenZkCompiler, Groth16CompressedData};
 use crate::tests::aiken_program_factory::{aiken_template_with_body_and_verify_definition, verify_declaration};
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 
@@ -8,20 +8,22 @@ use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 fn test_compiler_can_replace_addition_of_public_variables_by_the_corresponding_funcion_and_call(){
     test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(
         "offchain addition(pub a, pub b, pub c)",
-        "zk_verify_or_fail(redeemer, [a, b, c])"
-    );
-}
-
-/*#[test]
-#[serial]
-fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_funcion_and_call(){
-    test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(
-        "offchain addition(priv a, priv b, priv c)",
-        "zk_verify_or_fail(redeemer, [])"
+        "zk_verify_or_fail(redeemer, [a, b, c])",
+        addition_all_public_vk_compressed(), 3
     );
 }
 
 #[test]
+#[serial]
+fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_funcion_and_call(){
+    test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(
+        "offchain addition(priv a, priv b, priv c)",
+        "zk_verify_or_fail(redeemer, [])",
+        addition_all_private_vk_compressed(), 0
+    );
+}
+
+/*#[test]
 #[serial]
 fn test_compiler_can_replace_addition_of_mixed_variables_by_the_corresponding_funcion_and_call(){
     test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(
@@ -39,7 +41,7 @@ fn test_compiler_can_replace_addition_of_mixed_variables_and_constants_by_the_co
     );
 }*/
 
-fn test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(original: &str, replacement: &str){
+fn test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(original: &str, replacement: &str, vk_compressed_data: Groth16CompressedData, n_public_inputs: usize){
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let aiken_src = aiken_template_with_body_and_verify_definition(original, "");
     let output_filename = "my_program".to_string();
@@ -47,10 +49,37 @@ fn test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(orig
 
     let aiken_zk_src = AikenZkCompiler::apply_modifications_to_src_for_token(aiken_src, output_filename, random_seeds);
 
-    let verify_declaration = verify_declaration(3);
+    let verify_declaration = verify_declaration(n_public_inputs, vk_compressed_data);
     let expected_aiken_src = aiken_template_with_body_and_verify_definition(replacement, &verify_declaration);
 
     assert_eq!(without_delta(expected_aiken_src), without_delta(aiken_zk_src));
+}
+
+fn addition_all_public_vk_compressed() -> Groth16CompressedData {
+    Groth16CompressedData {
+        vk_alpha_1: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
+        vk_beta_2: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),
+        vk_gamma_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
+        vk_delta_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
+        IC: vec![
+            "b42a4610c5c2722df0cae5b696d0e212dd41e471a5246217751ae313dceba2b4d25c1be296ee8e00454027b7c4a45208".to_string(),
+            "87ef7b539de25c06493f7cd054a78da2819084b7027038d28b31fe88ce0b833f243723fbd9c4e502a3d0c2246aa69560".to_string(),
+            "a680399022e0bd33fa72396626b4bfc5d1d42e6d9207f3bc64f9fd26a32e5d150ba63a7c28d61db724d362bb9cf96680".to_string(),
+            "87ac4ff5d2863dd744e3ad397dfde8fe657c09c9c059e25ab8f37b85822eb8f34604d7ca2fe2622d1003ed258319bbf2".to_string(),
+        ],
+    }
+}
+
+fn addition_all_private_vk_compressed() -> Groth16CompressedData {
+    Groth16CompressedData {
+        vk_alpha_1: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
+        vk_beta_2: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),
+        vk_gamma_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
+        vk_delta_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
+        IC: vec![
+            "b8fcac9bb8eebddd4daf43519eb65d952436f5e98be287e246d70fc27f267379e132a156f6a4a742ece62fbb7c5e220d".to_string(),
+        ],
+    }
 }
 
 fn without_delta(final_program: String) -> String {
