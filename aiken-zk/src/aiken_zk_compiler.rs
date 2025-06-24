@@ -1,3 +1,5 @@
+use std::io::Error;
+use std::process::Command;
 use crate::circom_compiler::CircomCompiler;
 use crate::component_creator::ComponentCreator;
 use crate::lexer::{LexInfo, Lexer};
@@ -64,10 +66,9 @@ impl AikenZkCompiler {
         let circom_src_filename_with_extension = aiken_src_filename + ".circom";
         circom_compiler.save_into_file(circom_src_filename_with_extension.clone()).unwrap();
         circom_compiler.create_verification_key(circom_src_filename_with_extension, random_seeds).unwrap();
-        let vk_compressed_data = Self::extract_vk_compressed_data();
-        // Leer vk
-        // Comprimir los puntos de curva
-        // crear .ak modificado con el contenido de la vk
+
+        let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
+
         let mut aiken_zk_src = Self::replace_keyword_with_function_call(&aiken_src, &token, &span);
         aiken_zk_src = Self::append_verify_function_declaration(aiken_zk_src, &token, &vk_compressed_data);
         aiken_zk_src
@@ -79,8 +80,16 @@ impl AikenZkCompiler {
         aiken_zk_src + &full_verify_function_declaration
     }
 
-    fn extract_vk_compressed_data() -> Groth16CompressedData {
-        Groth16CompressedData {
+    fn extract_vk_compressed_data() -> Result<Groth16CompressedData, Error> {
+        // Leer vk
+        // Comprimir los puntos de curva
+        println!("{:?}", Command::new("npx")
+            .arg("tsx")
+            .arg("curve_compress/index.js")
+            .arg("build/verification_key.json")
+            .output()?);
+
+        Ok(Groth16CompressedData {
             vk_alpha: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
             vk_beta: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),
             vk_gamma: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
@@ -91,7 +100,7 @@ impl AikenZkCompiler {
                 "a680399022e0bd33fa72396626b4bfc5d1d42e6d9207f3bc64f9fd26a32e5d150ba63a7c28d61db724d362bb9cf96680".to_string(),
                 "87ac4ff5d2863dd744e3ad397dfde8fe657c09c9c059e25ab8f37b85822eb8f34604d7ca2fe2622d1003ed258319bbf2".to_string(),
             ],
-        }
+        })
     }
 
     fn create_verify_function_declaration_from(vk_compressed_data: &Groth16CompressedData, public_input_count: usize) -> String {

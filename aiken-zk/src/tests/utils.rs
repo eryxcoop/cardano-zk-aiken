@@ -30,9 +30,6 @@ pub fn create_sandbox_and_set_as_current_directory() -> TempDir {
     let perms = fs::Permissions::from_mode(0o777);
     fs::set_permissions(&temp_dir.path(), perms).expect("Failed to set permissions");
 
-    let res = Command::new("pwd").output().unwrap();
-    println!("{:?}", res);
-
     temp_dir
 }
 
