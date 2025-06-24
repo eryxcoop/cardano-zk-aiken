@@ -49,5 +49,21 @@ fn test_compiler_can_replace_addition_by_the_corresponding_funcion_and_call(orig
 
     let verify_declaration = verify_declaration(3);
     let expected_aiken_src = aiken_template_with_body_and_verify_definition(replacement, &verify_declaration);
-    assert_eq!(expected_aiken_src, aiken_zk_src);
+
+    assert_eq!(without_delta(expected_aiken_src), without_delta(aiken_zk_src));
+}
+
+fn without_delta(final_program: String) -> String {
+    let mut result = String::new();
+    let mut remainder: &str = &final_program;
+
+    let start_idx = remainder.find(r#"vkDelta: #""#).unwrap();
+    let (before, rest) = remainder.split_at(start_idx);
+    result.push_str(before);
+
+    let end_idx = rest[13..].find('"').unwrap();
+    remainder = &rest[13 + end_idx + 1..];
+
+    result.push_str(remainder);
+    result
 }

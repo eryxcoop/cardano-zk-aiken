@@ -6,13 +6,15 @@ use crate::lexer::{LexInfo, Lexer};
 use crate::token_zk::{TokenZK as Token, TokenZK};
 use crate::zk_examples::{InputVisibility, ZkExample};
 use aiken_lang::ast::Span;
+use serde::Deserialize;
 
+#[derive(Deserialize, Debug)]
 struct Groth16CompressedData {
-    vk_alpha: String,
-    vk_beta: String,
-    vk_gamma: String,
-    vk_delta: String,
-    vk_ic: Vec<String>,
+    vk_alpha_1: String,
+    vk_beta_2: String,
+    vk_gamma_2: String,
+    vk_delta_2: String,
+    IC: Vec<String>,
 }
 
 pub struct AikenZkCompiler;
@@ -81,30 +83,21 @@ impl AikenZkCompiler {
     }
 
     fn extract_vk_compressed_data() -> Result<Groth16CompressedData, Error> {
-        // Leer vk
-        // Comprimir los puntos de curva
-        println!("{:?}", Command::new("npx")
+        let output = Command::new("npx")
             .arg("tsx")
             .arg("curve_compress/index.js")
             .arg("build/verification_key.json")
-            .output()?);
+            .output()?;
 
-        Ok(Groth16CompressedData {
-            vk_alpha: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
-            vk_beta: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),
-            vk_gamma: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
-            vk_delta: "a73193a83d15104c605596c6e366f22ba37c503a9313f2fbe9d83bb16f663644a859a0d73e68394b619063b1ebcf97710f296c0826476b5c9302d2b504e2ffe77827a715a066a230fe804ed06287b2442d65651a6488146302459955943492c7".to_string(),
-            vk_ic: vec![
-                "b42a4610c5c2722df0cae5b696d0e212dd41e471a5246217751ae313dceba2b4d25c1be296ee8e00454027b7c4a45208".to_string(),
-                "87ef7b539de25c06493f7cd054a78da2819084b7027038d28b31fe88ce0b833f243723fbd9c4e502a3d0c2246aa69560".to_string(),
-                "a680399022e0bd33fa72396626b4bfc5d1d42e6d9207f3bc64f9fd26a32e5d150ba63a7c28d61db724d362bb9cf96680".to_string(),
-                "87ac4ff5d2863dd744e3ad397dfde8fe657c09c9c059e25ab8f37b85822eb8f34604d7ca2fe2622d1003ed258319bbf2".to_string(),
-            ],
-        })
+        let stdout = String::from_utf8(output.stdout).unwrap();
+        let compressed_vk: Groth16CompressedData = serde_json::from_str(&stdout)?;
+        Ok(compressed_vk)
+
+
     }
 
     fn create_verify_function_declaration_from(vk_compressed_data: &Groth16CompressedData, public_input_count: usize) -> String {
-        let formatted_ic = vk_compressed_data.vk_ic
+        let formatted_ic = vk_compressed_data.IC
             .iter()
             .map(|h| format!("                #\"{h}\""))
             .collect::<Vec<_>>()
@@ -140,10 +133,10 @@ impl AikenZkCompiler {
         let zk_redeemer = ZK {{ redeemer: zk_redeemer.redeemer, proofs }}
     }}"#,
                 public_input_count,
-                vkAlpha = vk_compressed_data.vk_alpha,
-                vkBeta = vk_compressed_data.vk_beta,
-                vkGamma = vk_compressed_data.vk_gamma,
-                vkDelta = vk_compressed_data.vk_delta,
+                vkAlpha = vk_compressed_data.vk_alpha_1,
+                vkBeta = vk_compressed_data.vk_beta_2,
+                vkGamma = vk_compressed_data.vk_gamma_2,
+                vkDelta = vk_compressed_data.vk_delta_2,
                 formatted_ic = formatted_ic,
         )
     }
