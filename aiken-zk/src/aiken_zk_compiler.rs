@@ -2,7 +2,7 @@ use crate::circom_compiler::CircomCompiler;
 use crate::component_creator::ComponentCreator;
 use crate::lexer::{LexInfo, Lexer};
 use crate::token_zk::{TokenZK as Token, TokenZK};
-use crate::zk_examples::{InputVisibility, ZkExample};
+use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
 use aiken_lang::ast::Span;
 use serde::Deserialize;
 use std::io::Error;
@@ -50,16 +50,20 @@ impl AikenZkCompiler {
         match token {
             Token::Offchain {
                 example: ZkExample::Addition { lhs, rhs, res },
-            } => [lhs, rhs, res].iter().fold(vec![], |mut acc, &input| {
-                match input.visibility.clone() {
-                    Some(InputVisibility::Private) => acc,
-                    _ => {
-                        acc.push(Self::extract_identifier_from_token(&input.token));
-                        acc
-                    }
-                }
-            }),
+            } => [lhs, rhs, res].iter().fold(
+                vec![],
+                |mut acc, &input| Self::extract_visibility_from_input(acc, &input)),
             _ => panic!("Not implemented"),
+        }
+    }
+
+    fn extract_visibility_from_input(mut acc: Vec<String>, input: &&InputZK) -> Vec<String> {
+        match input.visibility.clone() {
+            Some(InputVisibility::Private) => acc,
+            _ => {
+                acc.push(Self::extract_identifier_from_token(&input.token));
+                acc
+            }
         }
     }
 
