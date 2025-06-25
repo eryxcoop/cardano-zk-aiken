@@ -24,9 +24,10 @@ validator two_prime_factors_number_full_succinctness {
     _self: Transaction,
   ) {
     expect Some(two_prime_factors_number) = datum
-    let (_zk_redeemer, result) =
-      assert_factors_are_correct(zk_redeemer, two_prime_factors_number)
-    result?
+    let redeemer = zk_redeemer.redeemer
+    expect _zk_redeemer =
+      assert_factors_are_correct(zk_redeemer, two_prime_factors_number, redeemer.factor1, redeemer.factor2)
+    True
   }
 
   else(_) {
@@ -36,12 +37,10 @@ validator two_prime_factors_number_full_succinctness {
 
 fn assert_factors_are_correct(
   zk_redeemer: ZK<Redeemer>,
-  number: Int
-) -> (ZK<Redeemer>, Bool) {
-  let redeemer = zk_redeemer.redeemer
-  let factor1 = redeemer.factor1
-  let factor2 = redeemer.factor2
-
+  number: Int,
+  factor1: Int,
+  factor2: Int
+) -> ZK<Redeemer> {
   let vk: SnarkVerificationKey =
     SnarkVerificationKey {
       nPublic: 3,
@@ -60,12 +59,15 @@ fn assert_factors_are_correct(
 
   let public_values: List<Int> = [number, factor1, factor2]
   expect Some(proof) = list.head(zk_redeemer.proofs)
-  let is_valid = groth_verify(vk, proof, public_values)
+  if !groth_verify(vk, proof, public_values) {
+    fail
+    Void
+  } else {
+    Void
+  }
 
   expect Some(proofs) = list.tail(zk_redeemer.proofs)
-  let zk_redeemer = ZK { redeemer: zk_redeemer.redeemer, proofs }
-
-  (zk_redeemer, is_valid)
+  ZK { redeemer: zk_redeemer.redeemer, proofs: proofs }
 }
 
 test test_factorization() {
