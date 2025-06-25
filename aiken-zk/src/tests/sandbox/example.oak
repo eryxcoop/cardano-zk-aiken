@@ -1,0 +1,20 @@
+pub type ZK<redeemer_type> {
+  redeemer: redeemer_type,
+  proofs: List<Proof>,
+}
+
+validator example {
+  spend(
+    datum: Option<Int>,
+    redeemer: ZK<Redeemer>,
+    _own_ref: OutputReference,
+    _self: Transaction,
+  ) {
+    expect Some(b) = datum
+    offchain addition(priv a, b, 10)
+  }
+
+  else(_) {
+    fail
+  }
+}

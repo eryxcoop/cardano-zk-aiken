@@ -10,6 +10,9 @@ mod tests_circom_compiler;
 #[cfg(test)]
 mod tests_aiken_zk_compiler;
 
+#[cfg(test)]
+mod tests_interface;
+
 mod aiken_program_factory;
 mod token_factory;
 mod utils;

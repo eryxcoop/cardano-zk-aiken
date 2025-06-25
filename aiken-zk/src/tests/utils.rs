@@ -36,6 +36,6 @@ fn sandbox_path() -> String {
     manifest_path() + "/src/tests/sandbox"
 }
 
-fn manifest_path() -> String {
+pub fn manifest_path() -> String {
     env!("CARGO_MANIFEST_DIR").to_string()
 }
