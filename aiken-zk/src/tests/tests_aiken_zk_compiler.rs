@@ -7,8 +7,8 @@ use serial_test::serial;
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_public_variables_by_the_corresponding_funcion_and_call() {
-    test_compiler_can_replace_keyword_by_the_corresponding_funcion_and_call(
+fn test_compiler_can_replace_addition_of_public_variables_by_the_corresponding_function_and_call() {
+    test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(pub a, pub b, pub c)",
         "zk_verify_or_fail(redeemer, [a, b, c])",
         addition_all_public_vk_compressed(),
@@ -18,8 +18,8 @@ fn test_compiler_can_replace_addition_of_public_variables_by_the_corresponding_f
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_funcion_and_call() {
-    test_compiler_can_replace_keyword_by_the_corresponding_funcion_and_call(
+fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_function_and_call() {
+    test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv a, priv b, priv c)",
         "zk_verify_or_fail(redeemer, [])",
         addition_all_private_vk_compressed(),
@@ -29,8 +29,8 @@ fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_mixed_variables_by_the_corresponding_funcion_and_call(){
-    test_compiler_can_replace_keyword_by_the_corresponding_funcion_and_call(
+fn test_compiler_can_replace_addition_of_mixed_variables_by_the_corresponding_function_and_call(){
+    test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv a, b, pub c)",
         "zk_verify_or_fail(redeemer, [b, c])",
         addition_mixed_visibility_vk_compressed(), 2
@@ -39,8 +39,8 @@ fn test_compiler_can_replace_addition_of_mixed_variables_by_the_corresponding_fu
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_mixed_variables_and_constants_by_the_corresponding_funcion_and_call(){
-    test_compiler_can_replace_keyword_by_the_corresponding_funcion_and_call(
+fn test_compiler_can_replace_addition_of_mixed_variables_and_constants_by_the_corresponding_function_and_call(){
+    test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv a, 4, pub b)",
         "zk_verify_or_fail(redeemer, [4, b])",
         addition_mixed_visibility_vk_compressed(), 2
@@ -49,8 +49,8 @@ fn test_compiler_can_replace_addition_of_mixed_variables_and_constants_by_the_co
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_subtraction_of_mixed_variables_and_constants_by_the_corresponding_funcion_and_call(){
-    test_compiler_can_replace_keyword_by_the_corresponding_funcion_and_call(
+fn test_compiler_can_replace_subtraction_of_mixed_variables_and_constants_by_the_corresponding_function_and_call(){
+    test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain subtraction(priv a, 4, pub b)",
         "zk_verify_or_fail(redeemer, [4, b])",
         addition_mixed_visibility_vk_compressed(), 2
@@ -59,8 +59,8 @@ fn test_compiler_can_replace_subtraction_of_mixed_variables_and_constants_by_the
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_multiplication_of_mixed_variables_and_constants_by_the_corresponding_funcion_and_call(){
-    test_compiler_can_replace_keyword_by_the_corresponding_funcion_and_call(
+fn test_compiler_can_replace_multiplication_of_mixed_variables_and_constants_by_the_corresponding_function_and_call(){
+    test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain multiplication(priv a, 4, pub b)",
         "zk_verify_or_fail(redeemer, [4, b])",
         multiplication_mixed_visibility_vk_compressed(), 2
@@ -69,8 +69,8 @@ fn test_compiler_can_replace_multiplication_of_mixed_variables_and_constants_by_
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_fibonacci_of_mixed_variables_and_constants_by_the_corresponding_funcion_and_call(){
-    test_compiler_can_replace_keyword_by_the_corresponding_funcion_and_call(
+fn test_compiler_can_replace_fibonacci_of_mixed_variables_and_constants_by_the_corresponding_function_and_call(){
+    test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain fibonacci(priv a, b, 5, pub c)",
         "zk_verify_or_fail(redeemer, [b, c])",
         fibonacci_mixed_visibility_vk_compressed(), 2
@@ -79,29 +79,15 @@ fn test_compiler_can_replace_fibonacci_of_mixed_variables_and_constants_by_the_c
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_if_of_mixed_variables_and_constants_by_the_corresponding_funcion_and_call(){
-    test_compiler_can_replace_keyword_by_the_corresponding_funcion_and_call(
+fn test_compiler_can_replace_if_of_mixed_variables_and_constants_by_the_corresponding_function_and_call(){
+    test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain if(a, b, priv c, priv d)",
         "zk_verify_or_fail(redeemer, [a, b])",
         if_mixed_visibility_vk_compressed(), 2
     );
 }
 
-fn if_mixed_visibility_vk_compressed() -> Groth16CompressedData {
-    Groth16CompressedData {
-        vk_alpha_1: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
-        vk_beta_2: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),
-        vk_gamma_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
-        vk_delta_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
-        IC: vec![
-            "b2bc654c791b51b74caa10f4e71887609b45b7c8a9db92ad86a7067ca9899599a62406ae57ac26db27b456171ffc3198".to_string(),
-            "93575ed08ccd19b2ade4963c459840e35da43198f88b5289edc88b463b958f681139329fb3c9b79ac22c2015e85ec84b".to_string(),
-            "b967ef1ddaade3245e27fb745d0f6dfd4d9fcef20ee76ac0eef0afc20eb4122a5e72b6403fb20d73d96ee8bb62a210bb".to_string(),
-        ],
-    }
-}
-
-fn test_compiler_can_replace_keyword_by_the_corresponding_funcion_and_call(
+fn test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
     original: &str,
     replacement: &str,
     vk_compressed_data: Groth16CompressedData,
@@ -193,6 +179,20 @@ fn fibonacci_mixed_visibility_vk_compressed() -> Groth16CompressedData {
             "af1ca9d68a382928932cd5f1a3dde62489556f42da0c24e6d11191c1b187f147a206da840166e28f1ae73edee0c8b912".to_string(),
             "aba434215d34bebf3100b82fb68eaa69328cc6431a26ecc8ef81bffced149a5f7e193587789a1a0c6745b3e963c1989e".to_string(),
             "87db49b3c35ae1d3f5b767abf48ca5b73d17c81ad5c50419386a09415e7eba5b7bf50e5d3d2976ec11c31ad4f2ec3477".to_string(),
+        ],
+    }
+}
+
+fn if_mixed_visibility_vk_compressed() -> Groth16CompressedData {
+    Groth16CompressedData {
+        vk_alpha_1: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
+        vk_beta_2: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),
+        vk_gamma_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
+        vk_delta_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
+        IC: vec![
+            "b2bc654c791b51b74caa10f4e71887609b45b7c8a9db92ad86a7067ca9899599a62406ae57ac26db27b456171ffc3198".to_string(),
+            "93575ed08ccd19b2ade4963c459840e35da43198f88b5289edc88b463b958f681139329fb3c9b79ac22c2015e85ec84b".to_string(),
+            "b967ef1ddaade3245e27fb745d0f6dfd4d9fcef20ee76ac0eef0afc20eb4122a5e72b6403fb20d73d96ee8bb62a210bb".to_string(),
         ],
     }
 }
