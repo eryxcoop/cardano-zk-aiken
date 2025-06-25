@@ -158,7 +158,6 @@ impl AikenZkCompiler {
         zk_redeemer: ZK<Redeemer>,
         public_inputs: List<Int>
     ) -> ZK<Redeemer> {{
-        let redeemer = zk_redeemer.redeemer
 
         let vk: SnarkVerificationKey =
             SnarkVerificationKey {{

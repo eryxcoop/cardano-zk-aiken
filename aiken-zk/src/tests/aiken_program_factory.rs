@@ -5,14 +5,7 @@ pub fn aiken_template_with_body_and_verify_definition(
     verify_declaration: &str,
 ) -> String {
     format!(
-        r#"
-pub type Redeemer {{
-  a: Int,
-  b: Int,
-  c: Int,
-}}
-
-pub type ZK<redeemer_type> {{
+        r#"pub type ZK<redeemer_type> {{
   redeemer: redeemer_type,
   proofs: List<Proof>,
 }}
@@ -20,7 +13,7 @@ pub type ZK<redeemer_type> {{
 validator test_validator {{
   spend(
     datum: Option<Int>,
-    zk_redeemer: ZK<Redeemer>,
+    zk_redeemer: ZK<Void>,
     _own_ref: OutputReference,
     _self: Transaction,
   ) {{
@@ -53,7 +46,6 @@ pub fn verify_declaration(
         zk_redeemer: ZK<Redeemer>,
         public_inputs: List<Int>
     ) -> ZK<Redeemer> {{
-        let redeemer = zk_redeemer.redeemer
 
         let vk: SnarkVerificationKey =
             SnarkVerificationKey {{
