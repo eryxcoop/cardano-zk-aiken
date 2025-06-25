@@ -52,7 +52,14 @@ impl AikenZkCompiler {
                 example: ZkExample::Addition { lhs, rhs, res },
             } => [lhs, rhs, res].iter().fold(
                 vec![],
-                |mut acc, &input| Self::extract_visibility_from_input(acc, &input)),
+                |acc, &input| Self::extract_visibility_from_input(acc, &input)),
+
+            Token::Offchain {
+                example: ZkExample::Subtraction { lhs, rhs, res },
+            } => [lhs, rhs, res].iter().fold(
+                vec![],
+                |acc, &input| Self::extract_visibility_from_input(acc, &input)),
+
             _ => panic!("Not implemented"),
         }
     }
