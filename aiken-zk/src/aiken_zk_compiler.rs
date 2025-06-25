@@ -9,6 +9,7 @@ use std::io::Error;
 use std::process::Command;
 
 #[derive(Deserialize, Debug)]
+#[allow(non_snake_case)]
 pub struct Groth16CompressedData {
     pub vk_alpha_1: String,
     pub vk_beta_2: String,
