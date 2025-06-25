@@ -60,6 +60,12 @@ impl AikenZkCompiler {
                 vec![],
                 |acc, &input| Self::extract_visibility_from_input(acc, &input)),
 
+            Token::Offchain {
+                example: ZkExample::Multiplication { lhs, rhs, res },
+            } => [lhs, rhs, res].iter().fold(
+                vec![],
+                |acc, &input| Self::extract_visibility_from_input(acc, &input)),
+
             _ => panic!("Not implemented"),
         }
     }
