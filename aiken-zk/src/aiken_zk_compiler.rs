@@ -67,8 +67,14 @@ impl AikenZkCompiler {
                 |acc, &input| Self::extract_visibility_from_input(acc, &input)),
 
             Token::Offchain {
-                example: ZkExample::Fibonacci { fib_0, fib_1, n, res },
+                example: ZkExample::Fibonacci { fib_0, fib_1, res, .. },
             } => [fib_0, fib_1, res].iter().fold(
+                vec![],
+                |acc, &input| Self::extract_visibility_from_input(acc, &input)),
+
+            Token::Offchain {
+                example: ZkExample::If { condition, assigned, true_branch, false_branch },
+            } => [condition, assigned, true_branch, false_branch].iter().fold(
                 vec![],
                 |acc, &input| Self::extract_visibility_from_input(acc, &input)),
 
@@ -173,7 +179,7 @@ impl AikenZkCompiler {
         }}
 
         expect Some(proofs) = list.tail(zk_redeemer.proofs)
-        let zk_redeemer = ZK {{ redeemer: zk_redeemer.redeemer, proofs }}
+        ZK {{ redeemer: zk_redeemer.redeemer, proofs }}
     }}"#,
             public_input_count,
             vkAlpha = vk_compressed_data.vk_alpha_1,

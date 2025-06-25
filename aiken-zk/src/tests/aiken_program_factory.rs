@@ -75,7 +75,7 @@ pub fn verify_declaration(
         }}
 
         expect Some(proofs) = list.tail(zk_redeemer.proofs)
-        let zk_redeemer = ZK {{ redeemer: zk_redeemer.redeemer, proofs }}
+        ZK {{ redeemer: zk_redeemer.redeemer, proofs }}
     }}"#,
         public_input_count,
         vkAlpha = compressed_vk.vk_alpha_1,

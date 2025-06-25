@@ -75,6 +75,6 @@ fn test_component_creator_can_create_if_component_with_mixed_visibilities() {
     let token = if_token_with_mixed_visibility();
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"include "templates/if.circom";
-component main { public [a,c,d] } = If();"#;
+component main { public [condition,true_branch,false_branch] } = If();"#;
     assert_eq!(expected_program, component_creator.create())
 }

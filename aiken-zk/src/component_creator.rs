@@ -109,10 +109,10 @@ impl ComponentCreator {
                 false_branch,
             } => {
                 let public_inputs_identifiers = [
-                    (condition, "a"),
-                    (assigned, "b"),
-                    (true_branch, "c"),
-                    (false_branch, "d"),
+                    (condition, "condition"),
+                    (assigned, "assigned"),
+                    (true_branch, "true_branch"),
+                    (false_branch, "false_branch"),
                 ]
                 .iter()
                 .fold(vec![], |mut acc, (input, var_name)| {
