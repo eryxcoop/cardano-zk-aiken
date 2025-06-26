@@ -24,7 +24,6 @@ validator test_validator {{
     fail
   }}
 }}
-
 {}"#,
         keyword, verify_declaration
     )
@@ -42,7 +41,8 @@ pub fn verify_declaration(
         .join(",\n");
 
     format!(
-        r#"fn zk_verify_or_fail(
+        r#"
+    fn zk_verify_or_fail(
         zk_redeemer: ZK<Redeemer>,
         public_inputs: List<Int>
     ) -> ZK<Redeemer> {{

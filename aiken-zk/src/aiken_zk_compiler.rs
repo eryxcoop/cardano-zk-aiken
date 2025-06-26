@@ -127,7 +127,7 @@ impl AikenZkCompiler {
         let public_input_count = Self::extract_public_identifiers_from_token(token).len();
         let full_verify_function_declaration =
             Self::create_verify_function_declaration_from(vk_compressed_data, public_input_count);
-        aiken_zk_src + "\n\n" + &full_verify_function_declaration
+        aiken_zk_src + &full_verify_function_declaration
     }
 
     fn extract_vk_compressed_data() -> Result<Groth16CompressedData, Error> {
@@ -154,7 +154,8 @@ impl AikenZkCompiler {
             .join(",\n");
 
         format!(
-            r#"fn zk_verify_or_fail(
+            r#"
+    fn zk_verify_or_fail(
         zk_redeemer: ZK<Redeemer>,
         public_inputs: List<Int>
     ) -> ZK<Redeemer> {{

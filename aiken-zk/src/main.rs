@@ -20,9 +20,9 @@ fn main() {
     let output_path = _get_argument_value(&matches, output);
 
     let input = fs::read_to_string(input_path).unwrap();
-    let output = AikenZkCompiler::apply_modifications_to_src_for_token(input, "output".to_string(), ("tuvieja", "tuviejita"));
+    let output = AikenZkCompiler::apply_modifications_to_src_for_token(input, "output".to_string(), ("random1", "random2"));
 
-    fs::write(output_path, output).expect("explotó en la escritura");
+    fs::write(output_path, output).expect("output file write failed");
 }
 
 fn _get_argument_value(subcommand_matches: &ArgMatches, argument: Arg) -> &PathBuf {
