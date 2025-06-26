@@ -7,7 +7,7 @@ use std::process::Command;
 
 #[test]
 #[serial]
-fn test_() {
+fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
     let _temporal_directory = create_sandbox_and_set_as_current_directory();
     let binary_path = manifest_path() + "/target/debug/aiken-zk";
     let output = Command::new(binary_path)

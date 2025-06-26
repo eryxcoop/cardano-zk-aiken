@@ -62,8 +62,11 @@ pub fn verify_declaration(
 
         expect Some(proof) = list.head(zk_redeemer.proofs)
 
-        if (!groth_verify(vk, proof, public_inputs)){{
-            fail
+        if !groth_verify(vk, proof, public_values) {{
+          fail
+          Void
+        }} else {{
+          Void
         }}
 
         expect Some(proofs) = list.tail(zk_redeemer.proofs)
