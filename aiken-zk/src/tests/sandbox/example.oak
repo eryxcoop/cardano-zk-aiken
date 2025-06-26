@@ -1,7 +1,11 @@
+use cardano/transaction.{OutputReference, Transaction,}
+
 pub type ZK<redeemer_type> {
   redeemer: redeemer_type,
   proofs: List<Proof>,
 }
+
+type Redeemer = Void
 
 validator example {
   spend(
@@ -11,7 +15,8 @@ validator example {
     _self: Transaction,
   ) {
     expect Some(b) = datum
-    offchain addition(priv a, b, 10)
+    expect _zk_redeemer = offchain addition(priv a, b, 10)
+    True
   }
 
   else(_) {
