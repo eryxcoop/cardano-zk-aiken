@@ -11,7 +11,7 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
     let _temporal_directory = create_sandbox_and_set_as_current_directory();
     let binary_path = manifest_path() + "/target/debug/aiken-zk";
     let output = Command::new(binary_path)
-        .arg("example.oak")
+        .arg("original_aiken_code.ak")
         .arg("output.ak")
         .output()
         .unwrap();
@@ -22,9 +22,9 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
     let lines: Vec<String> = io::BufReader::new(file)
         .lines()
         .collect::<Result<_, _>>().unwrap();
-    let expected_line_14 = "zk_verify_or_fail(redeemer, [b, 10])";
-    let expected_line_23 = "fn zk_verify_or_fail(";
+    let expected_line_replacement = "zk_verify_or_fail(redeemer, [b, 10])";
+    let expected_line_declaration = "fn zk_verify_or_fail(";
 
-    assert!(lines[13].contains(expected_line_14));
-    assert!(lines[21].contains(expected_line_23));
+    assert!(lines[19].contains(expected_line_replacement));
+    assert!(lines[28].contains(expected_line_declaration));
 }

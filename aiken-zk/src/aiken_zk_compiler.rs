@@ -196,6 +196,6 @@ impl AikenZkCompiler {
     }
 
     fn prepend_imports(aiken_src: &str) -> String {
-        "use aiken/collection/list\nuse ak_381/groth16.{Proof, SnarkVerificationKey, groth_verify}".to_string() + aiken_src
+        "use aiken/collection/list\nuse ak_381/groth16.{Proof, SnarkVerificationKey, groth_verify}\n".to_string() + aiken_src
     }
 }

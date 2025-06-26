@@ -115,7 +115,7 @@ fn test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
 }
 
 fn import_header() -> &'static str {
-    "use aiken/collection/list\nuse ak_381/groth16.{Proof, SnarkVerificationKey, groth_verify}"
+    "use aiken/collection/list\nuse ak_381/groth16.{Proof, SnarkVerificationKey, groth_verify}\n"
 }
 
 fn addition_all_public_vk_compressed() -> Groth16CompressedData {
