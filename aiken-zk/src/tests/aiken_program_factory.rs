@@ -1,11 +1,13 @@
 use crate::aiken_zk_compiler::Groth16CompressedData;
 
 pub fn aiken_template_with_body_and_verify_definition(
+    header: &str,
     keyword: &str,
     verify_declaration: &str,
 ) -> String {
-    format!(
-        r#"pub type ZK<redeemer_type> {{
+    format!(r#"{}
+
+pub type ZK<redeemer_type> {{
   redeemer: redeemer_type,
   proofs: List<Proof>,
 }}
@@ -25,7 +27,7 @@ validator test_validator {{
   }}
 }}
 {}"#,
-        keyword, verify_declaration
+        header,keyword, verify_declaration
     )
 }
 

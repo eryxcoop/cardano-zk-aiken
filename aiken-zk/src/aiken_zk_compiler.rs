@@ -114,6 +114,7 @@ impl AikenZkCompiler {
         let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
 
         let mut aiken_zk_src = Self::replace_keyword_with_function_call(&aiken_src, &token, &span);
+        aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
         aiken_zk_src =
             Self::append_verify_function_declaration(aiken_zk_src, &token, &vk_compressed_data);
         aiken_zk_src
@@ -192,5 +193,9 @@ impl AikenZkCompiler {
             vkDelta = vk_compressed_data.vk_delta_2,
             formatted_ic = formatted_ic,
         )
+    }
+
+    fn prepend_imports(aiken_src: &str) -> String {
+        "use aiken/collection/list\nuse ak_381/groth16.{Proof, SnarkVerificationKey, groth_verify}".to_string() + aiken_src
     }
 }

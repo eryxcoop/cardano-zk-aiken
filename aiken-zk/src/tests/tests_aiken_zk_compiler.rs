@@ -94,7 +94,7 @@ fn test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
     n_public_inputs: usize,
 ) {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
-    let aiken_src = aiken_template_with_body_and_verify_definition(original, "");
+    let aiken_src = aiken_template_with_body_and_verify_definition("",original, "");
     let output_filename = "my_program".to_string();
     let random_seeds = ("asdasd", "dsadsa");
 
@@ -106,12 +106,16 @@ fn test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
 
     let verify_declaration = verify_declaration(n_public_inputs, vk_compressed_data);
     let expected_aiken_src =
-        aiken_template_with_body_and_verify_definition(replacement, &verify_declaration);
+        aiken_template_with_body_and_verify_definition(import_header(), replacement, &verify_declaration);
 
     assert_eq!(
         without_delta(expected_aiken_src),
         without_delta(aiken_zk_src)
     );
+}
+
+fn import_header() -> &'static str {
+    "use aiken/collection/list\nuse ak_381/groth16.{Proof, SnarkVerificationKey, groth_verify}"
 }
 
 fn addition_all_public_vk_compressed() -> Groth16CompressedData {
