@@ -78,6 +78,12 @@ impl AikenZkCompiler {
             } => [condition, assigned, true_branch, false_branch].iter().fold(
                 vec![],
                 |acc, &input| Self::extract_visibility_from_input(acc, &input)),
+            
+            Token::Offchain {
+                example: ZkExample::AssertEq { lhs, rhs},
+            } => [lhs, rhs].iter().fold(
+                vec![],
+                |acc, &input| Self::extract_visibility_from_input(acc, &input)),
 
             _ => panic!("Not implemented"),
         }
