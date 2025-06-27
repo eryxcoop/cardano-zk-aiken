@@ -165,3 +165,20 @@ pub fn if_token_with_mixed_visibility() -> token_zk::TokenZK {
         },
     }
 }
+
+// ----- ASSERT_EQ ----- //
+
+pub fn assert_eq_token_with_mixed_visibility() -> token_zk::TokenZK {
+    token_zk::TokenZK::Offchain {
+        example: ZkExample::AssertEq {
+            lhs: InputZK {
+                visibility: Some(InputVisibility::Private),
+                token: variable_token("a"),
+            },
+            rhs: InputZK {
+                visibility: Some(InputVisibility::Public),
+                token: int_token(5),
+            },
+        },
+    }
+}

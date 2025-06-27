@@ -1,10 +1,5 @@
 use crate::component_creator::ComponentCreator;
-use crate::tests::token_factory::{
-    addition_token_with_all_private_inputs, addition_token_with_mixed_visibility,
-    addition_token_with_public_inputs, fibonacci_token_with_mixed_visibility,
-    if_token_with_mixed_visibility, multiplication_token_with_mixed_visibility,
-    subtraction_token_with_mixed_visibility,
-};
+use crate::tests::token_factory::{addition_token_with_all_private_inputs, addition_token_with_mixed_visibility, addition_token_with_public_inputs, assert_eq_token_with_mixed_visibility, fibonacci_token_with_mixed_visibility, if_token_with_mixed_visibility, multiplication_token_with_mixed_visibility, subtraction_token_with_mixed_visibility};
 
 // ----------- ADDITION ----------- //
 
@@ -76,5 +71,16 @@ fn test_component_creator_can_create_if_component_with_mixed_visibilities() {
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"include "templates/if.circom";
 component main { public [condition,true_branch,false_branch] } = If();"#;
+    assert_eq!(expected_program, component_creator.create())
+}
+
+// ----------- ASSERT_EQ ----------- //
+
+#[test]
+fn test_component_creator_can_create_assert_eq_component_with_mixed_visibilities() {
+    let token = assert_eq_token_with_mixed_visibility();
+    let component_creator = ComponentCreator::from_token(token);
+    let expected_program = r#"include "templates/assert_eq.circom";
+component main { public [rhs] } = AssertEq();"#;
     assert_eq!(expected_program, component_creator.create())
 }

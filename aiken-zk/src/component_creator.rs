@@ -112,8 +112,25 @@ impl ComponentCreator {
                 import.to_string() + "\n" + &instantiation
             },
             ZkExample::AssertEq {
-                lhs,rhs
-            } => {String::from("")}
+                lhs,
+                rhs
+            } => {
+
+                let inputs_to_identifiers = [
+                    (lhs, "lhs"),
+                    (rhs, "rhs"),
+                ];
+                let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
+
+                let import = "include \"templates/assert_eq.circom\";";
+                let visibility = if public_inputs_identifiers.len() == 0 {
+                    "".to_string()
+                } else {
+                    format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
+                };
+                let instantiation = "component main ".to_string() + &visibility + "= AssertEq();";
+                import.to_string() + "\n" + &instantiation
+            }
         }
     }
 
