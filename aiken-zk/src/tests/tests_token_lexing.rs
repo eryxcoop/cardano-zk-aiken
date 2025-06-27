@@ -305,3 +305,26 @@ fn test_lexer_translates_if_parameters_with_mixed_visibility_and_input_types() {
         *offchain_token
     );
 }
+// --------- AssertEq --------- //
+
+#[test]
+fn test_lexer_translates_assert_eq_parameters_with_mixed_visibility_and_input_types() {
+    let program = "offchain assert_eq(priv a, pub 5)";
+    let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
+    let offchain_token = &tokens[0].0;
+    assert_eq!(
+        Token::Offchain {
+            example: ZkExample::AssertEq {
+                lhs: InputZK {
+                    visibility: Some(InputVisibility::Private),
+                    token: variable_token("a")
+                },
+                rhs: InputZK {
+                    visibility: Some(InputVisibility::Public),
+                    token: int_token(5)
+                },
+            }
+        },
+        *offchain_token
+    );
+}

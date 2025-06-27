@@ -110,7 +110,10 @@ impl ComponentCreator {
                 };
                 let instantiation = "component main ".to_string() + &visibility + "= If();";
                 import.to_string() + "\n" + &instantiation
-            }
+            },
+            ZkExample::AssertEq {
+                lhs,rhs
+            } => {String::from("")}
         }
     }
 

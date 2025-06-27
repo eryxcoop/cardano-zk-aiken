@@ -76,6 +76,10 @@ pub enum ZkExample {
         true_branch: InputZK,
         false_branch: InputZK,
     },
+    AssertEq {
+        lhs: InputZK,
+        rhs: InputZK
+    }
 }
 
 impl ZkExample {
@@ -172,6 +176,18 @@ impl ZkExample {
                 },
             })
     }
+    
+    fn assert_eq_parser() -> impl Parser<char, Token, Error = ParseError> {
+        just("assert_eq")
+            .padded()
+            .ignore_then(Self::parameters(2))
+            .map(|args| Token::Offchain {
+                example: ZkExample::AssertEq {
+                    lhs: InputZK::from(args[0].clone()),
+                    rhs: InputZK::from(args[1].clone()),
+                },
+            })
+    }
 
     pub fn parser() -> impl Parser<char, Token, Error = ParseError> {
         choice((
@@ -180,29 +196,7 @@ impl ZkExample {
             Self::multiplication_parser(),
             Self::fibonacci_parser(),
             Self::if_parser(),
+            Self::assert_eq_parser(),
         ))
-    }
-
-    pub fn keyword_to_replacement(example: Self) -> String {
-        match example {
-            Self::Addition { lhs, rhs, res } => format!("zk[{}+{}={}]", lhs, rhs, res),
-            Self::Subtraction { lhs, rhs, res } => format!("zk[{}-{}={}]", lhs, rhs, res),
-            Self::Multiplication { lhs, rhs, res } => format!("zk[{}*{}={}]", lhs, rhs, res),
-            Self::Fibonacci {
-                fib_0,
-                fib_1,
-                n,
-                res,
-            } => format!("zk[fib-{}-{}...{} times ={}]", fib_0, fib_1, n, res),
-            Self::If {
-                condition,
-                assigned,
-                true_branch,
-                false_branch,
-            } => format!(
-                "zk[{} = if {} then {} else {}]",
-                assigned, condition, true_branch, false_branch
-            ),
-        }
     }
 }
