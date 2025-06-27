@@ -73,23 +73,9 @@ impl ComponentCreator {
                 let Token::Int { value, base: _ } = &*n.token else {
                     panic!("Not expected kind of token")
                 };
-                let public_inputs_identifiers = [(fib_0, "a"), (fib_1, "b"), (res, "c")]
-                    .iter()
-                    .fold(vec![], |mut acc, (input, var_name)| {
-                        match input.visibility.clone() {
-                            Some(visibility) => match visibility {
-                                InputVisibility::Public => {
-                                    acc.push(*var_name);
-                                    acc
-                                }
-                                _ => acc,
-                            },
-                            None => {
-                                acc.push(*var_name);
-                                acc
-                            }
-                        }
-                    });
+                let inputs_to_identifiers = [(fib_0, "a"), (fib_1, "b"), (res, "c")];
+
+                let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
 
                 let import = "include \"templates/fibonacci.circom\";";
                 let visibility = if public_inputs_identifiers.len() == 0 {
@@ -108,28 +94,13 @@ impl ComponentCreator {
                 true_branch,
                 false_branch,
             } => {
-                let public_inputs_identifiers = [
+                let inputs_to_identifiers = [
                     (condition, "condition"),
                     (assigned, "assigned"),
                     (true_branch, "true_branch"),
                     (false_branch, "false_branch"),
-                ]
-                .iter()
-                .fold(vec![], |mut acc, (input, var_name)| {
-                    match input.visibility.clone() {
-                        Some(visibility) => match visibility {
-                            InputVisibility::Public => {
-                                acc.push(*var_name);
-                                acc
-                            }
-                            _ => acc,
-                        },
-                        None => {
-                            acc.push(*var_name);
-                            acc
-                        }
-                    }
-                });
+                ];
+                let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
 
                 let import = "include \"templates/if.circom\";";
                 let visibility = if public_inputs_identifiers.len() == 0 {
@@ -141,5 +112,18 @@ impl ComponentCreator {
                 import.to_string() + "\n" + &instantiation
             }
         }
+    }
+
+    fn process_inputs_visibility<const N:usize>(public_inputs_identifiers: [(&InputZK, &str); N]) -> Vec<String> {
+        public_inputs_identifiers.iter()
+            .fold(vec![], |mut acc, (input, var_name)| {
+                match input.visibility.clone() {
+                    Some(InputVisibility::Private) => acc,
+                    _ => {
+                        acc.push(var_name.to_string());
+                        acc
+                    }
+                }
+            })
     }
 }
