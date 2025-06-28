@@ -47,4 +47,5 @@ fn test_() {
         .unwrap();
 
     assert!(Path::new("verification_key.zkey").exists());
+    assert!(Path::new("output.circom").exists());
 }

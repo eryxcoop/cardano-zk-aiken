@@ -27,8 +27,6 @@ fn main() {
     );
 
     fs::write(output_path, output).expect("output file write failed");
-
-    fs::copy("build/verification_key.json", "verification_key.json").unwrap();
 }
 
 fn _get_argument_value(subcommand_matches: &ArgMatches, argument: Arg) -> &PathBuf {
