@@ -26,10 +26,8 @@ impl CircomCompiler {
         circom_program_filename: String,
         rand: (&str, &str),
     ) -> Result<(), Error> {
-        Command::new("./compile_proof_verify.sh")
-            .arg("-c")
+        Command::new("./generate_verification_key.sh")
             .arg(circom_program_filename)
-            .arg("xx")
             .arg("ceremony.ptau")
             .arg(rand.0)
             .arg(rand.1)

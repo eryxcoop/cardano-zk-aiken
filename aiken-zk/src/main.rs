@@ -1,7 +1,7 @@
+use aiken_zk::aiken_zk_compiler::AikenZkCompiler;
+use clap::{Arg, ArgMatches, Command, value_parser};
 use std::fs;
 use std::path::PathBuf;
-use clap::{value_parser, Arg, ArgMatches, Command};
-use aiken_zk::aiken_zk_compiler::AikenZkCompiler;
 
 fn main() {
     let input = Arg::new("input_path")
@@ -20,9 +20,15 @@ fn main() {
     let output_path = _get_argument_value(&matches, output);
 
     let input = fs::read_to_string(input_path).unwrap();
-    let output = AikenZkCompiler::apply_modifications_to_src_for_token(input, "output".to_string(), ("random1", "random2"));
+    let output = AikenZkCompiler::apply_modifications_to_src_for_token(
+        input,
+        "output".to_string(),
+        ("random1", "random2"),
+    );
 
     fs::write(output_path, output).expect("output file write failed");
+
+    fs::copy("build/verification_key.json", "verification_key.json").unwrap();
 }
 
 fn _get_argument_value(subcommand_matches: &ArgMatches, argument: Arg) -> &PathBuf {

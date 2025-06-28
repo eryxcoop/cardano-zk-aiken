@@ -78,7 +78,7 @@ impl AikenZkCompiler {
             } => [condition, assigned, true_branch, false_branch].iter().fold(
                 vec![],
                 |acc, &input| Self::extract_visibility_from_input(acc, &input)),
-            
+
             Token::Offchain {
                 example: ZkExample::AssertEq { lhs, rhs},
             } => [lhs, rhs].iter().fold(
@@ -138,14 +138,13 @@ impl AikenZkCompiler {
     }
 
     fn extract_vk_compressed_data() -> Result<Groth16CompressedData, Error> {
-        let output = Command::new("npx")
-            .arg("tsx")
-            .arg("curve_compress/index.js")
-            .arg("build/verification_key.json")
+        let output = Command::new("curve_compress/compressedVerificationKey.sh")
+            .arg("verification_key.zkey")
             .output()?;
 
         let stdout = String::from_utf8(output.stdout).unwrap();
         let compressed_vk: Groth16CompressedData = serde_json::from_str(&stdout)?;
+
         Ok(compressed_vk)
     }
 

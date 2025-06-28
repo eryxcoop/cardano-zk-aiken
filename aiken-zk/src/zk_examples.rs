@@ -78,7 +78,7 @@ pub enum ZkExample {
     },
     AssertEq {
         lhs: InputZK,
-        rhs: InputZK
+        rhs: InputZK,
     }
 }
 
