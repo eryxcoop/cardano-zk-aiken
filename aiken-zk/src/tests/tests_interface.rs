@@ -13,12 +13,14 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
     let aiken_zk_binary_path = manifest_path() + "/target/debug/aiken-zk";
     let output_path = "validators/output.ak";
     create_original_aiken_file_and_inputs();
+
     Command::new(aiken_zk_binary_path)
         .arg(source_aiken_filename())
         .arg(output_path)
         .output()
         .unwrap();
 
+    let compilation_result = Command::new("aiken").arg("build").output().unwrap();
     let file = File::open(output_path).unwrap();
     let lines: Vec<String> = io::BufReader::new(file)
         .lines()
@@ -26,13 +28,11 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
         .unwrap();
     let expected_line_replacement = "zk_verify_or_fail(redeemer, [b, 10])";
     let expected_line_declaration = "fn zk_verify_or_fail(";
-
     assert!(lines[19].contains(expected_line_replacement));
     assert!(lines[28].contains(expected_line_declaration));
     assert!(Path::new("verification_key.zkey").exists());
     assert!(Path::new("output.circom").exists());
 
-    let compilation_result = Command::new("aiken").arg("build").output().unwrap();
     assert!(compilation_result.status.success());
     assert!(Path::new("plutus.json").exists());
 }
