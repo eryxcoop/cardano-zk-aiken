@@ -138,8 +138,9 @@ impl AikenZkCompiler {
     }
 
     fn extract_vk_compressed_data() -> Result<Groth16CompressedData, Error> {
-        let output = Command::new("curve_compress/compressedVerificationKey.sh")
-            .arg("verification_key.zkey")
+        let output = Command::new("node")
+            .arg("curve_compress/compressedVerificationKey.js")
+            .arg("build/verification_key.json")
             .output()?;
 
         let stdout = String::from_utf8(output.stdout).unwrap();

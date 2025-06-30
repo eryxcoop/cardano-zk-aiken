@@ -22,3 +22,5 @@ echo $RAND_1 | snarkjs zkey contribute ${OUTPUT_PATH}${CIRCUIT_NAME}_0000.zkey $
 echo $RAND_2 | snarkjs zkey contribute ${OUTPUT_PATH}${CIRCUIT_NAME}_0001.zkey ${OUTPUT_PATH}${CIRCUIT_NAME}_0002.zkey --name="Second contribution Name" -v
 
 snarkjs zkey beacon ${OUTPUT_PATH}${CIRCUIT_NAME}_0000.zkey verification_key.zkey 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10 -n="Final Beacon phase2"
+
+snarkjs zkey export verificationkey verification_key.zkey "${OUTPUT_PATH}verification_key.json"

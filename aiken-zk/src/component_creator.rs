@@ -117,8 +117,8 @@ impl ComponentCreator {
             } => {
 
                 let inputs_to_identifiers = [
-                    (lhs, "lhs"),
-                    (rhs, "rhs"),
+                    (lhs, "a"),
+                    (rhs, "b"),
                 ];
                 let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
 

@@ -81,6 +81,6 @@ fn test_component_creator_can_create_assert_eq_component_with_mixed_visibilities
     let token = assert_eq_token_with_mixed_visibility();
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"include "templates/assert_eq.circom";
-component main { public [rhs] } = AssertEq();"#;
+component main { public [b] } = AssertEq();"#;
     assert_eq!(expected_program, component_creator.create())
 }

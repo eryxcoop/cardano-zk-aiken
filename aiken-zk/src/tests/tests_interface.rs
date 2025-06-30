@@ -29,9 +29,9 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
     assert!(lines[19].contains(expected_line_replacement));
     assert!(lines[28].contains(expected_line_declaration));
 
-    //let compilation_result = Command::new("aiken").arg("build").output().unwrap();
-    //assert!(compilation_result.status.success());
-    //assert!(Path::new("plutus.json").exists());
+    let compilation_result = Command::new("aiken").arg("build").output().unwrap();
+    assert!(compilation_result.status.success());
+    assert!(Path::new("plutus.json").exists());
 }
 
 #[test]
