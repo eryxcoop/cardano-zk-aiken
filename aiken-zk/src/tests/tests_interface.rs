@@ -11,14 +11,13 @@ use std::process::Command;
 fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
     let _temporal_directory = create_sandbox_and_set_as_current_directory();
     let binary_path = manifest_path() + "/target/debug/aiken-zk";
-    let output_path = "output_with_test.ak";
+    let output_path = "validators/output.ak";
     Command::new(binary_path)
         .arg("original_aiken_code.ak")
         .arg(output_path)
         .output()
         .unwrap();
 
-    // leer el archivo y buscar los strings
     let file = File::open(output_path).unwrap();
     let lines: Vec<String> = io::BufReader::new(file)
         .lines()

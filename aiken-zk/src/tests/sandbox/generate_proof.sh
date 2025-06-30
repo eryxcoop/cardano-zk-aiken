@@ -12,8 +12,6 @@ OUTPUT_PATH="build/"
 mkdir -p ${OUTPUT_PATH}
 
 
-echo snarkjs zkey export verificationkey "${VERIFICATION_KEY_PATH}" ${OUTPUT_PATH}verification_key.json
-
 circom "${CIRCUIT_PATH}" --r1cs --wasm --sym -p bls12381 -o ${OUTPUT_PATH}
 
 node "${OUTPUT_PATH}${CIRCUIT_NAME}_js/generate_witness.js" "${OUTPUT_PATH}${CIRCUIT_NAME}_js/${CIRCUIT_NAME}.wasm" "${INPUT_PATH}"  ${OUTPUT_PATH}witness.wtns
