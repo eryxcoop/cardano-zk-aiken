@@ -1,13 +1,23 @@
 use crate::component_creator::ComponentCreator;
 use crate::tests::token_factory::{addition_token_with_all_private_inputs, addition_token_with_mixed_visibility, addition_token_with_public_inputs, assert_eq_token_with_mixed_visibility, fibonacci_token_with_mixed_visibility, if_token_with_mixed_visibility, multiplication_token_with_mixed_visibility, subtraction_token_with_mixed_visibility};
 
+#[test]
+fn test_() {
+    let token = addition_token_with_public_inputs();
+    let component_creator = ComponentCreator::from_token(token);
+    let output = component_creator.create();
+    let lines = output.lines().collect::<Vec<_>>();
+    assert_eq!("pragma circom 2.1.9;", lines[0])
+}
+
 // ----------- ADDITION ----------- //
 
 #[test]
 fn test_component_creator_can_create_addition_component_with_all_public_inputs() {
     let token = addition_token_with_public_inputs();
     let component_creator = ComponentCreator::from_token(token);
-    let expected_program = r#"include "templates/addition.circom";
+    let expected_program = r#"pragma circom 2.1.9;
+include "templates/addition.circom";
 component main { public [a,b,c] } = Addition();"#;
     assert_eq!(expected_program, component_creator.create())
 }
@@ -16,7 +26,8 @@ component main { public [a,b,c] } = Addition();"#;
 fn test_component_creator_can_create_addition_component_with_all_private_inputs() {
     let token = addition_token_with_all_private_inputs();
     let component_creator = ComponentCreator::from_token(token);
-    let expected_program = r#"include "templates/addition.circom";
+    let expected_program = r#"pragma circom 2.1.9;
+include "templates/addition.circom";
 component main = Addition();"#;
     assert_eq!(expected_program, component_creator.create())
 }
@@ -25,7 +36,8 @@ component main = Addition();"#;
 fn test_component_creator_can_create_addition_component_with_mixed_visibilities() {
     let token = addition_token_with_mixed_visibility();
     let component_creator = ComponentCreator::from_token(token);
-    let expected_program = r#"include "templates/addition.circom";
+    let expected_program = r#"pragma circom 2.1.9;
+include "templates/addition.circom";
 component main { public [b,c] } = Addition();"#;
     assert_eq!(expected_program, component_creator.create())
 }
@@ -36,7 +48,8 @@ component main { public [b,c] } = Addition();"#;
 fn test_component_creator_can_create_subtraction_component_with_mixed_visibilities() {
     let token_public_addition = subtraction_token_with_mixed_visibility();
     let component_creator = ComponentCreator::from_token(token_public_addition);
-    let expected_program = r#"include "templates/subtraction.circom";
+    let expected_program = r#"pragma circom 2.1.9;
+include "templates/subtraction.circom";
 component main { public [a,c] } = Subtraction();"#;
     assert_eq!(expected_program, component_creator.create())
 }
@@ -47,7 +60,8 @@ component main { public [a,c] } = Subtraction();"#;
 fn test_component_creator_can_create_multiplication_component_with_mixed_visibilities() {
     let token = multiplication_token_with_mixed_visibility();
     let component_creator = ComponentCreator::from_token(token);
-    let expected_program = r#"include "templates/multiplication.circom";
+    let expected_program = r#"pragma circom 2.1.9;
+include "templates/multiplication.circom";
 component main { public [a,c] } = Multiplication();"#;
     assert_eq!(expected_program, component_creator.create())
 }
@@ -58,7 +72,8 @@ component main { public [a,c] } = Multiplication();"#;
 fn test_component_creator_can_create_fibonacci_component_with_mixed_visibilities() {
     let token = fibonacci_token_with_mixed_visibility(5);
     let component_creator = ComponentCreator::from_token(token);
-    let expected_program = r#"include "templates/fibonacci.circom";
+    let expected_program = r#"pragma circom 2.1.9;
+include "templates/fibonacci.circom";
 component main { public [a,c] } = Fibonacci(5);"#;
     assert_eq!(expected_program, component_creator.create())
 }
@@ -69,7 +84,8 @@ component main { public [a,c] } = Fibonacci(5);"#;
 fn test_component_creator_can_create_if_component_with_mixed_visibilities() {
     let token = if_token_with_mixed_visibility();
     let component_creator = ComponentCreator::from_token(token);
-    let expected_program = r#"include "templates/if.circom";
+    let expected_program = r#"pragma circom 2.1.9;
+include "templates/if.circom";
 component main { public [condition,true_branch,false_branch] } = If();"#;
     assert_eq!(expected_program, component_creator.create())
 }
@@ -80,7 +96,8 @@ component main { public [condition,true_branch,false_branch] } = If();"#;
 fn test_component_creator_can_create_assert_eq_component_with_mixed_visibilities() {
     let token = assert_eq_token_with_mixed_visibility();
     let component_creator = ComponentCreator::from_token(token);
-    let expected_program = r#"include "templates/assert_eq.circom";
+    let expected_program = r#"pragma circom 2.1.9;
+include "templates/assert_eq.circom";
 component main { public [b] } = AssertEq();"#;
     assert_eq!(expected_program, component_creator.create())
 }

@@ -35,6 +35,7 @@ impl ComponentCreator {
             },
         );
 
+        let version = "pragma circom 2.1.9;".to_string();
         let import = format!("include \"templates/{}.circom\";", template_file);
         let visibility = if public_inputs_identifiers.len() == 0 {
             "".to_string()
@@ -43,7 +44,7 @@ impl ComponentCreator {
         };
         let instantiation =
             "component main ".to_string() + &visibility + &format!("= {}();", template);
-        import.to_string() + "\n" + &instantiation
+        version + "\n" + &import + "\n" + &instantiation
     }
 
     pub fn create(&self) -> String {
@@ -77,6 +78,7 @@ impl ComponentCreator {
 
                 let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
 
+                let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/fibonacci.circom\";";
                 let visibility = if public_inputs_identifiers.len() == 0 {
                     "".to_string()
@@ -86,7 +88,7 @@ impl ComponentCreator {
                 let instantiation = "component main ".to_string()
                     + &visibility
                     + &format!("= Fibonacci({});", value);
-                import.to_string() + "\n" + &instantiation
+                version + "\n" + &import + "\n" + &instantiation
             }
             ZkExample::If {
                 condition,
@@ -102,6 +104,7 @@ impl ComponentCreator {
                 ];
                 let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
 
+                let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/if.circom\";";
                 let visibility = if public_inputs_identifiers.len() == 0 {
                     "".to_string()
@@ -109,7 +112,7 @@ impl ComponentCreator {
                     format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
                 };
                 let instantiation = "component main ".to_string() + &visibility + "= If();";
-                import.to_string() + "\n" + &instantiation
+                version + "\n" + import + "\n" + &instantiation
             },
             ZkExample::AssertEq {
                 lhs,
@@ -122,6 +125,7 @@ impl ComponentCreator {
                 ];
                 let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
 
+                let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/assert_eq.circom\";";
                 let visibility = if public_inputs_identifiers.len() == 0 {
                     "".to_string()
@@ -129,7 +133,7 @@ impl ComponentCreator {
                     format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
                 };
                 let instantiation = "component main ".to_string() + &visibility + "= AssertEq();";
-                import.to_string() + "\n" + &instantiation
+                version + "\n" + &import + "\n" + &instantiation
             }
         }
     }

@@ -43,7 +43,8 @@ fn test_compiler_can_compile_the_generated_circom_component() {
 // ---------- AUX ---------- //
 
 fn source_code_addition() -> String {
-    r#"include "templates/addition.circom";
+    r#"pragma circom 2.1.9;
+include "templates/addition.circom";
 component main { public [a,b,c] } = Addition();"#
         .to_string()
 }
