@@ -1,5 +1,7 @@
 use std::fs;
-use std::io::Error;
+use std::fs::File;
+use std::io::{Error, ErrorKind};
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 pub struct CircomCompiler {
@@ -49,6 +51,54 @@ impl CircomCompiler {
         export_verification_key(&verification_key_zkey, &verification_key_json);
 
         Ok(())
+    }
+
+    pub fn generate_proof(
+        circom_path: &str,
+        verification_key_path: &str,
+        inputs_path: &str,
+        output_path: &str,
+    ) {
+        let build_path = "build/".to_string();
+        fs::create_dir(&build_path).or_else(|error| {
+            if error.kind() == ErrorKind::AlreadyExists {
+                Ok(())
+            } else {
+                Err(error)
+            }
+        }).expect("Couldnt create directory");
+
+        compile_circuit(&circom_path, &build_path);
+
+        let ciruit_name = Path::new(circom_path).file_stem().unwrap().to_str().unwrap();
+        Command::new("node")
+            .arg(build_path.clone() + ciruit_name + "_js/generate_witness.js")
+            .arg(build_path.clone() + ciruit_name + "_js/" + ciruit_name + ".wasm")
+            .arg(inputs_path)
+            .arg(build_path.clone() + "witness.wtns")
+            .output()
+            .unwrap();
+
+        Command::new("snarkjs")
+            .arg("groth16")
+            .arg("prove")
+            .arg(verification_key_path)
+            .arg(build_path.clone() + "witness.wtns")
+            .arg(build_path.clone() + "proof.json")
+            .arg(build_path.clone() + "public.json")
+            .output()
+            .unwrap();
+
+        let output_file = File::create(output_path).expect("failed to create output file");
+        Command::new("node")
+            .arg("curve_compress/compressedProof.js")
+            .arg(build_path + "proof.json")
+            .arg(output_path)
+            .stdout(output_file)
+            .spawn()
+            .expect("failed to start echo")
+            .wait()
+            .expect("failed to finish proof compression");
     }
 }
 

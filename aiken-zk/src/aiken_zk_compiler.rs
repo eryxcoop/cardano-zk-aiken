@@ -222,12 +222,11 @@ impl AikenZkCompiler {
         inputs_path: &str,
         output_path: &str,
     ) {
-        Command::new("./generate_proof.sh")
-            .arg(circom_path)
-            .arg(verification_key_path)
-            .arg(inputs_path)
-            .arg(output_path)
-            .output()
-            .unwrap();
+        CircomCompiler::generate_proof(
+            circom_path,
+            verification_key_path,
+            inputs_path,
+            output_path,
+        )
     }
 }
