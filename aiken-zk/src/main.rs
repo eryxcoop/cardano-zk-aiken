@@ -4,33 +4,40 @@ use std::fs;
 use std::path::PathBuf;
 
 fn main() {
-    let input = Arg::new("input_path")
+    let build_subcommand = create_build_subcommand();
+    let main_command = Command::new("aiken-zk")
+        .subcommand_required(true)
+        .subcommand(build_subcommand.clone());
+
+    let main_command_matches = main_command.get_matches();
+    if let Some(subcommand_matches) = main_command_matches.subcommand_matches("build") {
+        let source_path = _get_argument_value(&subcommand_matches, "source_path");
+        let output_path = _get_argument_value(&subcommand_matches, "output_path");
+
+        let source_offchain_aiken = fs::read_to_string(source_path).unwrap();
+        let output_zk_aiken = AikenZkCompiler::apply_modifications_to_src_for_token(
+            source_offchain_aiken,
+            "output".to_string(),
+            ("random1", "random2"),
+        );
+
+        fs::write(output_path, output_zk_aiken).expect("output file write failed");   
+    }
+}
+
+fn _get_argument_value<'a>(subcommand_matches: &'a ArgMatches, argument_id: &str) -> &'a PathBuf {
+    subcommand_matches
+        .get_one::<PathBuf>(argument_id)
+        .expect("Value for command not found")
+}
+
+fn create_build_subcommand() -> Command {
+    let input = Arg::new("source_path")
         .required(true)
         .value_parser(value_parser!(PathBuf));
     let output = Arg::new("output_path")
         .required(true)
         .value_parser(value_parser!(PathBuf));
 
-    let command = Command::new("aiken-zk")
-        .arg(input.clone())
-        .arg(output.clone());
-
-    let matches = command.get_matches();
-    let input_path = _get_argument_value(&matches, input);
-    let output_path = _get_argument_value(&matches, output);
-
-    let input = fs::read_to_string(input_path).unwrap();
-    let output = AikenZkCompiler::apply_modifications_to_src_for_token(
-        input,
-        "output".to_string(),
-        ("random1", "random2"),
-    );
-
-    fs::write(output_path, output).expect("output file write failed");
-}
-
-fn _get_argument_value(subcommand_matches: &ArgMatches, argument: Arg) -> &PathBuf {
-    subcommand_matches
-        .get_one::<PathBuf>(argument.get_id().to_string().as_str())
-        .expect("Value for command not found")
+    Command::new("build").arg(input.clone()).arg(output.clone())
 }

@@ -53,7 +53,7 @@ impl CircomCompiler {
 }
 
 
-fn run_command_or_fail(mut cmd: &mut Command, label: &str) {
+fn run_command_or_fail(cmd: &mut Command, label: &str) {
     let status = cmd
         .status()
         .expect(&format!("Failed to start command '{}'", label));

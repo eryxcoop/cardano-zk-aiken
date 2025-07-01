@@ -2,7 +2,7 @@ use crate::tests::utils::{create_sandbox_and_set_as_current_directory, manifest_
 use serial_test::serial;
 use std::fs::File;
 use std::{fs, io};
-use std::io::BufRead;
+use std::io::{BufRead, ErrorKind};
 use std::path::Path;
 use std::process::Command;
 
@@ -15,6 +15,7 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
     create_original_aiken_file_and_inputs();
 
     Command::new(aiken_zk_binary_path)
+        .arg("build")
         .arg(source_aiken_filename())
         .arg(output_path)
         .output()
@@ -42,12 +43,18 @@ fn source_aiken_filename() -> &'static str {
 }
 
 fn create_original_aiken_file_and_inputs() {
-    fs::create_dir("validators").expect("Couldnt create dir");
+    fs::create_dir("validators").or_else(|error| {
+        if error.kind() == ErrorKind::AlreadyExists {
+            Ok(())
+        } else {
+            Err(error)
+        }
+    }).expect("Couldnt create dir");
     fs::write(source_aiken_filename(), original_aiken_code()).expect("output file write failed");
     // fs::write("inputs.json", inputs_json()).expect("output file write failed");
 }
 
-fn inputs_json() -> String {
+fn _inputs_json() -> String {
     r#"{"a": "3", "b": "7", "c": "10"}"#.to_string()
 }
 
