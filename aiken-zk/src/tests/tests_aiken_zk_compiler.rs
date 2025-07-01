@@ -1,9 +1,13 @@
 use crate::aiken_zk_compiler::{AikenZkCompiler, Groth16CompressedData};
+use crate::circom_compiler::CircomCompiler;
 use crate::tests::aiken_program_factory::{
     aiken_template_with_body_and_verify_definition, verify_declaration,
 };
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
+use std::{fs, io};
+use std::fs::File;
+use std::io::BufRead;
 
 #[test]
 #[serial]
@@ -95,6 +99,57 @@ fn test_compiler_can_replace_assert_eq_of_mixed_variables_and_constants_by_the_c
         "zk_verify_or_fail(redeemer, [b])",
         assert_eq_mixed_visibility_vk_compressed(), 1
     );
+}
+
+#[test]
+#[serial]
+fn test_tool_can_generate_proof(){
+    let _temporal_directory = create_sandbox_and_set_as_current_directory();
+    let circom_path = "my_program.circom";
+    let verification_key_path = "my_verification_key.zkey";
+    let inputs_path = "inputs.json";
+
+    let output_path = "proof.ak";
+    create_circom_and_inputs_file();
+
+    AikenZkCompiler::generate_proof(
+        circom_path,
+        verification_key_path,
+        inputs_path,
+        output_path,
+    );
+
+    let file = File::open(output_path).unwrap();
+    let lines: Vec<String> = io::BufReader::new(file)
+        .lines()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    
+    // todo: check verification
+    assert_eq!("Proof {", lines[0]);
+    assert!(lines[1].contains("piA: #"));
+    assert!(lines[2].contains("piB: #"));
+    assert!(lines[3].contains("piC: #"));
+    assert_eq!("}", lines[4]);
+}
+
+
+fn create_circom_and_inputs_file() {
+    let mut circom_compiler = CircomCompiler::from(circom_file());
+    circom_compiler.save_into_file("my_program.circom".to_string()).expect("output file write failed");
+    circom_compiler.create_verification_key("my_program.circom".to_string(), ("a", "b")).unwrap();
+
+    fs::write("inputs.json", inputs_json()).expect("output file write failed");
+}
+
+fn circom_file() -> String {
+    r#"pragma circom 2.1.9;
+include "templates/addition.circom";
+component main { public [a,b,c] } = Addition();"#.to_string()
+}
+
+fn inputs_json() -> String {
+    r#"{"a": "3", "b": "7", "c": "10"}"#.to_string()
 }
 
 fn test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(

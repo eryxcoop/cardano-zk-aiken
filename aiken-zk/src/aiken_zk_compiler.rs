@@ -51,39 +51,50 @@ impl AikenZkCompiler {
         match token {
             Token::Offchain {
                 example: ZkExample::Addition { lhs, rhs, res },
-            } => [lhs, rhs, res].iter().fold(
-                vec![],
-                |acc, &input| Self::extract_visibility_from_input(acc, &input)),
+            } => [lhs, rhs, res].iter().fold(vec![], |acc, &input| {
+                Self::extract_visibility_from_input(acc, &input)
+            }),
 
             Token::Offchain {
                 example: ZkExample::Subtraction { lhs, rhs, res },
-            } => [lhs, rhs, res].iter().fold(
-                vec![],
-                |acc, &input| Self::extract_visibility_from_input(acc, &input)),
+            } => [lhs, rhs, res].iter().fold(vec![], |acc, &input| {
+                Self::extract_visibility_from_input(acc, &input)
+            }),
 
             Token::Offchain {
                 example: ZkExample::Multiplication { lhs, rhs, res },
-            } => [lhs, rhs, res].iter().fold(
-                vec![],
-                |acc, &input| Self::extract_visibility_from_input(acc, &input)),
+            } => [lhs, rhs, res].iter().fold(vec![], |acc, &input| {
+                Self::extract_visibility_from_input(acc, &input)
+            }),
 
             Token::Offchain {
-                example: ZkExample::Fibonacci { fib_0, fib_1, res, .. },
-            } => [fib_0, fib_1, res].iter().fold(
-                vec![],
-                |acc, &input| Self::extract_visibility_from_input(acc, &input)),
+                example:
+                    ZkExample::Fibonacci {
+                        fib_0, fib_1, res, ..
+                    },
+            } => [fib_0, fib_1, res].iter().fold(vec![], |acc, &input| {
+                Self::extract_visibility_from_input(acc, &input)
+            }),
 
             Token::Offchain {
-                example: ZkExample::If { condition, assigned, true_branch, false_branch },
-            } => [condition, assigned, true_branch, false_branch].iter().fold(
-                vec![],
-                |acc, &input| Self::extract_visibility_from_input(acc, &input)),
+                example:
+                    ZkExample::If {
+                        condition,
+                        assigned,
+                        true_branch,
+                        false_branch,
+                    },
+            } => [condition, assigned, true_branch, false_branch]
+                .iter()
+                .fold(vec![], |acc, &input| {
+                    Self::extract_visibility_from_input(acc, &input)
+                }),
 
             Token::Offchain {
-                example: ZkExample::AssertEq { lhs, rhs},
-            } => [lhs, rhs].iter().fold(
-                vec![],
-                |acc, &input| Self::extract_visibility_from_input(acc, &input)),
+                example: ZkExample::AssertEq { lhs, rhs },
+            } => [lhs, rhs].iter().fold(vec![], |acc, &input| {
+                Self::extract_visibility_from_input(acc, &input)
+            }),
 
             _ => panic!("Not implemented"),
         }
@@ -203,5 +214,20 @@ impl AikenZkCompiler {
 
     fn prepend_imports(aiken_src: &str) -> String {
         "use aiken/collection/list\nuse ak_381/groth16.{Proof, SnarkVerificationKey, groth_verify}\n".to_string() + aiken_src
+    }
+
+    pub fn generate_proof(
+        circom_path: &str,
+        verification_key_path: &str,
+        inputs_path: &str,
+        output_path: &str,
+    ) {
+        Command::new("./generate_proof.sh")
+            .arg(circom_path)
+            .arg(verification_key_path)
+            .arg(inputs_path)
+            .arg(output_path)
+            .output()
+            .unwrap();
     }
 }
