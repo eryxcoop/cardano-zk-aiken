@@ -1,10 +1,11 @@
+use crate::circom_compiler::CircomCompiler;
 use crate::tests::utils::{create_sandbox_and_set_as_current_directory, manifest_path};
 use serial_test::serial;
 use std::fs::File;
-use std::{fs, io};
 use std::io::{BufRead, ErrorKind};
 use std::path::Path;
 use std::process::Command;
+use std::{fs, io};
 
 #[test]
 #[serial]
@@ -12,7 +13,7 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
     let _temporal_directory = create_sandbox_and_set_as_current_directory();
     let aiken_zk_binary_path = manifest_path() + "/target/debug/aiken-zk";
     let output_path = "validators/output.ak";
-    create_original_aiken_file_and_inputs();
+    create_original_aiken_file();
 
     Command::new(aiken_zk_binary_path)
         .arg("build")
@@ -31,18 +32,53 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
     let expected_line_declaration = "fn zk_verify_or_fail(";
     assert!(lines[19].contains(expected_line_replacement));
     assert!(lines[28].contains(expected_line_declaration));
-    assert!(Path::new("my_verification_key.zkey").exists());
+    assert!(Path::new("verification_key.zkey").exists());
     assert!(Path::new("output.circom").exists());
 
     assert!(compilation_result.status.success());
     assert!(Path::new("plutus.json").exists());
 }
 
+
+#[test]
+#[serial]
+fn test_() {
+    let _temporal_directory = create_sandbox_and_set_as_current_directory();
+    let aiken_zk_binary_path = manifest_path() + "/target/debug/aiken-zk";
+    let circom_path = "my_program.circom";
+    let verification_key_path = "verification_key.zkey";
+    let inputs_path = "inputs.json";
+    let output_path = "proof.ak";
+    create_circom_and_inputs_file();
+
+    Command::new(aiken_zk_binary_path)
+        .arg("prove")
+        .arg(circom_path)
+        .arg(verification_key_path)
+        .arg(inputs_path)
+        .arg(output_path)
+        .output()
+        .unwrap();
+
+    let file = File::open(output_path).unwrap();
+    let lines: Vec<String> = io::BufReader::new(file)
+        .lines()
+        .collect::<Result<_, _>>()
+        .unwrap();
+
+    // todo: check verification
+    assert_eq!("Proof {", lines[0]);
+    assert!(lines[1].contains("piA: #"));
+    assert!(lines[2].contains("piB: #"));
+    assert!(lines[3].contains("piC: #"));
+    assert_eq!("}", lines[4]);
+}
+
 fn source_aiken_filename() -> &'static str {
     "original_aiken_code.ak"
 }
 
-fn create_original_aiken_file_and_inputs() {
+fn create_original_aiken_file() {
     fs::create_dir("validators").or_else(|error| {
         if error.kind() == ErrorKind::AlreadyExists {
             Ok(())
@@ -51,10 +87,23 @@ fn create_original_aiken_file_and_inputs() {
         }
     }).expect("Couldnt create dir");
     fs::write(source_aiken_filename(), original_aiken_code()).expect("output file write failed");
-    // fs::write("inputs.json", inputs_json()).expect("output file write failed");
 }
 
-fn _inputs_json() -> String {
+fn create_circom_and_inputs_file() {
+    let mut circom_compiler = CircomCompiler::from(circom_file());
+    circom_compiler.save_into_file("my_program.circom".to_string()).expect("output file write failed");
+    circom_compiler.create_verification_key("my_program.circom".to_string(), ("a", "b")).unwrap();
+
+    fs::write("inputs.json", inputs_json()).expect("output file write failed");
+}
+
+fn circom_file() -> String {
+    r#"pragma circom 2.1.9;
+include "templates/addition.circom";
+component main { public [a,b,c] } = Addition();"#.to_string()
+}
+
+fn inputs_json() -> String {
     r#"{"a": "3", "b": "7", "c": "10"}"#.to_string()
 }
 
