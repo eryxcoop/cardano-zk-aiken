@@ -216,13 +216,13 @@ impl AikenZkCompiler {
         "use aiken/collection/list\nuse ak_381/groth16.{Proof, SnarkVerificationKey, groth_verify}\n".to_string() + aiken_src
     }
 
-    pub fn generate_proof(
+    pub fn generate_aiken_proof(
         circom_path: &str,
         verification_key_path: &str,
         inputs_path: &str,
         output_path: &str,
     ) {
-        CircomCompiler::generate_proof(
+        CircomCompiler::generate_aiken_proof(
             circom_path,
             verification_key_path,
             inputs_path,

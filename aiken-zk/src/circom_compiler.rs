@@ -53,42 +53,25 @@ impl CircomCompiler {
         Ok(())
     }
 
-    pub fn generate_proof(
+    pub fn generate_aiken_proof(
         circom_path: &str,
         verification_key_path: &str,
         inputs_path: &str,
         output_path: &str,
     ) {
         let build_path = "build/".to_string();
-        fs::create_dir(&build_path).or_else(|error| {
-            if error.kind() == ErrorKind::AlreadyExists {
-                Ok(())
-            } else {
-                Err(error)
-            }
-        }).expect("Couldnt create directory");
+        Self::create_directory_if_not_exists(&build_path);
 
         compile_circuit(&circom_path, &build_path);
 
-        let ciruit_name = Path::new(circom_path).file_stem().unwrap().to_str().unwrap();
-        Command::new("node")
-            .arg(build_path.clone() + ciruit_name + "_js/generate_witness.js")
-            .arg(build_path.clone() + ciruit_name + "_js/" + ciruit_name + ".wasm")
-            .arg(inputs_path)
-            .arg(build_path.clone() + "witness.wtns")
-            .output()
-            .unwrap();
+        Self::generate_witness(circom_path, inputs_path, &build_path);
 
-        Command::new("snarkjs")
-            .arg("groth16")
-            .arg("prove")
-            .arg(verification_key_path)
-            .arg(build_path.clone() + "witness.wtns")
-            .arg(build_path.clone() + "proof.json")
-            .arg(build_path.clone() + "public.json")
-            .output()
-            .unwrap();
+        Self::generate_proof(verification_key_path, &build_path);
 
+        Self::convert_proof_to_aiken_proof(output_path, build_path);
+    }
+
+    fn convert_proof_to_aiken_proof(output_path: &str, build_path: String) {
         let output_file = File::create(output_path).expect("failed to create output file");
         Command::new("node")
             .arg("curve_compress/compressedProof.js")
@@ -99,6 +82,39 @@ impl CircomCompiler {
             .expect("failed to start echo")
             .wait()
             .expect("failed to finish proof compression");
+    }
+
+    fn generate_proof(verification_key_path: &str, build_path: &String) {
+        Command::new("snarkjs")
+            .arg("groth16")
+            .arg("prove")
+            .arg(verification_key_path)
+            .arg(build_path.clone() + "witness.wtns")
+            .arg(build_path.clone() + "proof.json")
+            .arg(build_path.clone() + "public.json")
+            .output()
+            .unwrap();
+    }
+
+    fn generate_witness(circom_path: &str, inputs_path: &str, build_path: &String) {
+        let ciruit_name = Path::new(circom_path).file_stem().unwrap().to_str().unwrap();
+        Command::new("node")
+            .arg(build_path.clone() + ciruit_name + "_js/generate_witness.js")
+            .arg(build_path.clone() + ciruit_name + "_js/" + ciruit_name + ".wasm")
+            .arg(inputs_path)
+            .arg(build_path.clone() + "witness.wtns")
+            .output()
+            .unwrap();
+    }
+
+    fn create_directory_if_not_exists(build_path: &String) {
+        fs::create_dir(&build_path).or_else(|error| {
+            if error.kind() == ErrorKind::AlreadyExists {
+                Ok(())
+            } else {
+                Err(error)
+            }
+        }).expect("Couldnt create directory");
     }
 }
 

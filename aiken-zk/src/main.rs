@@ -28,7 +28,7 @@ fn main() {
         let inputs_path = _get_argument_value(&subcommand_matches, "inputs_path");
         let output_path = _get_argument_value(&subcommand_matches, "output_path");
 
-        AikenZkCompiler::generate_proof(
+        AikenZkCompiler::generate_aiken_proof(
             circom_path.to_str().unwrap(),
             verification_key_path.to_str().unwrap(),
             inputs_path.to_str().unwrap(),

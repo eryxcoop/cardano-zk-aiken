@@ -112,7 +112,7 @@ fn test_tool_can_generate_proof(){
     let output_path = "proof.ak";
     create_circom_and_inputs_file();
 
-    AikenZkCompiler::generate_proof(
+    AikenZkCompiler::generate_aiken_proof(
         circom_path,
         verification_key_path,
         inputs_path,
