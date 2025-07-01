@@ -78,9 +78,7 @@ impl CircomCompiler {
             .arg(build_path + "proof.json")
             .arg(output_path)
             .stdout(output_file)
-            .spawn()
-            .expect("failed to start echo")
-            .wait()
+            .status()
             .expect("failed to finish proof compression");
     }
 
@@ -121,6 +119,7 @@ impl CircomCompiler {
 
 fn run_command_or_fail(cmd: &mut Command, label: &str) {
     let status = cmd
+        .stdout(Stdio::null())
         .status()
         .expect(&format!("Failed to start command '{}'", label));
     if !status.success() {

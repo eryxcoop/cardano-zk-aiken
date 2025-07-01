@@ -26,7 +26,7 @@ fn main() {
         let circom_path = _get_argument_value(&subcommand_matches, "circom_path");
         let verification_key_path = _get_argument_value(&subcommand_matches, "verification_key_path");
         let inputs_path = _get_argument_value(&subcommand_matches, "inputs_path");
-        let output_path = _get_argument_value(&subcommand_matches, "output_path");
+        let output_path = _get_argument_value(&subcommand_matches, "output_proof_path");
 
         AikenZkCompiler::generate_aiken_proof(
             circom_path.to_str().unwrap(),
@@ -64,7 +64,7 @@ fn create_prove_subcommand() -> Command {
     let inputs_path = Arg::new("inputs_path")
         .required(true)
         .value_parser(value_parser!(PathBuf));
-    let output_path = Arg::new("output_path")
+    let output_path = Arg::new("output_proof_path")
         .required(true)
         .value_parser(value_parser!(PathBuf));
 
