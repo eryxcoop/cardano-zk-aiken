@@ -42,7 +42,7 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
 
 #[test]
 #[serial]
-fn test_() {
+fn test_user_can_generate_a_proof() {
     let _temporal_directory = create_sandbox_and_set_as_current_directory();
     let aiken_zk_binary_path = manifest_path() + "/target/debug/aiken-zk";
     let circom_path = "my_program.circom";
