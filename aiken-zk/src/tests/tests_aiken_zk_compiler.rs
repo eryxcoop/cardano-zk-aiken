@@ -1,13 +1,12 @@
 use crate::aiken_zk_compiler::{AikenZkCompiler, Groth16CompressedData};
-use crate::circom_compiler::CircomCompiler;
 use crate::tests::aiken_program_factory::{
     aiken_template_with_body_and_verify_definition, verify_declaration,
 };
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
-use std::{fs, io};
 use std::fs::File;
 use std::io::BufRead;
+use std::{fs, io};
 
 #[test]
 #[serial]
@@ -135,10 +134,7 @@ fn test_tool_can_generate_proof(){
 
 
 fn create_circom_and_inputs_file() {
-    let mut circom_compiler = CircomCompiler::from(circom_file());
-    circom_compiler.save_into_file("my_program.circom".to_string()).expect("output file write failed");
-    circom_compiler.create_verification_key("my_program.circom".to_string(), ("a", "b")).unwrap();
-
+    fs::write("my_program.circom", circom_file()).expect("output file write failed");
     fs::write("inputs.json", inputs_json()).expect("output file write failed");
 }
 
