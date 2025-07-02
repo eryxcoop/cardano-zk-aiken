@@ -2,8 +2,10 @@ use aiken_zk::aiken_zk_compiler::AikenZkCompiler;
 use clap::{Arg, ArgMatches, Command, value_parser};
 use std::fs;
 use std::path::PathBuf;
+use aiken_zk::create_validators_dir_lazy;
 
 fn main() {
+    create_validators_dir_lazy();
     let main_command = Command::new("aiken-zk")
         .subcommand_required(true)
         .subcommand(create_build_subcommand())

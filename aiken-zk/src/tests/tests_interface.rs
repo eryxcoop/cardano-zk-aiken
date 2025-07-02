@@ -2,7 +2,7 @@ use crate::circom_compiler::CircomCompiler;
 use crate::tests::utils::{create_sandbox_and_set_as_current_directory, manifest_path};
 use serial_test::serial;
 use std::fs::File;
-use std::io::{BufRead, ErrorKind};
+use std::io::BufRead;
 use std::path::Path;
 use std::process::Command;
 use std::{fs, io};
@@ -79,13 +79,6 @@ fn source_aiken_filename() -> &'static str {
 }
 
 fn create_original_aiken_file() {
-    fs::create_dir("validators").or_else(|error| {
-        if error.kind() == ErrorKind::AlreadyExists {
-            Ok(())
-        } else {
-            Err(error)
-        }
-    }).expect("Couldnt create dir");
     fs::write(source_aiken_filename(), original_aiken_code()).expect("output file write failed");
 }
 
