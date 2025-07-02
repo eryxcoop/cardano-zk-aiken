@@ -21,7 +21,8 @@ fn test_compiler_can_replace_addition_of_public_variables_by_the_corresponding_f
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_function_and_call() {
+fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_function_and_call()
+{
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv a, priv b, priv c)",
         "zk_verify_or_fail(redeemer, [])",
@@ -32,71 +33,84 @@ fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_mixed_variables_by_the_corresponding_function_and_call(){
+fn test_compiler_can_replace_addition_of_mixed_variables_by_the_corresponding_function_and_call() {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv a, b, pub c)",
         "zk_verify_or_fail(redeemer, [b, c])",
-        addition_mixed_visibility_vk_compressed(), 2
+        addition_mixed_visibility_vk_compressed(),
+        2,
     );
 }
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_mixed_variables_and_constants_by_the_corresponding_function_and_call(){
+fn test_compiler_can_replace_addition_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+ {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv a, 4, pub b)",
         "zk_verify_or_fail(redeemer, [4, b])",
-        addition_mixed_visibility_vk_compressed(), 2
+        addition_mixed_visibility_vk_compressed(),
+        2,
     );
 }
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_subtraction_of_mixed_variables_and_constants_by_the_corresponding_function_and_call(){
+fn test_compiler_can_replace_subtraction_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+ {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain subtraction(priv a, 4, pub b)",
         "zk_verify_or_fail(redeemer, [4, b])",
-        addition_mixed_visibility_vk_compressed(), 2
+        addition_mixed_visibility_vk_compressed(),
+        2,
     );
 }
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_multiplication_of_mixed_variables_and_constants_by_the_corresponding_function_and_call(){
+fn test_compiler_can_replace_multiplication_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+ {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain multiplication(priv a, 4, pub b)",
         "zk_verify_or_fail(redeemer, [4, b])",
-        multiplication_mixed_visibility_vk_compressed(), 2
+        multiplication_mixed_visibility_vk_compressed(),
+        2,
     );
 }
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_fibonacci_of_mixed_variables_and_constants_by_the_corresponding_function_and_call(){
+fn test_compiler_can_replace_fibonacci_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+ {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain fibonacci(priv a, b, 5, pub c)",
         "zk_verify_or_fail(redeemer, [b, c])",
-        fibonacci_mixed_visibility_vk_compressed(), 2
+        fibonacci_mixed_visibility_vk_compressed(),
+        2,
     );
 }
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_if_of_mixed_variables_and_constants_by_the_corresponding_function_and_call(){
+fn test_compiler_can_replace_if_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+ {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain if(a, b, priv c, priv d)",
         "zk_verify_or_fail(redeemer, [a, b])",
-        if_mixed_visibility_vk_compressed(), 2
+        if_mixed_visibility_vk_compressed(),
+        2,
     );
 }
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_assert_eq_of_mixed_variables_and_constants_by_the_corresponding_function_and_call(){
+fn test_compiler_can_replace_assert_eq_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+ {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain assert_eq(priv a, b)",
         "zk_verify_or_fail(redeemer, [b])",
-        assert_eq_mixed_visibility_vk_compressed(), 1
+        assert_eq_mixed_visibility_vk_compressed(),
+        1,
     );
 }
 
@@ -123,7 +137,7 @@ fn test_tool_can_generate_proof() {
         .lines()
         .collect::<Result<_, _>>()
         .unwrap();
-    
+
     // todo: check verification
     assert_eq!("Proof {", lines[0]);
     assert!(lines[1].contains("piA: #"));
@@ -131,7 +145,6 @@ fn test_tool_can_generate_proof() {
     assert!(lines[3].contains("piC: #"));
     assert_eq!("}", lines[4]);
 }
-
 
 fn create_circom_and_inputs_file() {
     fs::write("my_program.circom", circom_file()).expect("output file write failed");
@@ -141,7 +154,8 @@ fn create_circom_and_inputs_file() {
 fn circom_file() -> String {
     r#"pragma circom 2.1.9;
 include "templates/addition.circom";
-component main { public [a,b,c] } = Addition();"#.to_string()
+component main { public [a,b,c] } = Addition();"#
+        .to_string()
 }
 
 fn inputs_json() -> String {
@@ -155,7 +169,7 @@ fn test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
     n_public_inputs: usize,
 ) {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
-    let aiken_src = aiken_template_with_body_and_verify_definition("",original, "");
+    let aiken_src = aiken_template_with_body_and_verify_definition("", original, "");
     let output_filename = "my_program".to_string();
     let random_seeds = ("asdasd", "dsadsa");
 
@@ -166,8 +180,11 @@ fn test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
     );
 
     let verify_declaration = verify_declaration(n_public_inputs, vk_compressed_data);
-    let expected_aiken_src =
-        aiken_template_with_body_and_verify_definition(import_header(), replacement, &verify_declaration);
+    let expected_aiken_src = aiken_template_with_body_and_verify_definition(
+        import_header(),
+        replacement,
+        &verify_declaration,
+    );
 
     assert_eq!(
         without_delta(expected_aiken_src),

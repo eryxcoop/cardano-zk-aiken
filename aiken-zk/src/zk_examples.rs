@@ -79,7 +79,7 @@ pub enum ZkExample {
     AssertEq {
         lhs: InputZK,
         rhs: InputZK,
-    }
+    },
 }
 
 impl ZkExample {
@@ -176,7 +176,7 @@ impl ZkExample {
                 },
             })
     }
-    
+
     fn assert_eq_parser() -> impl Parser<char, Token, Error = ParseError> {
         just("assert_eq")
             .padded()

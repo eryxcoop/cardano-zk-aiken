@@ -28,8 +28,9 @@ impl CircomCompiler {
         circom_program_filename_with_extension: String,
         rand: (&str, &str),
     ) -> Result<(), Error> {
-
-        let circuit_name = circom_program_filename_with_extension.strip_suffix(".circom").unwrap();
+        let circuit_name = circom_program_filename_with_extension
+            .strip_suffix(".circom")
+            .unwrap();
         let output_path = "build/";
 
         fs::create_dir_all(&output_path).expect("Failed to create output directory");
@@ -47,7 +48,13 @@ impl CircomCompiler {
         contribute(&zkey_0, &zkey_1, "1st Contributor Name", &rand.0);
         contribute(&zkey_1, &zkey_2, "Second contribution Name", &rand.1);
         let hex_entr = "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
-        beacon(&zkey_0, &verification_key_zkey, hex_entr, 10, "Final Beacon phase2");
+        beacon(
+            &zkey_0,
+            &verification_key_zkey,
+            hex_entr,
+            10,
+            "Final Beacon phase2",
+        );
         export_verification_key(&verification_key_zkey, &verification_key_json);
 
         Ok(())
@@ -95,7 +102,11 @@ impl CircomCompiler {
     }
 
     fn generate_witness(circom_path: &str, inputs_path: &str, build_path: &String) {
-        let ciruit_name = Path::new(circom_path).file_stem().unwrap().to_str().unwrap();
+        let ciruit_name = Path::new(circom_path)
+            .file_stem()
+            .unwrap()
+            .to_str()
+            .unwrap();
         Command::new("node")
             .arg(build_path.clone() + ciruit_name + "_js/generate_witness.js")
             .arg(build_path.clone() + ciruit_name + "_js/" + ciruit_name + ".wasm")
@@ -106,16 +117,17 @@ impl CircomCompiler {
     }
 
     fn create_directory_if_not_exists(build_path: &String) {
-        fs::create_dir(&build_path).or_else(|error| {
-            if error.kind() == ErrorKind::AlreadyExists {
-                Ok(())
-            } else {
-                Err(error)
-            }
-        }).expect("Couldnt create directory");
+        fs::create_dir(&build_path)
+            .or_else(|error| {
+                if error.kind() == ErrorKind::AlreadyExists {
+                    Ok(())
+                } else {
+                    Err(error)
+                }
+            })
+            .expect("Couldnt create directory");
     }
 }
-
 
 fn run_command_or_fail(cmd: &mut Command, label: &str) {
     let status = cmd
@@ -123,7 +135,11 @@ fn run_command_or_fail(cmd: &mut Command, label: &str) {
         .status()
         .expect(&format!("Failed to start command '{}'", label));
     if !status.success() {
-        panic!("Command '{}' failed with exit code {:?}", label, status.code());
+        panic!(
+            "Command '{}' failed with exit code {:?}",
+            label,
+            status.code()
+        );
     }
 }
 
@@ -145,13 +161,7 @@ fn compile_circuit(circuit_path: &str, output_path: &str) {
 
 fn groth16_setup(r1cs_path: &str, ceremony_path: &str, output_zkey: &str) {
     run_command_or_fail(
-        Command::new("snarkjs").args(&[
-            "groth16",
-            "setup",
-            r1cs_path,
-            ceremony_path,
-            output_zkey,
-        ]),
+        Command::new("snarkjs").args(&["groth16", "setup", r1cs_path, ceremony_path, output_zkey]),
         "groth16 setup",
     );
 }
@@ -171,11 +181,11 @@ fn contribute(input_zkey: &str, output_zkey: &str, name: &str, entropy: &str) {
         .spawn()
         .expect("Failed to start zkey contribute");
 
-        use std::io::Write;
-        let stdin = child.stdin.as_mut().expect("Failed to open stdin");
-        stdin
-            .write_all(new_entropy.as_bytes())
-            .expect("Failed to write entropy");
+    use std::io::Write;
+    let stdin = child.stdin.as_mut().expect("Failed to open stdin");
+    stdin
+        .write_all(new_entropy.as_bytes())
+        .expect("Failed to write entropy");
 
     let status = child.wait().expect("Failed to wait on zkey contribute");
     if !status.success() {
@@ -204,13 +214,7 @@ fn beacon(zkey_input: &str, zkey_output: &str, entropy_hex: &str, rounds: u32, n
 
 fn export_verification_key(zkey: &str, output_json: &str) {
     run_command_or_fail(
-        Command::new("snarkjs").args(&[
-            "zkey",
-            "export",
-            "verificationkey",
-            zkey,
-            output_json,
-        ]),
+        Command::new("snarkjs").args(&["zkey", "export", "verificationkey", zkey, output_json]),
         "export verification key",
     );
 }

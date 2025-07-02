@@ -5,7 +5,8 @@ pub fn aiken_template_with_body_and_verify_definition(
     keyword: &str,
     verify_declaration: &str,
 ) -> String {
-    format!(r#"{}
+    format!(
+        r#"{}
 
 pub type ZK<redeemer_type> {{
   redeemer: redeemer_type,
@@ -27,7 +28,7 @@ validator test_validator {{
   }}
 }}
 {}"#,
-        header,keyword, verify_declaration
+        header, keyword, verify_declaration
     )
 }
 

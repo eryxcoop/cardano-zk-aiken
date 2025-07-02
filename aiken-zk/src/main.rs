@@ -5,5 +5,3 @@ fn main() {
     create_validators_dir_lazy();
     CommandLineInterface::parse_inputs_and_execute_command();
 }
-
-

@@ -76,7 +76,8 @@ impl ComponentCreator {
                 };
                 let inputs_to_identifiers = [(fib_0, "a"), (fib_1, "b"), (res, "c")];
 
-                let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
+                let public_inputs_identifiers =
+                    Self::process_inputs_visibility(inputs_to_identifiers);
 
                 let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/fibonacci.circom\";";
@@ -102,7 +103,8 @@ impl ComponentCreator {
                     (true_branch, "true_branch"),
                     (false_branch, "false_branch"),
                 ];
-                let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
+                let public_inputs_identifiers =
+                    Self::process_inputs_visibility(inputs_to_identifiers);
 
                 let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/if.circom\";";
@@ -113,17 +115,11 @@ impl ComponentCreator {
                 };
                 let instantiation = "component main ".to_string() + &visibility + "= If();";
                 version + "\n" + import + "\n" + &instantiation
-            },
-            ZkExample::AssertEq {
-                lhs,
-                rhs
-            } => {
-
-                let inputs_to_identifiers = [
-                    (lhs, "a"),
-                    (rhs, "b"),
-                ];
-                let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
+            }
+            ZkExample::AssertEq { lhs, rhs } => {
+                let inputs_to_identifiers = [(lhs, "a"), (rhs, "b")];
+                let public_inputs_identifiers =
+                    Self::process_inputs_visibility(inputs_to_identifiers);
 
                 let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/assert_eq.circom\";";
@@ -138,8 +134,11 @@ impl ComponentCreator {
         }
     }
 
-    fn process_inputs_visibility<const N:usize>(public_inputs_identifiers: [(&InputZK, &str); N]) -> Vec<String> {
-        public_inputs_identifiers.iter()
+    fn process_inputs_visibility<const N: usize>(
+        public_inputs_identifiers: [(&InputZK, &str); N],
+    ) -> Vec<String> {
+        public_inputs_identifiers
+            .iter()
             .fold(vec![], |mut acc, (input, var_name)| {
                 match input.visibility.clone() {
                     Some(InputVisibility::Private) => acc,

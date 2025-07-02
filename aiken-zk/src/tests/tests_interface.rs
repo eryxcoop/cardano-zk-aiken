@@ -39,7 +39,6 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
     assert!(Path::new("plutus.json").exists());
 }
 
-
 #[test]
 #[serial]
 fn test_user_can_generate_a_proof() {
@@ -84,8 +83,12 @@ fn create_original_aiken_file() {
 
 fn create_circom_and_inputs_file() {
     let mut circom_compiler = CircomCompiler::from(circom_file());
-    circom_compiler.save_into_file("my_program.circom".to_string()).expect("output file write failed");
-    circom_compiler.create_verification_key("my_program.circom".to_string(), ("a", "b")).unwrap();
+    circom_compiler
+        .save_into_file("my_program.circom".to_string())
+        .expect("output file write failed");
+    circom_compiler
+        .create_verification_key("my_program.circom".to_string(), ("a", "b"))
+        .unwrap();
 
     fs::write("inputs.json", inputs_json()).expect("output file write failed");
 }
@@ -93,14 +96,15 @@ fn create_circom_and_inputs_file() {
 fn circom_file() -> String {
     r#"pragma circom 2.1.9;
 include "templates/addition.circom";
-component main { public [a,b,c] } = Addition();"#.to_string()
+component main { public [a,b,c] } = Addition();"#
+        .to_string()
 }
 
 fn inputs_json() -> String {
     r#"{"a": "3", "b": "7", "c": "10"}"#.to_string()
 }
 
-fn original_aiken_code() -> String{
+fn original_aiken_code() -> String {
     r#"use cardano/transaction.{OutputReference, Transaction,}
 
 pub type ZK<redeemer_type> {
@@ -126,5 +130,6 @@ validator example {
     fail
   }
 }
-"#.to_string()
+"#
+    .to_string()
 }

@@ -1,5 +1,10 @@
 use crate::component_creator::ComponentCreator;
-use crate::tests::token_factory::{addition_token_with_all_private_inputs, addition_token_with_mixed_visibility, addition_token_with_public_inputs, assert_eq_token_with_mixed_visibility, fibonacci_token_with_mixed_visibility, if_token_with_mixed_visibility, multiplication_token_with_mixed_visibility, subtraction_token_with_mixed_visibility};
+use crate::tests::token_factory::{
+    addition_token_with_all_private_inputs, addition_token_with_mixed_visibility,
+    addition_token_with_public_inputs, assert_eq_token_with_mixed_visibility,
+    fibonacci_token_with_mixed_visibility, if_token_with_mixed_visibility,
+    multiplication_token_with_mixed_visibility, subtraction_token_with_mixed_visibility,
+};
 
 #[test]
 fn test_() {
