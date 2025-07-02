@@ -10,7 +10,10 @@ impl CommandLineInterface {
     const BUILD_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_path";
 
     const PROVE_COMMAND_NAME: &'static str = "prove";
-    // const PROVE_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_path";
+    const PROVE_COMMAND_CIRCOM_ARG_NAME: &'static str ="circom_path";
+    const PROVE_COMMAND_VK_ARG_NAME: &'static str ="verification_key_path";
+    const PROVE_COMMAND_INPUT_ARG_NAME: &'static str ="inputs_path";
+    const PROVE_COMMAND_OUTPUT_ARG_NAME: &'static str ="output_proof_path";
 
     pub fn parse_inputs_and_execute_command() {
         let main_command = Self::create_main_command();
@@ -21,6 +24,7 @@ impl CommandLineInterface {
             let output_path = Self::get_argument_value(&subcommand_matches, Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
 
             let source_offchain_aiken = fs::read_to_string(source_path).unwrap();
+
             let output_zk_aiken = AikenZkCompiler::apply_modifications_to_src_for_token(
                 source_offchain_aiken,
                 "output".to_string(),
@@ -29,10 +33,10 @@ impl CommandLineInterface {
 
             fs::write(output_path, output_zk_aiken).expect("output file write failed");
         } else if let Some(subcommand_matches) = main_command_matches.subcommand_matches(Self::PROVE_COMMAND_NAME) {
-            let circom_path = Self::get_argument_value(&subcommand_matches, "circom_path");
-            let verification_key_path = Self::get_argument_value(&subcommand_matches, "verification_key_path");
-            let inputs_path = Self::get_argument_value(&subcommand_matches, "inputs_path");
-            let output_path = Self::get_argument_value(&subcommand_matches, "output_proof_path");
+            let circom_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_CIRCOM_ARG_NAME);
+            let verification_key_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_VK_ARG_NAME);
+            let inputs_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_INPUT_ARG_NAME);
+            let output_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_OUTPUT_ARG_NAME);
 
             AikenZkCompiler::generate_aiken_proof(
                 circom_path.to_str().unwrap(),
@@ -64,10 +68,10 @@ impl CommandLineInterface {
     }
 
     fn create_prove_subcommand() -> Command {
-        let circom_path = Self::create_required_argument_with_id("circom_path");
-        let verification_key_path = Self::create_required_argument_with_id("verification_key_path");
-        let inputs_path = Self::create_required_argument_with_id("inputs_path");
-        let output_path = Self::create_required_argument_with_id("output_proof_path");
+        let circom_path = Self::create_required_argument_with_id(Self::PROVE_COMMAND_CIRCOM_ARG_NAME);
+        let verification_key_path = Self::create_required_argument_with_id(Self::PROVE_COMMAND_VK_ARG_NAME);
+        let inputs_path = Self::create_required_argument_with_id(Self::PROVE_COMMAND_INPUT_ARG_NAME);
+        let output_path = Self::create_required_argument_with_id(Self::PROVE_COMMAND_OUTPUT_ARG_NAME);
 
         Command::new(Self::PROVE_COMMAND_NAME)
             .arg(circom_path)
