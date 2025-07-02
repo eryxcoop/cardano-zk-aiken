@@ -35,7 +35,7 @@ To run the tests
 # Manual testing
 
 ### Building
-To run an example yourself, go to the directory ```milestone 2 - example``` and run 
+To run an example yourself, go to the directory ```milestone 2 - example```. First, enter the sub-directory ```curve_compress``` and run ```npm install```. Then go back and run the following:
 
 ```cargo run -- build validators_with_offchain/example.ak validators/output.ak```
 
