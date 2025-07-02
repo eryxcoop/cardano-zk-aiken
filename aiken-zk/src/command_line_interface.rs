@@ -38,7 +38,7 @@ impl CommandLineInterface {
         );
     }
 
-    fn get_prove_arguments<'a>(subcommand_matches: &'a ArgMatches) -> (&'a PathBuf, &'a PathBuf, &'a PathBuf, &'a PathBuf) {
+    fn get_prove_arguments(subcommand_matches: &ArgMatches) -> (&PathBuf, &PathBuf, &PathBuf, &PathBuf) {
         let circom_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_CIRCOM_ARG_NAME);
         let verification_key_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_VK_ARG_NAME);
         let inputs_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_INPUT_ARG_NAME);
@@ -58,7 +58,7 @@ impl CommandLineInterface {
         fs::write(output_path, output_zk_aiken).expect("output file write failed");
     }
 
-    fn get_build_arguments<'a>(subcommand_matches: &'a ArgMatches) -> (&'a PathBuf, &'a PathBuf) {
+    fn get_build_arguments(subcommand_matches: &ArgMatches) -> (&PathBuf, &PathBuf) {
         let source_path = Self::get_argument_value(&subcommand_matches, Self::BUILD_COMMAND_SOURCE_ARG_NAME);
         let output_path = Self::get_argument_value(&subcommand_matches, Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
         (source_path, output_path)
