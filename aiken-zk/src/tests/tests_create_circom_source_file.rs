@@ -7,7 +7,7 @@ use crate::tests::token_factory::{
 };
 
 #[test]
-fn test_() {
+fn test_circom_version_should_be_2_1_9() {
     let token = addition_token_with_public_inputs();
     let component_creator = ComponentCreator::from_token(token);
     let output = component_creator.create();
