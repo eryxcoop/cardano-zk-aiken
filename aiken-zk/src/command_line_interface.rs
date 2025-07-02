@@ -1,7 +1,7 @@
 use crate::aiken_zk_compiler::AikenZkCompiler;
 use clap::{Arg, ArgMatches, Command, value_parser};
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub struct CommandLineInterface;
 impl CommandLineInterface {
@@ -22,13 +22,13 @@ impl CommandLineInterface {
         if let Some(subcommand_matches) =
             main_command_matches.subcommand_matches(Self::BUILD_COMMAND_NAME)
         {
-            let (source_path, output_path) = Self::get_build_arguments(&subcommand_matches);
+            let (source_path, output_path) = Self::get_build_arguments(subcommand_matches);
             Self::execute_build_command(source_path, output_path);
         } else if let Some(subcommand_matches) =
             main_command_matches.subcommand_matches(Self::PROVE_COMMAND_NAME)
         {
             let (circom_path, verification_key_path, inputs_path, output_path) =
-                Self::get_prove_arguments(&subcommand_matches);
+                Self::get_prove_arguments(subcommand_matches);
             Self::execute_prove_command(
                 circom_path,
                 verification_key_path,
@@ -39,10 +39,10 @@ impl CommandLineInterface {
     }
 
     fn execute_prove_command(
-        circom_path: &PathBuf,
-        verification_key_path: &PathBuf,
-        inputs_path: &PathBuf,
-        output_path: &PathBuf,
+        circom_path: &Path,
+        verification_key_path: &Path,
+        inputs_path: &Path,
+        output_path: &Path,
     ) {
         AikenZkCompiler::generate_aiken_proof(
             circom_path.to_str().unwrap(),
@@ -56,13 +56,13 @@ impl CommandLineInterface {
         subcommand_matches: &ArgMatches,
     ) -> (&PathBuf, &PathBuf, &PathBuf, &PathBuf) {
         let circom_path =
-            Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_CIRCOM_ARG_NAME);
+            Self::get_argument_value(subcommand_matches, Self::PROVE_COMMAND_CIRCOM_ARG_NAME);
         let verification_key_path =
-            Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_VK_ARG_NAME);
+            Self::get_argument_value(subcommand_matches, Self::PROVE_COMMAND_VK_ARG_NAME);
         let inputs_path =
-            Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_INPUT_ARG_NAME);
+            Self::get_argument_value(subcommand_matches, Self::PROVE_COMMAND_INPUT_ARG_NAME);
         let output_path =
-            Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_OUTPUT_ARG_NAME);
+            Self::get_argument_value(subcommand_matches, Self::PROVE_COMMAND_OUTPUT_ARG_NAME);
         (circom_path, verification_key_path, inputs_path, output_path)
     }
 
@@ -80,9 +80,9 @@ impl CommandLineInterface {
 
     fn get_build_arguments(subcommand_matches: &ArgMatches) -> (&PathBuf, &PathBuf) {
         let source_path =
-            Self::get_argument_value(&subcommand_matches, Self::BUILD_COMMAND_SOURCE_ARG_NAME);
+            Self::get_argument_value(subcommand_matches, Self::BUILD_COMMAND_SOURCE_ARG_NAME);
         let output_path =
-            Self::get_argument_value(&subcommand_matches, Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
+            Self::get_argument_value(subcommand_matches, Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
         (source_path, output_path)
     }
 

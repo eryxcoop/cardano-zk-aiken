@@ -37,7 +37,7 @@ impl ComponentCreator {
 
         let version = "pragma circom 2.1.9;".to_string();
         let import = format!("include \"templates/{}.circom\";", template_file);
-        let visibility = if public_inputs_identifiers.len() == 0 {
+        let visibility = if public_inputs_identifiers.is_empty() {
             "".to_string()
         } else {
             format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
@@ -81,7 +81,7 @@ impl ComponentCreator {
 
                 let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/fibonacci.circom\";";
-                let visibility = if public_inputs_identifiers.len() == 0 {
+                let visibility = if public_inputs_identifiers.is_empty() {
                     "".to_string()
                 } else {
                     format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
@@ -89,7 +89,7 @@ impl ComponentCreator {
                 let instantiation = "component main ".to_string()
                     + &visibility
                     + &format!("= Fibonacci({});", value);
-                version + "\n" + &import + "\n" + &instantiation
+                version + "\n" + import + "\n" + &instantiation
             }
             ZkExample::If {
                 condition,
@@ -108,7 +108,7 @@ impl ComponentCreator {
 
                 let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/if.circom\";";
-                let visibility = if public_inputs_identifiers.len() == 0 {
+                let visibility = if public_inputs_identifiers.is_empty() {
                     "".to_string()
                 } else {
                     format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
@@ -123,13 +123,13 @@ impl ComponentCreator {
 
                 let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/assert_eq.circom\";";
-                let visibility = if public_inputs_identifiers.len() == 0 {
+                let visibility = if public_inputs_identifiers.is_empty() {
                     "".to_string()
                 } else {
                     format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
                 };
                 let instantiation = "component main ".to_string() + &visibility + "= AssertEq();";
-                version + "\n" + &import + "\n" + &instantiation
+                version + "\n" + import + "\n" + &instantiation
             }
         }
     }

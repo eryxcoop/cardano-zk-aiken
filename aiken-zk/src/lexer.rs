@@ -14,6 +14,11 @@ pub struct LexInfo {
 pub struct Lexer {
     lexer: Box<dyn Parser<char, Vec<(Token, Span)>, Error = ParseError>>,
 }
+impl Default for Lexer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl Lexer {
     pub fn new() -> Self {

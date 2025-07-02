@@ -95,7 +95,7 @@ impl ZkExample {
 
     pub fn visibility_parser() -> impl Parser<char, InputVisibility, Error = ParseError> {
         choice((just("pub").padded(), just("priv").padded()))
-            .map(|visibility_keyword| InputVisibility::from(visibility_keyword))
+            .map(InputVisibility::from)
     }
 
     fn parameters(

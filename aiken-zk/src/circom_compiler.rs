@@ -33,9 +33,9 @@ impl CircomCompiler {
             .unwrap();
         let output_path = "build/";
 
-        fs::create_dir_all(&output_path).expect("Failed to create output directory");
+        fs::create_dir_all(output_path).expect("Failed to create output directory");
 
-        compile_circuit(&circom_program_filename_with_extension, &output_path);
+        compile_circuit(&circom_program_filename_with_extension, output_path);
 
         let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
         let zkey_0 = format!("{}{}_0000.zkey", output_path, circuit_name);
@@ -45,8 +45,8 @@ impl CircomCompiler {
         let verification_key_json = format!("{}verification_key.json", output_path);
 
         groth16_setup(&r1cs_path, "ceremony.ptau", &zkey_0);
-        contribute(&zkey_0, &zkey_1, "1st Contributor Name", &rand.0);
-        contribute(&zkey_1, &zkey_2, "Second contribution Name", &rand.1);
+        contribute(&zkey_0, &zkey_1, "1st Contributor Name", rand.0);
+        contribute(&zkey_1, &zkey_2, "Second contribution Name", rand.1);
         let hex_entr = "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
         beacon(
             &zkey_0,
@@ -69,7 +69,7 @@ impl CircomCompiler {
         let build_path = "build/".to_string();
         Self::create_directory_if_not_exists(&build_path);
 
-        compile_circuit(&circom_path, &build_path);
+        compile_circuit(circom_path, &build_path);
 
         Self::generate_witness(circom_path, inputs_path, &build_path);
 
@@ -89,35 +89,35 @@ impl CircomCompiler {
             .expect("failed to finish proof compression");
     }
 
-    fn generate_proof(verification_key_path: &str, build_path: &String) {
+    fn generate_proof(verification_key_path: &str, build_path: &str) {
         Command::new("snarkjs")
             .arg("groth16")
             .arg("prove")
             .arg(verification_key_path)
-            .arg(build_path.clone() + "witness.wtns")
-            .arg(build_path.clone() + "proof.json")
-            .arg(build_path.clone() + "public.json")
+            .arg(build_path.to_string() + "witness.wtns")
+            .arg(build_path.to_string() + "proof.json")
+            .arg(build_path.to_string() + "public.json")
             .output()
             .unwrap();
     }
 
-    fn generate_witness(circom_path: &str, inputs_path: &str, build_path: &String) {
+    fn generate_witness(circom_path: &str, inputs_path: &str, build_path: &str) {
         let ciruit_name = Path::new(circom_path)
             .file_stem()
             .unwrap()
             .to_str()
             .unwrap();
         Command::new("node")
-            .arg(build_path.clone() + ciruit_name + "_js/generate_witness.js")
-            .arg(build_path.clone() + ciruit_name + "_js/" + ciruit_name + ".wasm")
+            .arg(build_path.to_string() + ciruit_name + "_js/generate_witness.js")
+            .arg(build_path.to_string() + ciruit_name + "_js/" + ciruit_name + ".wasm")
             .arg(inputs_path)
-            .arg(build_path.clone() + "witness.wtns")
+            .arg(build_path.to_string() + "witness.wtns")
             .output()
             .unwrap();
     }
 
-    fn create_directory_if_not_exists(build_path: &String) {
-        fs::create_dir(&build_path)
+    fn create_directory_if_not_exists(build_path: &str) {
+        fs::create_dir(build_path)
             .or_else(|error| {
                 if error.kind() == ErrorKind::AlreadyExists {
                     Ok(())
@@ -133,7 +133,7 @@ fn run_command_or_fail(cmd: &mut Command, label: &str) {
     let status = cmd
         .stdout(Stdio::null())
         .status()
-        .expect(&format!("Failed to start command '{}'", label));
+        .unwrap_or_else(|_| panic!("Failed to start command '{}'", label));
     if !status.success() {
         panic!(
             "Command '{}' failed with exit code {:?}",
@@ -145,7 +145,7 @@ fn run_command_or_fail(cmd: &mut Command, label: &str) {
 
 fn compile_circuit(circuit_path: &str, output_path: &str) {
     run_command_or_fail(
-        Command::new("circom").args(&[
+        Command::new("circom").args([
             circuit_path,
             "--r1cs",
             "--wasm",
@@ -161,7 +161,7 @@ fn compile_circuit(circuit_path: &str, output_path: &str) {
 
 fn groth16_setup(r1cs_path: &str, ceremony_path: &str, output_zkey: &str) {
     run_command_or_fail(
-        Command::new("snarkjs").args(&["groth16", "setup", r1cs_path, ceremony_path, output_zkey]),
+        Command::new("snarkjs").args(["groth16", "setup", r1cs_path, ceremony_path, output_zkey]),
         "groth16 setup",
     );
 }
@@ -169,7 +169,7 @@ fn groth16_setup(r1cs_path: &str, ceremony_path: &str, output_zkey: &str) {
 fn contribute(input_zkey: &str, output_zkey: &str, name: &str, entropy: &str) {
     let new_entropy = &format!("{}\n", entropy);
     let mut child = Command::new("snarkjs")
-        .args(&[
+        .args([
             "zkey",
             "contribute",
             input_zkey,
@@ -199,7 +199,7 @@ fn contribute(input_zkey: &str, output_zkey: &str, name: &str, entropy: &str) {
 
 fn beacon(zkey_input: &str, zkey_output: &str, entropy_hex: &str, rounds: u32, name: &str) {
     run_command_or_fail(
-        Command::new("snarkjs").args(&[
+        Command::new("snarkjs").args([
             "zkey",
             "beacon",
             zkey_input,
@@ -214,7 +214,7 @@ fn beacon(zkey_input: &str, zkey_output: &str, entropy_hex: &str, rounds: u32, n
 
 fn export_verification_key(zkey: &str, output_json: &str) {
     run_command_or_fail(
-        Command::new("snarkjs").args(&["zkey", "export", "verificationkey", zkey, output_json]),
+        Command::new("snarkjs").args(["zkey", "export", "verificationkey", zkey, output_json]),
         "export verification key",
     );
 }
