@@ -24,7 +24,7 @@ validator example {
   }
 }
 
-test test_factorization() {
+test test_example() {
   let proof: Proof = Proof {
                      	piA: "complete with generated piA",
                      	piB: "complete with generated piB",

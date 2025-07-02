@@ -16,7 +16,7 @@ Takes an Aiken source code (some_program.ak) as an input. This src can have **on
 
 The program ```aiken-zk``` is used like:
 
-```aiken-zk my_original_program.ak my_zk_program.ak```, where ```my_original_program.ak``` is the aiken source code with one of the tokens mentioned above, and ```my_zk_program.ak``` is the generated aiken code that includes a validator for such token.
+```aiken-zk build my_original_program.ak my_zk_program.ak```, where ```my_original_program.ak``` is the aiken source code with one of the tokens mentioned above, and ```my_zk_program.ak``` is the generated aiken code that includes a validator for such token.
 
 # Prerequisites
 To run the aiken-zk compiler you must have the following tools:
@@ -45,4 +45,24 @@ The command will generate a modified aiken file in ```validators/output.ak```. T
 
 You'll notice that the generated aiken code has some extra imports, some weird looking ```SnarkVerificationKey``` at the end, and that the new token was replaced by a function call to the verification algorithm. The thing is, this is now pure aiken code, whereas the original code wasn't. You could try to build the original code with the aiken compiler, but it would definitively fail. The ```aiken-zk``` performs a pre-compilation phase
 
+The compilation output includes additional files needed for proof generation (that will be used on testing and deployment steps):
+- circom circuit: generated circuit that matches the function behaviour (```addition``` in the example)
+- verification key: the blueprint of the zk circuit generated that it's also included on the output aiken program. Be careful, different compilations from the same program generates different verification keys
+
+
 ### Verifying the proof
+The previous generated source code (validators/output.ak) includes a
+test that missing a valid proof to success.
+
+Aiken-zk provides a command to generate the proof given the following elements:
+- circom circuit from building step
+- verification key from building step
+- inputs: the inputs for the function provided by the user. Inputs a,b,c for the addition example where a+b should be equal to c
+
+So, if you run the following:
+
+```cargo run -- prove output.circom verification_key.zkey inputs.json proof.ak```
+
+You'll get a proof.ak ready to be copy&paste on the test ```test_example```
+
+Then, running an ```aiken check``` should execute successfully.
