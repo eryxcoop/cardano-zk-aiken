@@ -1,0 +1,10 @@
+.idea/
+venv/
+node_modules/
+build/
+plutus.json
+*.addr
+*.sk
+proof.json
+public.json
+*.env
