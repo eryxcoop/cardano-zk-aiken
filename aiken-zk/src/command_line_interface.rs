@@ -17,34 +17,51 @@ impl CommandLineInterface {
 
     pub fn parse_inputs_and_execute_command() {
         let main_command = Self::create_main_command();
-
         let main_command_matches = main_command.get_matches();
+
         if let Some(subcommand_matches) = main_command_matches.subcommand_matches(Self::BUILD_COMMAND_NAME) {
-            let source_path = Self::get_argument_value(&subcommand_matches, Self::BUILD_COMMAND_SOURCE_ARG_NAME);
-            let output_path = Self::get_argument_value(&subcommand_matches, Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
-
-            let source_offchain_aiken = fs::read_to_string(source_path).unwrap();
-
-            let output_zk_aiken = AikenZkCompiler::apply_modifications_to_src_for_token(
-                source_offchain_aiken,
-                "output".to_string(),
-                ("random1", "random2"),
-            );
-
-            fs::write(output_path, output_zk_aiken).expect("output file write failed");
+            let (source_path, output_path) = Self::get_build_arguments(&subcommand_matches);
+            Self::execute_build_command(source_path, output_path);
         } else if let Some(subcommand_matches) = main_command_matches.subcommand_matches(Self::PROVE_COMMAND_NAME) {
-            let circom_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_CIRCOM_ARG_NAME);
-            let verification_key_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_VK_ARG_NAME);
-            let inputs_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_INPUT_ARG_NAME);
-            let output_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_OUTPUT_ARG_NAME);
-
-            AikenZkCompiler::generate_aiken_proof(
-                circom_path.to_str().unwrap(),
-                verification_key_path.to_str().unwrap(),
-                inputs_path.to_str().unwrap(),
-                output_path.to_str().unwrap()
-            );
+            let (circom_path, verification_key_path, inputs_path, output_path) =
+                Self::get_prove_arguments(&subcommand_matches);
+            Self::execute_prove_command(circom_path, verification_key_path, inputs_path, output_path);
         }
+    }
+
+    fn execute_prove_command(circom_path: &PathBuf, verification_key_path: &PathBuf, inputs_path: &PathBuf, output_path: &PathBuf) {
+        AikenZkCompiler::generate_aiken_proof(
+            circom_path.to_str().unwrap(),
+            verification_key_path.to_str().unwrap(),
+            inputs_path.to_str().unwrap(),
+            output_path.to_str().unwrap()
+        );
+    }
+
+    fn get_prove_arguments<'a>(subcommand_matches: &'a ArgMatches) -> (&'a PathBuf, &'a PathBuf, &'a PathBuf, &'a PathBuf) {
+        let circom_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_CIRCOM_ARG_NAME);
+        let verification_key_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_VK_ARG_NAME);
+        let inputs_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_INPUT_ARG_NAME);
+        let output_path = Self::get_argument_value(&subcommand_matches, Self::PROVE_COMMAND_OUTPUT_ARG_NAME);
+        (circom_path, verification_key_path, inputs_path, output_path)
+    }
+
+    fn execute_build_command(source_path: &PathBuf, output_path: &PathBuf) {
+        let source_offchain_aiken = fs::read_to_string(source_path).unwrap();
+
+        let output_zk_aiken = AikenZkCompiler::apply_modifications_to_src_for_token(
+            source_offchain_aiken,
+            "output".to_string(),
+            ("random1", "random2"),
+        );
+
+        fs::write(output_path, output_zk_aiken).expect("output file write failed");
+    }
+
+    fn get_build_arguments<'a>(subcommand_matches: &'a ArgMatches) -> (&'a PathBuf, &'a PathBuf) {
+        let source_path = Self::get_argument_value(&subcommand_matches, Self::BUILD_COMMAND_SOURCE_ARG_NAME);
+        let output_path = Self::get_argument_value(&subcommand_matches, Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
+        (source_path, output_path)
     }
 
     fn create_main_command() -> Command {
