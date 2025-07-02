@@ -24,22 +24,22 @@ validator example {
   }
 }
 
+// UNCOMMENT TO TEST THE VERIFICATION OF THE GENERATED PROOF
 
-test test_factorization() {
-  let proof: Proof = # complete with generated proof
-
-  test_proof_is_valid(proof)
-}
-
-fn test_proof_is_valid(proof: Proof) -> Bool {
-  let utxo_datum = 7
-
-  let utxo_reference = OutputReference { transaction_id: "", output_index: 0 }
-
-  example.spend(
-    Some(utxo_datum),
-    ZK { redeemer: Void, proofs: [proof] },
-    utxo_reference,
-    Transaction { ..transaction.placeholder, inputs: [], outputs: [] },
-  )
-}
+//test test_factorization() {
+//  let proof: Proof = # complete with generated proof
+//  test_proof_is_valid(proof)
+//}
+//
+//fn test_proof_is_valid(proof: Proof) -> Bool {
+//  let utxo_datum = 7
+//
+//  let utxo_reference = OutputReference { transaction_id: "", output_index: 0 }
+//
+//  example.spend(
+//    Some(utxo_datum),
+//    ZK { redeemer: Void, proofs: [proof] },
+//    utxo_reference,
+//    Transaction { ..transaction.placeholder, inputs: [], outputs: [] },
+//  )
+//}
