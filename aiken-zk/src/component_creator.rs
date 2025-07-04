@@ -11,7 +11,7 @@ impl ComponentCreator {
     }
     const USED_CIRCOM_VERSION: &'static str = "2.1.9";
 
-    fn process_three_inputs_for_template(
+    fn process_components_with_3_inputs_and_no_template_parameters(
         &self,
         lhs: &InputZK,
         rhs: &InputZK,
@@ -75,12 +75,12 @@ impl ComponentCreator {
         };
         match example {
             ZkExample::Addition { lhs, rhs, res } => {
-                self.process_three_inputs_for_template(lhs, rhs, res, "addition", "Addition")
+                self.process_components_with_3_inputs_and_no_template_parameters(lhs, rhs, res, "addition", "Addition")
             }
             ZkExample::Subtraction { lhs, rhs, res } => {
-                self.process_three_inputs_for_template(lhs, rhs, res, "subtraction", "Subtraction")
+                self.process_components_with_3_inputs_and_no_template_parameters(lhs, rhs, res, "subtraction", "Subtraction")
             }
-            ZkExample::Multiplication { lhs, rhs, res } => self.process_three_inputs_for_template(
+            ZkExample::Multiplication { lhs, rhs, res } => self.process_components_with_3_inputs_and_no_template_parameters(
                 lhs,
                 rhs,
                 res,
@@ -122,30 +122,25 @@ impl ComponentCreator {
                 let public_inputs_identifiers =
                     Self::process_inputs_visibility(inputs_to_identifiers);
 
-                let version = "pragma circom 2.1.9;".to_string();
-                let import = "include \"templates/if.circom\";";
-                let visibility = if public_inputs_identifiers.len() == 0 {
-                    "".to_string()
-                } else {
-                    format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
-                };
-                let instantiation = "component main ".to_string() + &visibility + "= If();";
-                version + "\n" + import + "\n" + &instantiation
+                Self::generate_circom_component(
+                    Self::USED_CIRCOM_VERSION,
+                    "if",
+                    "If",
+                    public_inputs_identifiers,
+                    &[],
+                )
             }
             ZkExample::AssertEq { lhs, rhs } => {
                 let inputs_to_identifiers = [(lhs, "a"), (rhs, "b")];
                 let public_inputs_identifiers =
                     Self::process_inputs_visibility(inputs_to_identifiers);
-
-                let version = "pragma circom 2.1.9;".to_string();
-                let import = "include \"templates/assert_eq.circom\";";
-                let visibility = if public_inputs_identifiers.len() == 0 {
-                    "".to_string()
-                } else {
-                    format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
-                };
-                let instantiation = "component main ".to_string() + &visibility + "= AssertEq();";
-                version + "\n" + &import + "\n" + &instantiation
+                Self::generate_circom_component(
+                    Self::USED_CIRCOM_VERSION,
+                    "assert_eq",
+                    "AssertEq",
+                    public_inputs_identifiers,
+                    &[],
+                )
             }
         }
     }
