@@ -64,8 +64,7 @@ The compilation output includes additional files needed for proof generation (th
 
 
 ### Verifying the proof
-The previous generated source code (validators/output.ak) includes a
-test that missing a valid proof to success.
+The previous generated source code (validators/output.ak) includes a test that missing a valid proof to success.
 
 Aiken-zk provides a command to generate the proof given the following elements:
 - circom circuit from building step
