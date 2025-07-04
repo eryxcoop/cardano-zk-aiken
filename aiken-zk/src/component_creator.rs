@@ -9,8 +9,9 @@ impl ComponentCreator {
     pub fn from_token(token: Token) -> Self {
         Self { token }
     }
+    const USED_CIRCOM_VERSION: &'static str = "2.1.9";
 
-    fn process_three_inputs_for_template(
+    fn process_components_with_3_inputs_and_no_template_parameters(
         &self,
         lhs: &InputZK,
         rhs: &InputZK,
@@ -18,33 +19,57 @@ impl ComponentCreator {
         template_file: &str,
         template: &str,
     ) -> String {
-        let public_inputs_identifiers = [(lhs, "a"), (rhs, "b"), (res, "c")].iter().fold(
-            vec![],
-            |mut acc, (input, var_name)| match input.visibility.clone() {
-                Some(visibility) => match visibility {
-                    InputVisibility::Public => {
-                        acc.push(*var_name);
-                        acc
-                    }
-                    _ => acc,
-                },
-                None => {
-                    acc.push(*var_name);
-                    acc
-                }
-            },
+        let input_to_identifiers = [(lhs, "a"), (rhs, "b"), (res, "c")];
+        let public_inputs_identifiers = Self::process_inputs_visibility(input_to_identifiers);
+
+        Self::generate_circom_component(
+            Self::USED_CIRCOM_VERSION,
+            template_file,
+            template,
+            public_inputs_identifiers,
+            &[],
+        )
+    }
+
+    fn generate_circom_component(
+        circom_version: &str,
+        template_file_name: &str,
+        template_name: &str,
+        public_inputs_identifiers: Vec<String>,
+        parameters: &[&str],
+    ) -> String {
+        let circom_version_line = format!("pragma circom {};", circom_version);
+        let import_line = format!("include \"templates/{}.circom\";", template_file_name);
+
+        let visibility_line = Self::generate_inputs_visibility(public_inputs_identifiers);
+
+        let component_parameters = Self::process_and_generate_template_arguments(parameters);
+
+        let instantiation = format!(
+            "component main {}= {}{};",
+            visibility_line, template_name, component_parameters
         );
 
-        let version = "pragma circom 2.1.9;".to_string();
-        let import = format!("include \"templates/{}.circom\";", template_file);
-        let visibility = if public_inputs_identifiers.is_empty() {
+        format!(
+            "{}\n{}\n{}",
+            circom_version_line, import_line, instantiation
+        )
+    }
+
+    fn process_and_generate_template_arguments(parameters: &[&str]) -> String {
+        if parameters.is_empty() {
+            "()".to_string()
+        } else {
+            format!("({})", parameters.join(", "))
+        }
+    }
+
+    fn generate_inputs_visibility(public_inputs_identifiers: Vec<String>) -> String {
+        if public_inputs_identifiers.is_empty() {
             "".to_string()
         } else {
             format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
-        };
-        let instantiation =
-            "component main ".to_string() + &visibility + &format!("= {}();", template);
-        version + "\n" + &import + "\n" + &instantiation
+        }
     }
 
     pub fn create(&self) -> String {
@@ -52,19 +77,26 @@ impl ComponentCreator {
             panic!("Not expected kind of token")
         };
         match example {
-            ZkExample::Addition { lhs, rhs, res } => {
-                self.process_three_inputs_for_template(lhs, rhs, res, "addition", "Addition")
-            }
-            ZkExample::Subtraction { lhs, rhs, res } => {
-                self.process_three_inputs_for_template(lhs, rhs, res, "subtraction", "Subtraction")
-            }
-            ZkExample::Multiplication { lhs, rhs, res } => self.process_three_inputs_for_template(
-                lhs,
-                rhs,
-                res,
-                "multiplication",
-                "Multiplication",
-            ),
+            ZkExample::Addition { lhs, rhs, res } => self
+                .process_components_with_3_inputs_and_no_template_parameters(
+                    lhs, rhs, res, "addition", "Addition",
+                ),
+            ZkExample::Subtraction { lhs, rhs, res } => self
+                .process_components_with_3_inputs_and_no_template_parameters(
+                    lhs,
+                    rhs,
+                    res,
+                    "subtraction",
+                    "Subtraction",
+                ),
+            ZkExample::Multiplication { lhs, rhs, res } => self
+                .process_components_with_3_inputs_and_no_template_parameters(
+                    lhs,
+                    rhs,
+                    res,
+                    "multiplication",
+                    "Multiplication",
+                ),
             ZkExample::Fibonacci {
                 fib_0,
                 fib_1,
@@ -75,21 +107,15 @@ impl ComponentCreator {
                     panic!("Not expected kind of token")
                 };
                 let inputs_to_identifiers = [(fib_0, "a"), (fib_1, "b"), (res, "c")];
-
                 let public_inputs_identifiers =
                     Self::process_inputs_visibility(inputs_to_identifiers);
-
-                let version = "pragma circom 2.1.9;".to_string();
-                let import = "include \"templates/fibonacci.circom\";";
-                let visibility = if public_inputs_identifiers.is_empty() {
-                    "".to_string()
-                } else {
-                    format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
-                };
-                let instantiation = "component main ".to_string()
-                    + &visibility
-                    + &format!("= Fibonacci({});", value);
-                version + "\n" + import + "\n" + &instantiation
+                Self::generate_circom_component(
+                    Self::USED_CIRCOM_VERSION,
+                    "fibonacci",
+                    "Fibonacci",
+                    public_inputs_identifiers,
+                    &[&value],
+                )
             }
             ZkExample::If {
                 condition,
@@ -106,30 +132,25 @@ impl ComponentCreator {
                 let public_inputs_identifiers =
                     Self::process_inputs_visibility(inputs_to_identifiers);
 
-                let version = "pragma circom 2.1.9;".to_string();
-                let import = "include \"templates/if.circom\";";
-                let visibility = if public_inputs_identifiers.is_empty() {
-                    "".to_string()
-                } else {
-                    format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
-                };
-                let instantiation = "component main ".to_string() + &visibility + "= If();";
-                version + "\n" + import + "\n" + &instantiation
+                Self::generate_circom_component(
+                    Self::USED_CIRCOM_VERSION,
+                    "if",
+                    "If",
+                    public_inputs_identifiers,
+                    &[],
+                )
             }
             ZkExample::AssertEq { lhs, rhs } => {
                 let inputs_to_identifiers = [(lhs, "a"), (rhs, "b")];
                 let public_inputs_identifiers =
                     Self::process_inputs_visibility(inputs_to_identifiers);
-
-                let version = "pragma circom 2.1.9;".to_string();
-                let import = "include \"templates/assert_eq.circom\";";
-                let visibility = if public_inputs_identifiers.is_empty() {
-                    "".to_string()
-                } else {
-                    format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
-                };
-                let instantiation = "component main ".to_string() + &visibility + "= AssertEq();";
-                version + "\n" + import + "\n" + &instantiation
+                Self::generate_circom_component(
+                    Self::USED_CIRCOM_VERSION,
+                    "assert_eq",
+                    "AssertEq",
+                    public_inputs_identifiers,
+                    &[],
+                )
             }
         }
     }
