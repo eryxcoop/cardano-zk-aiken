@@ -9,6 +9,8 @@ impl ComponentCreator {
     pub fn from_token(token: Token) -> Self {
         Self { token }
     }
+    const USED_CIRCOM_VERSION: &'static str = "2.1.9";
+
 
     fn process_three_inputs_for_template(
         &self,
@@ -18,33 +20,45 @@ impl ComponentCreator {
         template_file: &str,
         template: &str,
     ) -> String {
-        let public_inputs_identifiers = [(lhs, "a"), (rhs, "b"), (res, "c")].iter().fold(
-            vec![],
-            |mut acc, (input, var_name)| match input.visibility.clone() {
-                Some(visibility) => match visibility {
-                    InputVisibility::Public => {
-                        acc.push(*var_name);
-                        acc
-                    }
-                    _ => acc,
-                },
-                None => {
-                    acc.push(*var_name);
-                    acc
-                }
-            },
-        );
+        let input_to_identifiers = [(lhs, "a"), (rhs, "b"), (res, "c")];
+        let public_inputs_identifiers = Self::process_inputs_visibility(input_to_identifiers);
 
-        let version = "pragma circom 2.1.9;".to_string();
+        Self::generate_circom_code(Self::USED_CIRCOM_VERSION, template_file, template, public_inputs_identifiers, &[])
+    }
+
+    fn generate_circom_code(
+        circom_version: &str,
+        template_file: &str,
+        template: &str,
+        public_inputs_identifiers: Vec<String>,
+        parameters: &[&str],
+    ) -> String {
+        let version = format!("pragma circom {};", circom_version);
         let import = format!("include \"templates/{}.circom\";", template_file);
-        let visibility = if public_inputs_identifiers.is_empty() {
+
+        let visibility = Self::generate_inputs_visibility(public_inputs_identifiers);
+
+        let component_parameters = Self::process_and_generate_component_parameters(parameters);
+
+        let instantiation = format!("component main {}= {}{};", visibility, template, component_parameters);
+
+        format!("{}\n{}\n{}", version, import, instantiation)
+    }
+
+    fn process_and_generate_component_parameters(parameters: &[&str]) -> String {
+        if parameters.is_empty() {
+            "()".to_string()
+        } else {
+            format!("({})", parameters.join(", "))
+        }
+    }
+
+    fn generate_inputs_visibility(public_inputs_identifiers: Vec<String>) -> String {
+        if public_inputs_identifiers.is_empty() {
             "".to_string()
         } else {
             format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
-        };
-        let instantiation =
-            "component main ".to_string() + &visibility + &format!("= {}();", template);
-        version + "\n" + &import + "\n" + &instantiation
+        }
     }
 
     pub fn create(&self) -> String {
@@ -76,12 +90,11 @@ impl ComponentCreator {
                 };
                 let inputs_to_identifiers = [(fib_0, "a"), (fib_1, "b"), (res, "c")];
 
-                let public_inputs_identifiers =
-                    Self::process_inputs_visibility(inputs_to_identifiers);
+                let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
 
                 let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/fibonacci.circom\";";
-                let visibility = if public_inputs_identifiers.is_empty() {
+                let visibility = if public_inputs_identifiers.len() == 0 {
                     "".to_string()
                 } else {
                     format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
@@ -89,7 +102,7 @@ impl ComponentCreator {
                 let instantiation = "component main ".to_string()
                     + &visibility
                     + &format!("= Fibonacci({});", value);
-                version + "\n" + import + "\n" + &instantiation
+                version + "\n" + &import + "\n" + &instantiation
             }
             ZkExample::If {
                 condition,
@@ -103,42 +116,44 @@ impl ComponentCreator {
                     (true_branch, "true_branch"),
                     (false_branch, "false_branch"),
                 ];
-                let public_inputs_identifiers =
-                    Self::process_inputs_visibility(inputs_to_identifiers);
+                let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
 
                 let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/if.circom\";";
-                let visibility = if public_inputs_identifiers.is_empty() {
+                let visibility = if public_inputs_identifiers.len() == 0 {
                     "".to_string()
                 } else {
                     format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
                 };
                 let instantiation = "component main ".to_string() + &visibility + "= If();";
                 version + "\n" + import + "\n" + &instantiation
-            }
-            ZkExample::AssertEq { lhs, rhs } => {
-                let inputs_to_identifiers = [(lhs, "a"), (rhs, "b")];
-                let public_inputs_identifiers =
-                    Self::process_inputs_visibility(inputs_to_identifiers);
+            },
+            ZkExample::AssertEq {
+                lhs,
+                rhs
+            } => {
+
+                let inputs_to_identifiers = [
+                    (lhs, "a"),
+                    (rhs, "b"),
+                ];
+                let public_inputs_identifiers = Self::process_inputs_visibility(inputs_to_identifiers);
 
                 let version = "pragma circom 2.1.9;".to_string();
                 let import = "include \"templates/assert_eq.circom\";";
-                let visibility = if public_inputs_identifiers.is_empty() {
+                let visibility = if public_inputs_identifiers.len() == 0 {
                     "".to_string()
                 } else {
                     format!("{{ public [{}] }} ", public_inputs_identifiers.join(","))
                 };
                 let instantiation = "component main ".to_string() + &visibility + "= AssertEq();";
-                version + "\n" + import + "\n" + &instantiation
+                version + "\n" + &import + "\n" + &instantiation
             }
         }
     }
 
-    fn process_inputs_visibility<const N: usize>(
-        public_inputs_identifiers: [(&InputZK, &str); N],
-    ) -> Vec<String> {
-        public_inputs_identifiers
-            .iter()
+    fn process_inputs_visibility<const N:usize>(public_inputs_identifiers: [(&InputZK, &str); N]) -> Vec<String> {
+        public_inputs_identifiers.iter()
             .fold(vec![], |mut acc, (input, var_name)| {
                 match input.visibility.clone() {
                     Some(InputVisibility::Private) => acc,
