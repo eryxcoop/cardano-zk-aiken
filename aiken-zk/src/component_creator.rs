@@ -50,7 +50,10 @@ impl ComponentCreator {
             visibility_line, template_name, component_parameters
         );
 
-        format!("{}\n{}\n{}", circom_version_line, import_line, instantiation)
+        format!(
+            "{}\n{}\n{}",
+            circom_version_line, import_line, instantiation
+        )
     }
 
     fn process_and_generate_template_arguments(parameters: &[&str]) -> String {
@@ -74,19 +77,26 @@ impl ComponentCreator {
             panic!("Not expected kind of token")
         };
         match example {
-            ZkExample::Addition { lhs, rhs, res } => {
-                self.process_components_with_3_inputs_and_no_template_parameters(lhs, rhs, res, "addition", "Addition")
-            }
-            ZkExample::Subtraction { lhs, rhs, res } => {
-                self.process_components_with_3_inputs_and_no_template_parameters(lhs, rhs, res, "subtraction", "Subtraction")
-            }
-            ZkExample::Multiplication { lhs, rhs, res } => self.process_components_with_3_inputs_and_no_template_parameters(
-                lhs,
-                rhs,
-                res,
-                "multiplication",
-                "Multiplication",
-            ),
+            ZkExample::Addition { lhs, rhs, res } => self
+                .process_components_with_3_inputs_and_no_template_parameters(
+                    lhs, rhs, res, "addition", "Addition",
+                ),
+            ZkExample::Subtraction { lhs, rhs, res } => self
+                .process_components_with_3_inputs_and_no_template_parameters(
+                    lhs,
+                    rhs,
+                    res,
+                    "subtraction",
+                    "Subtraction",
+                ),
+            ZkExample::Multiplication { lhs, rhs, res } => self
+                .process_components_with_3_inputs_and_no_template_parameters(
+                    lhs,
+                    rhs,
+                    res,
+                    "multiplication",
+                    "Multiplication",
+                ),
             ZkExample::Fibonacci {
                 fib_0,
                 fib_1,
