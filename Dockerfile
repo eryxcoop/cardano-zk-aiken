@@ -13,5 +13,7 @@ RUN cd root && \. .nvm/nvm.sh && nvm install 22 && npm install -g snarkjs@latest
 
 COPY aiken-zk/ /root/aiken-zk/
 WORKDIR /root/aiken-zk
+RUN bash -c "source $NVM_DIR/nvm.sh && npm install src/tests/sandbox/curve_compress"
+RUN bash -c "source $NVM_DIR/nvm.sh && npm install milestone_2_example/curve_compress"
 
 ENTRYPOINT ["bash"]
