@@ -39,16 +39,29 @@ To run the aiken-zk compiler you must have the following tools:
 
 The idea in the future is to reduce the amount of dependencies. 
 
+# Alternative: use docker
+To avoid installing all the dependencies listed above, you can use docker. Run
+
+```docker pull bweisz/aiken-zk:latest```
+
+then run 
+
+```docker run -it bweisz/aiken-zk:latest``` to create a container and start running bash commands inside it.
+
+Inside the container, run ```./start.sh``` to install some dependencies and build the tool.
+Then, you can proceed to automated or manual testing. 
+
+
 # Automated testing
-To run the tests 
-1. Go to the ```src/tests/sandbox/curve_compress``` and run ```npm install```.You'll only have to do this once.
+You can avoid the first 2 steps if you are going with the Docker version, since they've been done in the ```./start.sh``` command. To run the tests:
+1. Go to the ```src/tests/sandbox/curve_compress``` and run ```npm install```. You'll only have to do this once.
 2. Run ```cargo build```.
 3. Run ```cargo test```.
 
 # Manual testing
 
 ### Building
-To run an example yourself, go to the directory ```milestone 2 - example```. First, enter the sub-directory ```curve_compress``` and run ```npm install```. Then go back and run the following:
+To run an example yourself, go to the directory ```milestone 2 - example```. First, enter the sub-directory ```curve_compress``` and run ```npm install```. You can avoid this step if you are going with the Docker version. Then go back and run the following:
 
 ```cargo run -- build validators_with_offchain/example.ak validators/output.ak```
 

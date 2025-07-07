@@ -15,8 +15,5 @@ ENV PATH=$PATH:$AIKEN_DIR
 
 COPY aiken-zk/ /root/aiken-zk/
 WORKDIR /root/aiken-zk
-RUN bash -c "source $NVM_DIR/nvm.sh && cd src/tests/sandbox/curve_compress && npm install"
-RUN bash -c "source $NVM_DIR/nvm.sh && cd milestone_2_example/curve_compress && npm install"
-RUN cargo build
 
 ENTRYPOINT ["bash"]
