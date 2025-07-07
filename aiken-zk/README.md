@@ -61,7 +61,12 @@ You can avoid the first 2 steps if you are going with the Docker version, since 
 # Manual testing
 
 ### Building
-To run an example yourself, go to the directory ```milestone 2 - example```. First, enter the sub-directory ```curve_compress``` and run ```npm install```. You can avoid this step if you are going with the Docker version. Then go back and run the following:
+To run an example yourself, go to the directory ```milestone_2_example```.
+
+You can avoid this step if you are going with the Docker version:
+Enter the sub-directory ```curve_compress``` and run ```npm install```.
+
+Then go back and run the following:
 
 ```cargo run -- build validators_with_offchain/example.ak validators/output.ak```
 
