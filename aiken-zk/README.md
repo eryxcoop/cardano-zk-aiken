@@ -1,11 +1,15 @@
 # Explanation (so far)
-This repo contains a tool that facilitates the integration of Aiken validators with Zero Knowledge proofs. It allows the user to write Aiken programs that contain some ```offchain``` block. Instead of being executed on-chain, this fragment of the code will be replaced by a Groth16 validator.
+This repo contains a tool that facilitates the integration of Aiken validators with Zero Knowledge proofs. It allows the user to write Aiken programs that contain some offchain block. This creates a new source code so that instead of being executed on-chain, the program will receive a proof of that execution and validate it. This is useful to move computation out of the chain and/or to hide information.
+
+The compilation of the code will also create a circom component that represents the desired computation, compile and execute it and generate a verifying key. This verifying key will be included in the new source code, along with some code to verify a proof for that specific program. This proof has to be generated in order to invoque/execute this Aiken program onchain.
+
+The proving system used for this process is Groth16.
 
 ### What does the tool actually do (so far)
 Takes an Aiken source code (some_program.ak) as an input. This src can have **one** of the following new language tokens in the validator body:
 * ```offchain addition(x, y, z)```: verifies that ```x + y == z```.
 * ```offchain subtraction(x, y, z)```: vverifies that ```x - y == z```.
-* ```offchain multiplication(x, y, z)```: verifies that verifies that ```x * y == z```.
+* ```offchain multiplication(x, y, z)```: verifies that ```x * y == z```.
 * ```offchain fibonacci(x, y, z, w)```: verifies that the fibonacci sequence with initial values ```[x,y]``` and ```z``` elements ends with ```w```. In this case, ```z``` **must** be a literal number.
 * ```offchain if(x, y, z, w)```: verifies that ```y == z if (x == 1) | y == w if (x == 0)```. ```x``` must be 1 or 0. 
 * ```offchain assert_eq(x, y)```: verifies that ```x == y```
@@ -13,6 +17,13 @@ Takes an Aiken source code (some_program.ak) as an input. This src can have **on
 ```x```,```y```,```z``` and ```w``` must be 
 * **numeric literals** such as ```4``` or ```0xa3```.
 * **single variable names** such as ```my_number```.
+
+### Public and private parameters
+This new addition to the language allows you to declare some of the arguments as private. Some examples are
+* offchain addition(priv x, pub y, z)
+* offchain assert_eq(priv x, y)
+
+If the visibility modifier is not present, the argument is assumed to be **public**.
 
 The program ```aiken-zk``` is used like:
 
@@ -23,19 +34,34 @@ To run the aiken-zk compiler you must have the following tools:
 * Rust > 1.87.0 - https://www.rust-lang.org/tools/install
 * Node >= 20.10.0 - https://nodejs.org/en/download
 * Snark.js >= 0.7.5 - https://www.npmjs.com/package/snarkjs
-* Circom >= 2.1.9 - https://docs.circom.io/getting-started/installation/
+* Circom = 2.1.9 - https://docs.circom.io/getting-started/installation/ (```git checkout v2.1.9```)
 * Aiken >= 1.1.17 - https://aiken-lang.org/installation-instructions
 
+The idea in the future is to reduce the amount of dependencies. 
+
+# Alternative: use docker
+To avoid installing all the dependencies listed above, you can use docker. Run
+
+```docker pull bweisz/aiken-zk:latest```
+
+then run 
+
+```docker run -it bweisz/aiken-zk:latest``` to create a container and start running bash commands inside it.
+
+Inside the container, run ```./start.sh``` to install some dependencies and build the tool.
+Then, you can proceed to automated or manual testing. 
+
+
 # Automated testing
-To run the tests 
-1. Go to the ```src/tests/sandbox/curve_compress``` and run ```npm install```.You'll only have to do this once.
+You can avoid the first 2 steps if you are going with the Docker version, since they've been done in the ```./start.sh``` command. To run the tests:
+1. Go to the ```src/tests/sandbox/curve_compress``` and run ```npm install```. You'll only have to do this once.
 2. Run ```cargo build```.
 3. Run ```cargo test```.
 
 # Manual testing
 
 ### Building
-To run an example yourself, go to the directory ```milestone 2 - example```. First, enter the sub-directory ```curve_compress``` and run ```npm install```. Then go back and run the following:
+To run an example yourself, go to the directory ```milestone 2 - example```. First, enter the sub-directory ```curve_compress``` and run ```npm install```. You can avoid this step if you are going with the Docker version. Then go back and run the following:
 
 ```cargo run -- build validators_with_offchain/example.ak validators/output.ak```
 
@@ -51,8 +77,7 @@ The compilation output includes additional files needed for proof generation (th
 
 
 ### Verifying the proof
-The previous generated source code (validators/output.ak) includes a
-test that missing a valid proof to success.
+The previous generated source code (validators/output.ak) includes a test that missing a valid proof to success.
 
 Aiken-zk provides a command to generate the proof given the following elements:
 - circom circuit from building step
