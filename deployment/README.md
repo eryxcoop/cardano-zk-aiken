@@ -24,4 +24,6 @@ Wait for the transaction to take place on [CardanoScan](https://preview.cardanos
 Compile an aiken file. That should generate a ```plutus.json```. 
 
 ## Unlock
+To unlock the funds, you must run
 
+```npx tsx unlock_private.ts path_to_plutus script_index lock_transaction_hash```
