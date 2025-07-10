@@ -38,4 +38,7 @@ aiken build programita_zk.ak --> Genera el plutus.json
 
 * Crear un ```ZkDatum``` como el ```ZkRedeemer```. 
   * Parametrizar los tests con el datum dependiendo de la cantidad de variables (no constantes) públicas. 
-* 
+
+(A definir si es algo que queremos) 
+Crear un comando más para aiken-zk. Este comando ```deploy``` debería usar Mesh para deployar el validator. También tiene que encontrar dentro del plutus.json el índice del script correspondiente. Eso lo puede hacer por nombre_de_archivo.ak + "spend", de esta forma sacándole la responsabilidad al usuario. Por otro lado, necesitamos poder indicarle qué valores meter en el datum. En este momento, el ```lock.ts``` tiene hardcodeado el datum para que sea un solo número, pero en la realidad va a ser algo más complejo (como un diccionario).
+
