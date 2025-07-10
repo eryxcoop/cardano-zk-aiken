@@ -27,3 +27,15 @@ Compile an aiken file. That should generate a ```plutus.json```.
 To unlock the funds, you must run
 
 ```npx tsx unlock_private.ts path_to_plutus script_index lock_transaction_hash```
+
+# Flujo del milestone 2
+aiken-zk build programita.ak asdasd -> programita_zk.ak
+aiken-zk prove circom_path verification_key_path inputs_path output_path
+
+# Milestone 3
+aiken build programita_zk.ak --> Genera el plutus.json
+```npx tsx lock.ts path_to_plutus script_index path_to_datum```
+
+* Crear un ```ZkDatum``` como el ```ZkRedeemer```. 
+  * Parametrizar los tests con el datum dependiendo de la cantidad de variables (no constantes) públicas. 
+* 
