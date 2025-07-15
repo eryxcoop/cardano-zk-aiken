@@ -6,7 +6,12 @@ use cardano/transaction.{
   InlineDatum, Input, Output, OutputReference, Transaction,
 }
 
-pub type ZK<redeemer_type> {
+pub type ZK_Datum<datum_type> {
+  redeemer: redeemer_type,
+  proofs: List<Proof>,
+}
+
+pub type ZK_Redeemer<redeemer_type> {
   redeemer: redeemer_type,
   proofs: List<Proof>,
 }
@@ -39,11 +44,11 @@ fn assert_factors_are_correct(
       vkAlpha: #"85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5",
       vkBeta: #"b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f", 
       vkGamma: #"93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8", 
-      vkDelta: #"8ba835c6e6f924b7f2df596b8d54a26d3cac1363e1251d3a5f159dae12fde97d02e7816da49ac60cba15d0086532a832105c3c36b90637066e09e3bdcf564ea89b5d7e8fdd4b318d01dc43be840dd838434a59869fb0f2fbe22f91f6c60de22f",
+      vkDelta: #"b8d3cf7245031d7e254f7c95731f411f0a4ebc2b21bac39ac2732788a7e48f7c891abbe70e11a55694b0498bb5bac73119d5ce8fb26cce8f976cb733548cd4a59b2537fbf2d2af331fb875c8ec56f909fd2a37a9c115106675d24f21a8e48822",
       vkAlphaBeta: [],
       vkIC: [
-        #"a79ab0d2da57b1f49e91ada909216b107d3c6edfb1eaee07eb0e0f70ee8cfb2cc8fcc5cb4880875b038c4b9a3c871602", 
-        #"b52b87d8b23b15a6160a7046d315c51fa6737c641c79268a540218c9208054f566d9a2b58a503fddfbc6482d0822927d", 
+        #"ae867a510e73111734ea10124bcd1fc8315e4082777713d5a77c2b9ff2e9f4246b850e3613301ac7e0887618d0241a54",
+        #"a640148222df0bc9953a6b79441abfcf50fc17f07ecfce3d3aba52c3cd74104125bed4512e73228c365fb9f2ac75041d",
       ],
     }
 
@@ -59,7 +64,7 @@ fn assert_factors_are_correct(
 
 test test_factorization() {
 
-  let utxo_datum = 35
+  let utxo_datum = 14
 
   let utxo_reference = OutputReference { transaction_id: "", output_index: 0 }
 

@@ -8,7 +8,7 @@ if (args.length == 1) {
   console.log('Just one path argument is needed!');
 } 
 
-// const proof = JSON.parse(fs.readFileSync("proof.json", "utf-8"));
+const proof = JSON.parse(fs.readFileSync("proof.json", "utf-8"));
 const verificationKey = JSON.parse(fs.readFileSync("verification_key.json", "utf-8"));
 
 async function compressedG1(point) {
@@ -174,7 +174,7 @@ async function ffTest() {
 
 async function run_program () {
   await printCompressedVerificationKey();
-  // await printCompressedProof();
+  await printCompressedProof();
   process.exit();
 }
 
