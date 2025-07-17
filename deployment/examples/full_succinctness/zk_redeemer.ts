@@ -1,0 +1,28 @@
+import {MConStr} from "@meshsdk/common";
+import {Data, mConStr0} from "@meshsdk/core";
+
+type Proof = MConStr<any, string[]>;
+
+type ZKRedeemer = MConStr<any, Data[] | Proof[]>;
+
+function mProof(piA: string, piB: string, piC: string): Proof {
+    if (piA.length != 96 || piB.length != 192 || piC.length != 96) {
+        throw new Error("Wrong proof");
+    }
+
+    return mConStr0([piA, piB, piC]);
+}
+
+export function mZKRedeemer(redeemer: Data): ZKRedeemer {
+    return mConStr0([redeemer, zk_redeemer()]);
+}
+
+function zk_redeemer(): Proof[] {
+    const proof = mProof(
+        "a66840faf8af87a974d1bcf96820f3893870463bfce0140f265bbe2fdf699d7c3e8822c1400d7b1a30390ef5c1e021af",
+        "897d7b5074b813ff043efa7b5f62a028ead87b8576e8700cbb138ef9d209b4a3365ccd1ffd5eb30f8bbaeac75977a1ca06a9e54ef326e5b60000065406dfb24f64db99e7e38672f21e8a1c67d4ca61db45e9e5887d5db6a3ed7cb40c96256b5e",
+        "ad6a3410175b686c3982e6cafdcc68414fcda8a769f9f5c06c0b5130146a6c6885ee2a8bffce7e0ce3a5c9cf813ad534"
+    );
+
+    return [proof];
+}
