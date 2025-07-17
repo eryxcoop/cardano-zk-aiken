@@ -7,7 +7,7 @@ describe('Contract Deployment', () => {
   let blockchainProvider: BlockchainProvider;
   let wallet: MeshWallet;
   beforeEach(() => {
-    scriptPath = "./tests/plutus.json";
+    scriptPath = "./tests/contracts/plutus.json";
     blockchainProvider = new BlockchainProvider();
     wallet = blockchainProvider.getWalletUsing('me.sk');
   })
