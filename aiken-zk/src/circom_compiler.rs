@@ -8,6 +8,12 @@ pub struct CircomCompiler {
     pub circom_source_code_path: Option<String>,
 }
 
+pub struct Groth16ProofBlsxxx {
+    pub piA: String,
+    pub piB: String,
+    pub piC: String,
+}
+
 impl CircomCompiler {
     pub fn from(circom_source_code: String) -> Self {
         Self {
@@ -88,14 +94,19 @@ impl CircomCompiler {
         let compressed_pi_A = &standard_output[..96];
         let compressed_pi_B = &standard_output[96..288];
         let compressed_pi_C = &standard_output[288..384];
+        let proof = Groth16ProofBlsxxx {
+            piA: compressed_pi_A.to_string(),
+            piB: compressed_pi_B.to_string(),
+            piC: compressed_pi_C.to_string(),
+        };
         let aiken_proof =
             "Proof {\n".to_string() +
             "\tpiA: #\"" +
-                compressed_pi_A +  "\",\n" +
+                &proof.piA +  "\",\n" +
             "\tpiB: #\"" +
-                compressed_pi_B + "\",\n" +
+                &proof.piB + "\",\n" +
             "\tpiC: #\"" +
-                compressed_pi_C + "\",\n" +
+                &proof.piC + "\",\n" +
             "}";
         fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
