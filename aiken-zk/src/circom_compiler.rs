@@ -89,7 +89,9 @@ impl CircomCompiler {
             "Proof {\n".to_string() +
             "\tpiA: #\"" +
             &standard_output[..96] +  "\",\n" +
-                &standard_output[96..] +
+            "\tpiB: #\"" +
+            &standard_output[96..288] + "\",\n" +
+                &standard_output[288..] +
             "}";
         fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
