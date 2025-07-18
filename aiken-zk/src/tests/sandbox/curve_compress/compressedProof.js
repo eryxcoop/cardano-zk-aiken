@@ -100,7 +100,6 @@ async function convertProofToUncompressed(proof) {
 
 async function printCompressedProof() {
     console.log(await convertProofToUncompressed(proof));
-    console.log("}");
     process.exit();
 }
 
