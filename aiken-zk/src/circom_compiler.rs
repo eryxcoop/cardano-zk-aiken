@@ -85,14 +85,17 @@ impl CircomCompiler {
             .expect("failed to finish proof compression");
 
         let standard_output = String::from_utf8(command_output.stdout).unwrap();
+        let compressed_pi_A = &standard_output[..96];
+        let compressed_pi_B = &standard_output[96..288];
+        let compressed_pi_C = &standard_output[288..384];
         let aiken_proof =
             "Proof {\n".to_string() +
             "\tpiA: #\"" +
-            &standard_output[..96] +  "\",\n" +
+                compressed_pi_A +  "\",\n" +
             "\tpiB: #\"" +
-            &standard_output[96..288] + "\",\n" +
+                compressed_pi_B + "\",\n" +
             "\tpiC: #\"" +
-                &standard_output[288..384] + "\",\n" +
+                compressed_pi_C + "\",\n" +
             "}";
         fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
