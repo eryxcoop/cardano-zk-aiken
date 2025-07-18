@@ -1,5 +1,4 @@
 use std::fs;
-use std::fs::File;
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -79,13 +78,14 @@ impl CircomCompiler {
     }
 
     fn convert_proof_to_aiken_proof(output_path: &str, build_path: String) {
-        let output_file = File::create(output_path).expect("failed to create output file");
-        Command::new("node")
+        let command_output = Command::new("node")
             .arg("curve_compress/compressedProof.js")
             .arg(build_path + "proof.json")
-            .stdout(output_file)
-            .status()
+            .output()
             .expect("failed to finish proof compression");
+        
+        let standard_output = String::from_utf8(command_output.stdout).unwrap();
+        fs::write(output_path, standard_output).expect("failed to create output file");
     }
 
     fn generate_proof(verification_key_path: &str, build_path: &str) {
