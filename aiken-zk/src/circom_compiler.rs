@@ -14,6 +14,32 @@ pub struct Groth16ProofBlsxxx {
     pub piC: String,
 }
 
+impl Groth16ProofBlsxxx {
+    pub(crate) fn to_aiken(&self) -> String {
+        format!(
+            "Proof {{
+\tpiA: #\"{}\",
+\tpiB: #\"{}\",
+\tpiC: #\"{}\",
+}}",
+            &self.piA, &self.piB, &self.piC
+        )
+    }
+}
+
+impl Groth16ProofBlsxxx {
+    pub fn from_script_output(script_output: String) -> Self {
+        let compressed_pi_A = &script_output[..96];
+        let compressed_pi_B = &script_output[96..288];
+        let compressed_pi_C = &script_output[288..384];
+        Groth16ProofBlsxxx {
+            piA: compressed_pi_A.to_string(),
+            piB: compressed_pi_B.to_string(),
+            piC: compressed_pi_C.to_string(),
+        }
+    }
+}
+
 impl CircomCompiler {
     pub fn from(circom_source_code: String) -> Self {
         Self {
@@ -91,23 +117,8 @@ impl CircomCompiler {
             .expect("failed to finish proof compression");
 
         let standard_output = String::from_utf8(command_output.stdout).unwrap();
-        let compressed_pi_A = &standard_output[..96];
-        let compressed_pi_B = &standard_output[96..288];
-        let compressed_pi_C = &standard_output[288..384];
-        let proof = Groth16ProofBlsxxx {
-            piA: compressed_pi_A.to_string(),
-            piB: compressed_pi_B.to_string(),
-            piC: compressed_pi_C.to_string(),
-        };
-        let aiken_proof =
-            "Proof {\n".to_string() +
-            "\tpiA: #\"" +
-                &proof.piA +  "\",\n" +
-            "\tpiB: #\"" +
-                &proof.piB + "\",\n" +
-            "\tpiC: #\"" +
-                &proof.piC + "\",\n" +
-            "}";
+        let proof = Groth16ProofBlsxxx::from_script_output(standard_output);
+        let aiken_proof = proof.to_aiken();
         fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
 
