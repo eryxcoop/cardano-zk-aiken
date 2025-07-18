@@ -1,7 +1,6 @@
+import {mConStr0} from "@meshsdk/core";
 import {BlockchainProvider} from "../../blockchain_provider";
-import {Contract, mVoid} from "../../contract";
-import {mZKRedeemer} from "./zk_redeemer";
-
+import {Contract} from "../../contract";
 
 async function main() {
     const compiledContractPath = process.argv[2];
@@ -11,9 +10,8 @@ async function main() {
     const wallet = blockchain_provider.getWalletUsing("me.sk");
 
     const contract = new Contract(compiledContractPath, blockchain_provider, wallet);
-    const myRedeemer = mVoid();
-    const redeemer = mZKRedeemer(myRedeemer);
-    await contract.spend(validatorScriptIndex, txHashFromDeposit, redeemer, {mem: 154984, steps: 4284159244});
+    const factors = mConStr0([5, 7]);
+    await contract.spend(validatorScriptIndex, txHashFromDeposit, factors, {mem: 97246, steps: 4018447759})
 }
 
 main();

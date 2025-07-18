@@ -83,7 +83,6 @@ impl CircomCompiler {
         Command::new("node")
             .arg("curve_compress/compressedProof.js")
             .arg(build_path + "proof.json")
-            .arg(output_path)
             .stdout(output_file)
             .status()
             .expect("failed to finish proof compression");

@@ -1,4 +1,4 @@
-import {mConStr0, mStringToPlutusBSArray} from "@meshsdk/core";
+import {mConStr0} from "@meshsdk/core";
 import {BlockchainProvider} from "../../blockchain_provider";
 import {Contract} from "../../contract";
 import {mZKRedeemer} from "./zk_redeemer";
@@ -12,8 +12,7 @@ async function main() {
 
     const contract = new Contract(compiledContractPath, blockchain_provider, wallet);
     const factors = mConStr0([5, 7]);
-    const redeemer = mZKRedeemer(factors);
-    await contract.spend(validatorScriptIndex, txHashFromDeposit, redeemer, {mem: 154984, steps: 4284159244})
+    await contract.spend(validatorScriptIndex, txHashFromDeposit, mZKRedeemer(factors), {mem: 154984, steps: 4284159244})
 }
 
 main();

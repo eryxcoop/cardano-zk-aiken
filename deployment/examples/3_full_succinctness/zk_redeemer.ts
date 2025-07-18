@@ -14,10 +14,10 @@ function mProof(piA: string, piB: string, piC: string): Proof {
 }
 
 export function mZKRedeemer(redeemer: Data): ZKRedeemer {
-    return mConStr0([redeemer, zk_redeemer()]);
+    return mConStr0([redeemer, proofs()]);
 }
 
-function zk_redeemer(): Proof[] {
+function proofs(): Proof[] {
     const proof = mProof(
         "a66840faf8af87a974d1bcf96820f3893870463bfce0140f265bbe2fdf699d7c3e8822c1400d7b1a30390ef5c1e021af",
         "897d7b5074b813ff043efa7b5f62a028ead87b8576e8700cbb138ef9d209b4a3365ccd1ffd5eb30f8bbaeac75977a1ca06a9e54ef326e5b60000065406dfb24f64db99e7e38672f21e8a1c67d4ca61db45e9e5887d5db6a3ed7cb40c96256b5e",
