@@ -92,7 +92,7 @@ async function compressedG2(point) {
 
 
 async function convertProofToUncompressed(proof) {
-    return "\t" + 'piA: #"' + await compressedG1(proof.pi_a) + '",' +"\n" +
+    return await compressedG1(proof.pi_a) + '",' +"\n" +
         "\t" + 'piB: #"' + await compressedG2(proof.pi_b) + '",' + "\n" +
         "\t" + 'piC: #"' + await compressedG1(proof.pi_c) + '",';
 }
