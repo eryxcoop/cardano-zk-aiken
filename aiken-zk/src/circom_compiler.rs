@@ -85,10 +85,11 @@ impl CircomCompiler {
             .expect("failed to finish proof compression");
 
         let standard_output = String::from_utf8(command_output.stdout).unwrap();
-        let aiken_proof = 
-            "Proof {\n".to_string() + 
-            "\tpiA: #\"" + 
-            &standard_output +
+        let aiken_proof =
+            "Proof {\n".to_string() +
+            "\tpiA: #\"" +
+            &standard_output[..96] +  "\",\n" +
+                &standard_output[96..] +
             "}";
         fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
