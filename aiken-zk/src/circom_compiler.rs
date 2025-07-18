@@ -83,9 +83,10 @@ impl CircomCompiler {
             .arg(build_path + "proof.json")
             .output()
             .expect("failed to finish proof compression");
-        
+
         let standard_output = String::from_utf8(command_output.stdout).unwrap();
-        fs::write(output_path, standard_output).expect("failed to create output file");
+        let aiken_proof = "Proof {\n".to_string() + &standard_output;
+        fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
 
     fn generate_proof(verification_key_path: &str, build_path: &str) {
