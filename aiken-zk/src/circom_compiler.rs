@@ -91,7 +91,8 @@ impl CircomCompiler {
             &standard_output[..96] +  "\",\n" +
             "\tpiB: #\"" +
             &standard_output[96..288] + "\",\n" +
-                &standard_output[288..] +
+            "\tpiC: #\"" +
+                &standard_output[288..384] + "\",\n" +
             "}";
         fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
