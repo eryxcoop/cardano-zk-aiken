@@ -36,15 +36,16 @@ impl CompressedGroth16ProofBls12_381 {
             .expect("failed to finish proof compression")
     }
 
-    pub fn to_aiken(&self) -> String {
-        format!(
-            "Proof {{
-\tpiA: #\"{}\",
-\tpiB: #\"{}\",
-\tpiC: #\"{}\",
-}}",
-            &self.piA, &self.piB, &self.piC
-        )
+    pub fn piA_as_byte_string(&self) -> &str {
+        &self.piA
+    }
+
+    pub fn piB_as_byte_string(&self) -> &str {
+        &self.piB
+    }
+
+    pub fn piC_as_byte_string(&self) -> &str {
+        &self.piC
     }
 }
 
@@ -54,14 +55,23 @@ pub struct Groth16ProofBls12_381AikenPresenter {
 
 impl Groth16ProofBls12_381AikenPresenter {
 
-    pub fn new(compressed_groth16proof_bls12_381: CompressedGroth16ProofBls12_381) -> Self {
+    pub fn new(compressed_groth16_proof_bls12_381: CompressedGroth16ProofBls12_381) -> Self {
         Self {
-            proof: compressed_groth16proof_bls12_381
+            proof: compressed_groth16_proof_bls12_381
         }
     }
 
     pub fn present(&self) -> String {
-        self.proof.to_aiken()
+        format!(
+            "Proof {{
+\tpiA: #\"{}\",
+\tpiB: #\"{}\",
+\tpiC: #\"{}\",
+}}",
+            &self.proof.piA_as_byte_string(),
+            &self.proof.piB_as_byte_string(),
+            &self.proof.piC_as_byte_string()
+        )
     }
 
 }
