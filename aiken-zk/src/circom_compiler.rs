@@ -8,14 +8,14 @@ pub struct CircomCompiler {
     pub circom_source_code_path: Option<String>,
 }
 
-pub struct Groth16ProofBls12_381 {
+pub struct CompressedGroth16ProofBls12_381 {
     piA: String,
     piB: String,
     piC: String,
 }
 
-impl Groth16ProofBls12_381 {
-    pub fn new(piA: &str, piB: &str, piC: &str) -> Self {
+impl CompressedGroth16ProofBls12_381 {
+    fn new(piA: &str, piB: &str, piC: &str) -> Self {
         Self {
             piA: piA.to_string(),
             piB: piB.to_string(),
@@ -23,20 +23,16 @@ impl Groth16ProofBls12_381 {
         }
     }
 
-    pub fn from_script_output(script_output: String) -> Self {
-        Self::new(
-            &script_output[..96],
-            &script_output[96..288],
-            &script_output[288..384],
-        )
-    }
-
     pub fn from_json(build_path: &str) -> Self {
         let command_output = Self::execute_curve_compress_command(&build_path);
 
         let standard_output = String::from_utf8(command_output.stdout).unwrap();
 
-        Self::from_script_output(standard_output)
+        Self::new(
+            &standard_output[..96],
+            &standard_output[96..288],
+            &standard_output[288..384],
+        )
     }
 
     fn execute_curve_compress_command(build_path: &str) -> Output {
@@ -114,7 +110,7 @@ impl CircomCompiler {
         circom_path: &str,
         verification_key_path: &str,
         inputs_path: &str,
-    ) -> Groth16ProofBls12_381 {
+    ) -> CompressedGroth16ProofBls12_381 {
         let build_path = "build/".to_string();
         Self::create_directory_if_not_exists(&build_path);
 
@@ -124,7 +120,7 @@ impl CircomCompiler {
 
         Self::execute_groth16_prove_command(verification_key_path, &build_path);
 
-        Groth16ProofBls12_381::from_json(&build_path)
+        CompressedGroth16ProofBls12_381::from_json(&build_path)
     }
 
     fn execute_groth16_prove_command(verification_key_path: &str, build_path: &str) {
