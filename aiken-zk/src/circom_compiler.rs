@@ -1,7 +1,7 @@
 use std::fs;
 use std::io::{Error, ErrorKind};
 use std::path::Path;
-use std::process::{Command, Stdio};
+use std::process::{Command, Output, Stdio};
 
 pub struct CircomCompiler {
     pub circom_source_code: String,
@@ -107,20 +107,16 @@ impl CircomCompiler {
 
         Self::generate_witness(circom_path, inputs_path, &build_path);
 
-        Self::generate_proof(verification_key_path, &build_path);
-
-        let proof = Self::convert_proof_to_aiken_proof(output_path, build_path);
+        let proof = Self::generate_proof(verification_key_path, &build_path);
 
         let aiken_proof = proof.to_aiken();
         fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
 
-    fn convert_proof_to_aiken_proof(output_path: &str, build_path: String) -> Groth16ProofBls12_381 {
-        let command_output = Command::new("node")
-            .arg("curve_compress/compressedProof.js")
-            .arg(build_path + "proof.json")
-            .output()
-            .expect("failed to finish proof compression");
+    fn generate_proof(verification_key_path: &str, build_path: &str) -> Groth16ProofBls12_381{
+        Self::execute_groth16_prove_command(verification_key_path, build_path);
+
+        let command_output = Self::execute_curve_compress_command(build_path);
 
         let standard_output = String::from_utf8(command_output.stdout).unwrap();
         let proof = Groth16ProofBls12_381::from_script_output(standard_output);
@@ -128,7 +124,15 @@ impl CircomCompiler {
         proof
     }
 
-    fn generate_proof(verification_key_path: &str, build_path: &str) {
+    fn execute_curve_compress_command(build_path: &str) -> Output {
+        Command::new("node")
+            .arg("curve_compress/compressedProof.js")
+            .arg(build_path.to_string() + "proof.json")
+            .output()
+            .expect("failed to finish proof compression")
+    }
+
+    fn execute_groth16_prove_command(verification_key_path: &str, build_path: &str) {
         Command::new("snarkjs")
             .arg("groth16")
             .arg("prove")
