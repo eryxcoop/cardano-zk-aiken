@@ -48,14 +48,20 @@ impl CompressedGroth16ProofBls12_381 {
     }
 }
 
-pub struct XXX {
-
+pub struct Groth16ProofBls12_381AikenPresenter {
+    proof: CompressedGroth16ProofBls12_381
 }
 
-impl XXX {
+impl Groth16ProofBls12_381AikenPresenter {
 
-    pub fn xxx(compressed_proof: CompressedGroth16ProofBls12_381) -> String {
-        compressed_proof.to_aiken()
+    pub fn new(compressed_groth16proof_bls12_381: CompressedGroth16ProofBls12_381) -> Self {
+        Self {
+            proof: compressed_groth16proof_bls12_381
+        }
+    }
+
+    pub fn present(&self) -> String {
+        self.proof.to_aiken()
     }
 
 }
