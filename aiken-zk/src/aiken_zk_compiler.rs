@@ -8,6 +8,7 @@ use aiken_lang::ast::Span;
 use serde::Deserialize;
 use std::io::Error;
 use std::process::Command;
+use crate::compressed_groth16_proof_bls12_381::XXX;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -229,7 +230,7 @@ impl AikenZkCompiler {
             inputs_path,
         );
 
-        let aiken_proof = proof.to_aiken();
+        let aiken_proof = XXX::xxx(proof);
         fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
 }
