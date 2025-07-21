@@ -109,10 +109,13 @@ impl CircomCompiler {
 
         Self::generate_proof(verification_key_path, &build_path);
 
-        Self::convert_proof_to_aiken_proof(output_path, build_path);
+        let proof = Self::convert_proof_to_aiken_proof(output_path, build_path);
+
+        let aiken_proof = proof.to_aiken();
+        fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
 
-    fn convert_proof_to_aiken_proof(output_path: &str, build_path: String) {
+    fn convert_proof_to_aiken_proof(output_path: &str, build_path: String) -> Groth16ProofBls12_381 {
         let command_output = Command::new("node")
             .arg("curve_compress/compressedProof.js")
             .arg(build_path + "proof.json")
@@ -121,8 +124,8 @@ impl CircomCompiler {
 
         let standard_output = String::from_utf8(command_output.stdout).unwrap();
         let proof = Groth16ProofBls12_381::from_script_output(standard_output);
-        let aiken_proof = proof.to_aiken();
-        fs::write(output_path, aiken_proof).expect("failed to create output file");
+
+        proof
     }
 
     fn generate_proof(verification_key_path: &str, build_path: &str) {
