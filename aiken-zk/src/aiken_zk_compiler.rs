@@ -223,11 +223,10 @@ impl AikenZkCompiler {
         inputs_path: &str,
         output_path: &str,
     ) {
-        let proof = CircomCompiler::generate_aiken_proof(
+        let proof = CircomCompiler::generate_proof(
             circom_path,
             verification_key_path,
             inputs_path,
-            output_path,
         );
 
         let aiken_proof = proof.to_aiken();

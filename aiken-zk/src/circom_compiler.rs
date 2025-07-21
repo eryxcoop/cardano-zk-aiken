@@ -94,11 +94,10 @@ impl CircomCompiler {
         Ok(())
     }
 
-    pub fn generate_aiken_proof(
+    pub fn generate_proof(
         circom_path: &str,
         verification_key_path: &str,
         inputs_path: &str,
-        output_path: &str,
     ) -> Groth16ProofBls12_381 {
         let build_path = "build/".to_string();
         Self::create_directory_if_not_exists(&build_path);
@@ -107,20 +106,13 @@ impl CircomCompiler {
 
         Self::generate_witness(circom_path, inputs_path, &build_path);
 
-        let proof = Self::generate_proof(verification_key_path, &build_path);
+        Self::execute_groth16_prove_command(verification_key_path, &build_path);
 
-        proof
-    }
-
-    fn generate_proof(verification_key_path: &str, build_path: &str) -> Groth16ProofBls12_381{
-        Self::execute_groth16_prove_command(verification_key_path, build_path);
-
-        let command_output = Self::execute_curve_compress_command(build_path);
+        let command_output = Self::execute_curve_compress_command(&build_path);
 
         let standard_output = String::from_utf8(command_output.stdout).unwrap();
-        let proof = Groth16ProofBls12_381::from_script_output(standard_output);
 
-        proof
+        Groth16ProofBls12_381::from_script_output(standard_output)
     }
 
     fn execute_curve_compress_command(build_path: &str) -> Output {
