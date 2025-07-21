@@ -1,3 +1,4 @@
+use std::fs;
 use crate::circom_compiler::CircomCompiler;
 use crate::component_creator::ComponentCreator;
 use crate::lexer::{LexInfo, Lexer};
@@ -222,11 +223,14 @@ impl AikenZkCompiler {
         inputs_path: &str,
         output_path: &str,
     ) {
-        CircomCompiler::generate_aiken_proof(
+        let proof = CircomCompiler::generate_aiken_proof(
             circom_path,
             verification_key_path,
             inputs_path,
             output_path,
-        )
+        );
+
+        let aiken_proof = proof.to_aiken();
+        fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
 }

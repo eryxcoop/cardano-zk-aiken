@@ -99,7 +99,7 @@ impl CircomCompiler {
         verification_key_path: &str,
         inputs_path: &str,
         output_path: &str,
-    ) {
+    ) -> Groth16ProofBls12_381 {
         let build_path = "build/".to_string();
         Self::create_directory_if_not_exists(&build_path);
 
@@ -109,8 +109,7 @@ impl CircomCompiler {
 
         let proof = Self::generate_proof(verification_key_path, &build_path);
 
-        let aiken_proof = proof.to_aiken();
-        fs::write(output_path, aiken_proof).expect("failed to create output file");
+        proof
     }
 
     fn generate_proof(verification_key_path: &str, build_path: &str) -> Groth16ProofBls12_381{
