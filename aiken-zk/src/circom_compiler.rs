@@ -31,6 +31,22 @@ impl Groth16ProofBls12_381 {
         )
     }
 
+    pub fn from_json(build_path: &str) -> Self {
+        let command_output = Self::execute_curve_compress_command(&build_path);
+
+        let standard_output = String::from_utf8(command_output.stdout).unwrap();
+
+        Self::from_script_output(standard_output)
+    }
+
+    fn execute_curve_compress_command(build_path: &str) -> Output {
+        Command::new("node")
+            .arg("curve_compress/compressedProof.js")
+            .arg(build_path.to_string() + "proof.json")
+            .output()
+            .expect("failed to finish proof compression")
+    }
+
     pub fn to_aiken(&self) -> String {
         format!(
             "Proof {{
@@ -108,19 +124,7 @@ impl CircomCompiler {
 
         Self::execute_groth16_prove_command(verification_key_path, &build_path);
 
-        let command_output = Self::execute_curve_compress_command(&build_path);
-
-        let standard_output = String::from_utf8(command_output.stdout).unwrap();
-
-        Groth16ProofBls12_381::from_script_output(standard_output)
-    }
-
-    fn execute_curve_compress_command(build_path: &str) -> Output {
-        Command::new("node")
-            .arg("curve_compress/compressedProof.js")
-            .arg(build_path.to_string() + "proof.json")
-            .output()
-            .expect("failed to finish proof compression")
+        Groth16ProofBls12_381::from_json(&build_path)
     }
 
     fn execute_groth16_prove_command(verification_key_path: &str, build_path: &str) {
