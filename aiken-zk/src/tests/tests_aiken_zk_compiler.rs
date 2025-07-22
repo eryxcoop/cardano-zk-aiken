@@ -116,7 +116,7 @@ fn test_compiler_can_replace_assert_eq_of_mixed_variables_and_constants_by_the_c
 
 #[test]
 #[serial]
-fn test_tool_can_generate_proof() {
+fn test_tool_can_generate_proof_for_aiken_testing() {
     let _temporal_directory = create_sandbox_and_set_as_current_directory();
     let circom_path = "my_program.circom";
     let verification_key_path = "my_verification_key.zkey";
