@@ -68,7 +68,7 @@ impl CircomCompiler {
         let build_path = "build/".to_string();
         Self::create_directory_if_not_exists(&build_path);
 
-        compile_circuit(circom_path, &build_path);
+        compile_witness_generator(circom_path, &build_path);
 
         Self::generate_witness(circom_path, inputs_path, &build_path);
 
@@ -136,8 +136,20 @@ fn compile_circuit(circuit_path: &str, output_path: &str) {
         Command::new("circom").args([
             circuit_path,
             "--r1cs",
+            "-p",
+            "bls12381",
+            "-o",
+            output_path,
+        ]),
+        "circom",
+    );
+}
+
+fn compile_witness_generator(circuit_path: &str, output_path: &str) {
+    run_command_or_fail(
+        Command::new("circom").args([
+            circuit_path,
             "--wasm",
-            "--sym",
             "-p",
             "bls12381",
             "-o",
