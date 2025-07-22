@@ -44,7 +44,7 @@ fn test_compiler_can_compile_the_generated_circom_component() {
 
 #[test]
 #[serial]
-fn test_xxx_creates_proof_object() {
+fn test_proof_object_is_correctly_created() {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let circom_program_filename = "test.circom".to_string();
     let mut compiler = CircomCompiler::from(source_code_addition());
