@@ -35,7 +35,7 @@ impl CircomCompiler {
 
         fs::create_dir_all(output_path).expect("Failed to create output directory");
 
-        compile_circuit(&circom_program_filename_with_extension, output_path);
+        Self::compile_circuit(&circom_program_filename_with_extension, output_path);
 
         let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
         let zkey_0 = format!("{}{}_0000.zkey", output_path, circuit_name);
@@ -44,18 +44,18 @@ impl CircomCompiler {
         let verification_key_zkey = "verification_key.zkey".to_string();
         let verification_key_json = format!("{}verification_key.json", output_path);
 
-        groth16_setup(&r1cs_path, "ceremony.ptau", &zkey_0);
-        contribute(&zkey_0, &zkey_1, "1st Contributor Name", rand.0);
-        contribute(&zkey_1, &zkey_2, "Second contribution Name", rand.1);
+        Self::groth16_setup(&r1cs_path, "ceremony.ptau", &zkey_0);
+        Self::contribute(&zkey_0, &zkey_1, "1st Contributor Name", rand.0);
+        Self::contribute(&zkey_1, &zkey_2, "Second contribution Name", rand.1);
         let hex_entr = "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
-        beacon(
+        Self::beacon(
             &zkey_0,
             &verification_key_zkey,
             hex_entr,
             10,
             "Final Beacon phase2",
         );
-        export_verification_key(&verification_key_zkey, &verification_key_json);
+        Self::export_verification_key(&verification_key_zkey, &verification_key_json);
 
         Ok(())
     }
@@ -68,7 +68,7 @@ impl CircomCompiler {
         let build_path = "build/".to_string();
         Self::create_directory_if_not_exists(&build_path);
 
-        compile_witness_generator(circom_path, &build_path);
+        Self::compile_witness_generator(circom_path, &build_path);
 
         Self::generate_witness(circom_path, inputs_path, &build_path);
 
@@ -115,106 +115,107 @@ impl CircomCompiler {
             })
             .expect("Couldnt create directory");
     }
-}
 
-fn run_command_or_fail(cmd: &mut Command, label: &str) {
-    let status = cmd
-        .stdout(Stdio::null())
-        .status()
-        .unwrap_or_else(|_| panic!("Failed to start command '{}'", label));
-    if !status.success() {
-        panic!(
-            "Command '{}' failed with exit code {:?}",
-            label,
-            status.code()
+    fn run_command_or_fail(cmd: &mut Command, label: &str) {
+        let status = cmd
+            .stdout(Stdio::null())
+            .status()
+            .unwrap_or_else(|_| panic!("Failed to start command '{}'", label));
+        if !status.success() {
+            panic!(
+                "Command '{}' failed with exit code {:?}",
+                label,
+                status.code()
+            );
+        }
+    }
+
+    fn compile_circuit(circuit_path: &str, output_path: &str) {
+        Self::run_command_or_fail(
+            Command::new("circom").args([
+                circuit_path,
+                "--r1cs",
+                "-p",
+                "bls12381",
+                "-o",
+                output_path,
+            ]),
+            "circom",
+        );
+    }
+
+    fn compile_witness_generator(circuit_path: &str, output_path: &str) {
+        Self::run_command_or_fail(
+            Command::new("circom").args([
+                circuit_path,
+                "--wasm",
+                "-p",
+                "bls12381",
+                "-o",
+                output_path,
+            ]),
+            "circom",
+        );
+    }
+
+    fn groth16_setup(r1cs_path: &str, ceremony_path: &str, output_zkey: &str) {
+        Self::run_command_or_fail(
+            Command::new("snarkjs").args(["groth16", "setup", r1cs_path, ceremony_path, output_zkey]),
+            "groth16 setup",
+        );
+    }
+
+    fn contribute(input_zkey: &str, output_zkey: &str, name: &str, entropy: &str) {
+        let new_entropy = &format!("{}\n", entropy);
+        let mut child = Command::new("snarkjs")
+            .args([
+                "zkey",
+                "contribute",
+                input_zkey,
+                output_zkey,
+                &format!("--name={}", name),
+                "-v",
+            ])
+            .stdin(Stdio::piped())
+            .spawn()
+            .expect("Failed to start zkey contribute");
+
+        use std::io::Write;
+        let stdin = child.stdin.as_mut().expect("Failed to open stdin");
+        stdin
+            .write_all(new_entropy.as_bytes())
+            .expect("Failed to write entropy");
+
+        let status = child.wait().expect("Failed to wait on zkey contribute");
+        if !status.success() {
+            panic!(
+                "zkey contribute '{}' failed with exit code {:?}",
+                name,
+                status.code()
+            );
+        }
+    }
+
+    fn beacon(zkey_input: &str, zkey_output: &str, entropy_hex: &str, rounds: u32, name: &str) {
+        Self::run_command_or_fail(
+            Command::new("snarkjs").args([
+                "zkey",
+                "beacon",
+                zkey_input,
+                zkey_output,
+                entropy_hex,
+                &rounds.to_string(),
+                &format!("-n={}", name),
+            ]),
+            "zkey beacon",
+        );
+    }
+
+    fn export_verification_key(zkey: &str, output_json: &str) {
+        Self::run_command_or_fail(
+            Command::new("snarkjs").args(["zkey", "export", "verificationkey", zkey, output_json]),
+            "export verification key",
         );
     }
 }
 
-fn compile_circuit(circuit_path: &str, output_path: &str) {
-    run_command_or_fail(
-        Command::new("circom").args([
-            circuit_path,
-            "--r1cs",
-            "-p",
-            "bls12381",
-            "-o",
-            output_path,
-        ]),
-        "circom",
-    );
-}
-
-fn compile_witness_generator(circuit_path: &str, output_path: &str) {
-    run_command_or_fail(
-        Command::new("circom").args([
-            circuit_path,
-            "--wasm",
-            "-p",
-            "bls12381",
-            "-o",
-            output_path,
-        ]),
-        "circom",
-    );
-}
-
-fn groth16_setup(r1cs_path: &str, ceremony_path: &str, output_zkey: &str) {
-    run_command_or_fail(
-        Command::new("snarkjs").args(["groth16", "setup", r1cs_path, ceremony_path, output_zkey]),
-        "groth16 setup",
-    );
-}
-
-fn contribute(input_zkey: &str, output_zkey: &str, name: &str, entropy: &str) {
-    let new_entropy = &format!("{}\n", entropy);
-    let mut child = Command::new("snarkjs")
-        .args([
-            "zkey",
-            "contribute",
-            input_zkey,
-            output_zkey,
-            &format!("--name={}", name),
-            "-v",
-        ])
-        .stdin(Stdio::piped())
-        .spawn()
-        .expect("Failed to start zkey contribute");
-
-    use std::io::Write;
-    let stdin = child.stdin.as_mut().expect("Failed to open stdin");
-    stdin
-        .write_all(new_entropy.as_bytes())
-        .expect("Failed to write entropy");
-
-    let status = child.wait().expect("Failed to wait on zkey contribute");
-    if !status.success() {
-        panic!(
-            "zkey contribute '{}' failed with exit code {:?}",
-            name,
-            status.code()
-        );
-    }
-}
-
-fn beacon(zkey_input: &str, zkey_output: &str, entropy_hex: &str, rounds: u32, name: &str) {
-    run_command_or_fail(
-        Command::new("snarkjs").args([
-            "zkey",
-            "beacon",
-            zkey_input,
-            zkey_output,
-            entropy_hex,
-            &rounds.to_string(),
-            &format!("-n={}", name),
-        ]),
-        "zkey beacon",
-    );
-}
-
-fn export_verification_key(zkey: &str, output_json: &str) {
-    run_command_or_fail(
-        Command::new("snarkjs").args(["zkey", "export", "verificationkey", zkey, output_json]),
-        "export verification key",
-    );
-}
