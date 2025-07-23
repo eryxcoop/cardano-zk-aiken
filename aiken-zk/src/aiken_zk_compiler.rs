@@ -24,8 +24,13 @@ pub struct Groth16CompressedData {
 pub struct AikenZkCompiler;
 
 impl AikenZkCompiler {
-    pub fn generate_mesh_js_zk_redeemer_library(p0: &str, p1: &str, p2: &str, p3: &str) {
-        let text = r#"import {MConStr} from "@meshsdk/common";
+    pub fn generate_mesh_js_zk_redeemer_library(
+        circom_path: &str,
+        verification_key_path: &str,
+        inputs_path: &str,
+        output_path: &str,
+    ) {
+        let mut zk_redeemer = r#"import {MConStr} from "@meshsdk/common";
 import {Data, mConStr0} from "@meshsdk/core";
 
 type Proof = MConStr<any, string[]>;
@@ -46,8 +51,13 @@ export function mZKRedeemer(redeemer: Data): ZKRedeemer {
 
 function proofs(): Proof[] {
     return [
-"#.to_string() + "        mProof(";
-        fs::write(p3, text).expect("output file write failed");
+"#
+        .to_string()
+            + "        mProof(\n";
+        let circuit = CircomCircuit::from(circom_path.to_string());
+        let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
+        zk_redeemer += &("            \"".to_string() + proof.piA_as_byte_string() + "\",");
+        fs::write(output_path, zk_redeemer).expect("output file write failed");
     }
 }
 

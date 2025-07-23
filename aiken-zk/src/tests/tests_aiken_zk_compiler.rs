@@ -5,9 +5,9 @@ use crate::tests::aiken_program_factory::{
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
 use std::fs::File;
-use std::io::{BufRead, Read};
-use std::{fs, io};
+use std::io::{BufRead, BufReader, Read};
 use std::ptr::read;
+use std::{fs, io};
 
 #[test]
 #[serial]
@@ -175,7 +175,25 @@ fn test_it_can_generate_proof_for_the_mesh_js_spend() {
 
     let mut line = String::new();
     reader.read_line(&mut line).unwrap();
-    assert_eq!("        mProof(", line);
+    assert_eq!("        mProof(\n", line);
+
+    assert_proof_component_format_is_correct(&mut reader);
+}
+
+fn assert_proof_component_format_is_correct(reader: &mut BufReader<File>) {
+    let mut line = String::new();
+    reader.read_line(&mut line).unwrap();
+    
+    let expected_prefix = "            \"";
+    let expected_suffix = "\",";
+    
+    let prefix = &line[..expected_prefix.len()];
+    let pi_n = &line[expected_prefix.len()..expected_prefix.len() + 96];
+    let suffix = &line[expected_prefix.len() + 96..];
+    
+    assert_eq!(expected_prefix.to_string(), prefix);
+    assert!(pi_n.chars().into_iter().all(|c| c.is_ascii_hexdigit()));
+    assert_eq!(expected_suffix.to_string(), suffix);
 }
 
 fn xxx() -> String {
@@ -200,13 +218,15 @@ export function mZKRedeemer(redeemer: Data): ZKRedeemer {
 
 function proofs(): Proof[] {
     return [
-"#.to_string()
+"#
+    .to_string()
 }
 
 fn yyy() -> String {
     r#"    ];
 }
-"#.to_string()
+"#
+    .to_string()
 }
 
 fn create_circom_and_inputs_file() {
