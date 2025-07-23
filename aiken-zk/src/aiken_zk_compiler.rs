@@ -1,4 +1,3 @@
-use crate::circom_circuit;
 use crate::circom_circuit::CircomCircuit;
 use crate::component_creator::ComponentCreator;
 use crate::compressed_groth16_proof_bls12_381_aiken_presenter::CompressedGroth16ProofBls12_381AikenPresenter;
@@ -56,9 +55,9 @@ function proofs(): Proof[] {
             + "        mProof(\n";
         let circuit = CircomCircuit::from(circom_path.to_string());
         let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
-        zk_redeemer += &("            \"".to_string() + proof.piA_as_byte_string() + "\",\n");
-        zk_redeemer += &("            \"".to_string() + proof.piB_as_byte_string() + "\",\n");
-        zk_redeemer += &("            \"".to_string() + proof.piC_as_byte_string() + "\",\n");
+        zk_redeemer += &("            \"".to_string() + proof.pi_a_as_byte_string() + "\",\n");
+        zk_redeemer += &("            \"".to_string() + proof.pi_b_as_byte_string() + "\",\n");
+        zk_redeemer += &("            \"".to_string() + proof.pi_c_as_byte_string() + "\",\n");
         zk_redeemer += &Self::yyy();
 
         fs::write(output_path, zk_redeemer).expect("output file write failed");

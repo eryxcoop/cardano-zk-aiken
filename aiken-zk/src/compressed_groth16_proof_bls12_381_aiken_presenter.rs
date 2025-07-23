@@ -19,9 +19,9 @@ impl CompressedGroth16ProofBls12_381AikenPresenter {
 \tpiB: #\"{}\",
 \tpiC: #\"{}\",
 }}",
-            &self.proof.piA_as_byte_string(),
-            &self.proof.piB_as_byte_string(),
-            &self.proof.piC_as_byte_string()
+            &self.proof.pi_a_as_byte_string(),
+            &self.proof.pi_b_as_byte_string(),
+            &self.proof.pi_c_as_byte_string()
         )
     }
 

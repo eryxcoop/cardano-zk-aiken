@@ -38,26 +38,26 @@ fn test_circuit_can_generate_a_proof() {
 // Ideally we would run a verification using the proof and the circuit
 // but this would slow down noticeably the tests
 fn assert_proof_is_valid(proof: CompressedGroth16ProofBls12_381) {
-    assert_eq!(96, proof.piA_as_byte_string().len());
+    assert_eq!(96, proof.pi_a_as_byte_string().len());
     assert!(
         proof
-            .piA_as_byte_string()
+            .pi_a_as_byte_string()
             .chars()
             .into_iter()
             .all(|c| c.is_ascii_hexdigit())
     );
-    assert_eq!(192, proof.piB_as_byte_string().len());
+    assert_eq!(192, proof.pi_b_as_byte_string().len());
     assert!(
         proof
-            .piB_as_byte_string()
+            .pi_b_as_byte_string()
             .chars()
             .into_iter()
             .all(|c| c.is_ascii_hexdigit())
     );
-    assert_eq!(96, proof.piC_as_byte_string().len());
+    assert_eq!(96, proof.pi_c_as_byte_string().len());
     assert!(
         proof
-            .piC_as_byte_string()
+            .pi_c_as_byte_string()
             .chars()
             .into_iter()
             .all(|c| c.is_ascii_hexdigit())

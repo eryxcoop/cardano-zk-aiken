@@ -6,7 +6,6 @@ use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
-use std::ptr::read;
 use std::{fs, io};
 
 #[test]

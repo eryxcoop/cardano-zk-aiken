@@ -1,16 +1,16 @@
 use std::process::{Command, Output};
 pub struct CompressedGroth16ProofBls12_381 {
-    piA: String,
-    piB: String,
-    piC: String,
+    pi_a: String,
+    pi_b: String,
+    pi_c: String,
 }
 
 impl CompressedGroth16ProofBls12_381 {
-    fn new(piA: &str, piB: &str, piC: &str) -> Self {
+    fn new(pi_a: &str, pi_b: &str, pi_c: &str) -> Self {
         Self {
-            piA: piA.to_string(),
-            piB: piB.to_string(),
-            piC: piC.to_string(),
+            pi_a: pi_a.to_string(),
+            pi_b: pi_b.to_string(),
+            pi_c: pi_c.to_string(),
         }
     }
 
@@ -34,16 +34,16 @@ impl CompressedGroth16ProofBls12_381 {
             .expect("failed to finish proof compression")
     }
 
-    pub fn piA_as_byte_string(&self) -> &str {
-        &self.piA
+    pub fn pi_a_as_byte_string(&self) -> &str {
+        &self.pi_a
     }
 
-    pub fn piB_as_byte_string(&self) -> &str {
-        &self.piB
+    pub fn pi_b_as_byte_string(&self) -> &str {
+        &self.pi_b
     }
 
-    pub fn piC_as_byte_string(&self) -> &str {
-        &self.piC
+    pub fn pi_c_as_byte_string(&self) -> &str {
+        &self.pi_c
     }
 }
 
