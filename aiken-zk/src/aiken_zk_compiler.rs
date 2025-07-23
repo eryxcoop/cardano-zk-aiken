@@ -1,15 +1,15 @@
-use std::fs;
+use crate::circom_compiler;
 use crate::circom_compiler::CircomCompiler;
 use crate::component_creator::ComponentCreator;
+use crate::compressed_groth16_proof_bls12_381_aiken_presenter::CompressedGroth16ProofBls12_381AikenPresenter;
 use crate::lexer::{LexInfo, Lexer};
 use crate::token_zk::{TokenZK as Token, TokenZK};
 use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
 use aiken_lang::ast::Span;
 use serde::Deserialize;
+use std::fs;
 use std::io::Error;
 use std::process::Command;
-use crate::circom_compiler;
-use crate::compressed_groth16_proof_bls12_381_aiken_presenter::CompressedGroth16ProofBls12_381AikenPresenter;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -122,12 +122,12 @@ impl AikenZkCompiler {
         let (token, span) = Self::find_offchain_token(tokens);
         let circom_component_src = ComponentCreator::from_token(token.clone()).create();
 
-        let mut circom_compiler = CircomCompiler::from("".to_string());
         let circom_src_filename_with_extension = aiken_src_filename + ".circom";
         fs::write(&circom_src_filename_with_extension, circom_component_src).unwrap();
+        let mut circom_compiler = CircomCompiler::from(circom_src_filename_with_extension.clone());
 
         circom_compiler
-            .create_verification_key(circom_src_filename_with_extension, random_seeds)
+            .create_verification_key(random_seeds)
             .unwrap();
 
         let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();

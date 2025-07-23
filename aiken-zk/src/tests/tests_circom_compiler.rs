@@ -10,11 +10,11 @@ fn test_compiler_can_compile_the_generated_circom_component() {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let circom_program_filename = "test.circom".to_string();
     fs::write(&circom_program_filename, source_code_addition()).unwrap();
-    let mut compiler = CircomCompiler::from(source_code_addition());
+    let mut compiler = CircomCompiler::from(circom_program_filename.clone());
 
     let random_seeds = ("asdasd", "dsadsa");
     compiler
-        .create_verification_key(circom_program_filename, random_seeds)
+        .create_verification_key(random_seeds)
         .unwrap();
 
     let stored_vk =

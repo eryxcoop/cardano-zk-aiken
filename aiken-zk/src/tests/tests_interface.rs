@@ -82,11 +82,12 @@ fn create_original_aiken_file() {
 }
 
 fn create_circom_and_inputs_file() {
-    let mut circom_compiler = CircomCompiler::from(circom_file());
-    fs::write("my_program.circom", circom_file()).unwrap();
+    let circom_path = "my_program.circom";
+    fs::write(circom_path, circom_file()).unwrap();
+    let mut circom_compiler = CircomCompiler::from(circom_path.to_string());
 
     circom_compiler
-        .create_verification_key("my_program.circom".to_string(), ("a", "b"))
+        .create_verification_key(("a", "b"))
         .unwrap();
 
     fs::write("inputs.json", inputs_json()).expect("output file write failed");

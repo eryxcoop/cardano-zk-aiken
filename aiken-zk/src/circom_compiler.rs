@@ -17,17 +17,16 @@ impl CircomCompiler {
 
     pub fn create_verification_key(
         &mut self,
-        circom_program_filename_with_extension: String,
         rand: (&str, &str),
     ) -> Result<(), Error> {
-        let circuit_name = circom_program_filename_with_extension
+        let circuit_name = self.circom_source_code_path
             .strip_suffix(".circom")
             .unwrap();
         let output_path = "build/";
 
         fs::create_dir_all(output_path).expect("Failed to create output directory");
 
-        self.compile_circuit(&circom_program_filename_with_extension, output_path);
+        self.compile_circuit(&self.circom_source_code_path, output_path);
 
         let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
         let zkey_0 = format!("{}{}_0000.zkey", output_path, circuit_name);
