@@ -28,7 +28,7 @@ impl CircomCompiler {
 
         fs::create_dir_all(output_path).expect("Failed to create output directory");
 
-        self.compile_circuit(output_path);
+        self.compile_to_r1cs(output_path);
 
         let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
         let zkey_0 = format!("{}{}_0000.zkey", output_path, circuit_name);
@@ -74,7 +74,7 @@ impl CircomCompiler {
 
     // private - verification key generation    
 
-    fn compile_circuit(&self, output_path: &str) {
+    fn compile_to_r1cs(&self, output_path: &str) {
         self.run_command_or_fail(
             Command::new("circom").args([
                 &self.circom_source_code_path,
