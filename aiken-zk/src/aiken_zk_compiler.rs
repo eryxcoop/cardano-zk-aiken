@@ -59,7 +59,15 @@ function proofs(): Proof[] {
         zk_redeemer += &("            \"".to_string() + proof.piA_as_byte_string() + "\",\n");
         zk_redeemer += &("            \"".to_string() + proof.piB_as_byte_string() + "\",\n");
         zk_redeemer += &("            \"".to_string() + proof.piC_as_byte_string() + "\",\n");
+        zk_redeemer += &Self::yyy();
+
         fs::write(output_path, zk_redeemer).expect("output file write failed");
+    }
+
+    fn yyy() -> String {
+        r#"    ];
+}
+"#.to_string()
     }
 }
 
