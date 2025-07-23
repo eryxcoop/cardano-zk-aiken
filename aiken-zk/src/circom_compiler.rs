@@ -5,15 +5,13 @@ use std::process::{Command, Stdio};
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 
 pub struct CircomCompiler {
-    pub circom_source_code: String,
-    pub circom_source_code_path: Option<String>,
+    pub circom_source_code_path: String,
 }
 
 impl CircomCompiler {
-    pub fn from(circom_source_code: String) -> Self {
+    pub fn from(circom_source_code_path: String) -> Self {
         Self {
-            circom_source_code,
-            circom_source_code_path: None,
+            circom_source_code_path,
         }
     }
 
