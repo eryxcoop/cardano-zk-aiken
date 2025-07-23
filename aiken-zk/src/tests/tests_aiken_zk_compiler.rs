@@ -167,11 +167,8 @@ fn test_it_can_generate_proof_for_the_mesh_js_spend() {
 
     let file = File::open(output_path).unwrap();
     let mut reader = io::BufReader::new(file);
-    let mut buffer = vec![0u8; xxx().len()]; // un buffer de N bytes
-    let bytes_read = reader.read(&mut buffer).unwrap();
-    let text = String::from_utf8_lossy(&buffer[..bytes_read]);
 
-    assert_eq!(xxx(), text);
+    assert_text_matches(&mut reader, xxx());
 
     let mut line = String::new();
     reader.read_line(&mut line).unwrap();
@@ -180,6 +177,14 @@ fn test_it_can_generate_proof_for_the_mesh_js_spend() {
     assert_proof_component_format_is_correct(&mut reader, 96);
     assert_proof_component_format_is_correct(&mut reader, 192);
     assert_proof_component_format_is_correct(&mut reader, 96);
+}
+
+fn assert_text_matches(reader: &mut BufReader<File>, expected_text: String) {
+    let mut buffer = vec![0u8; expected_text.len()]; // un buffer de N bytes
+    let bytes_read = reader.read(&mut buffer).unwrap();
+    let text = String::from_utf8_lossy(&buffer[..bytes_read]);
+
+    assert_eq!(expected_text, text);
 }
 
 fn assert_proof_component_format_is_correct(
