@@ -87,7 +87,7 @@ fn create_circom_and_inputs_file() {
     let mut circom_compiler = CircomCompiler::from(circom_path.to_string());
 
     circom_compiler
-        .create_verification_key(("a", "b"))
+        .generate_verification_key(("a", "b"))
         .unwrap();
 
     fs::write("inputs.json", inputs_json()).expect("output file write failed");

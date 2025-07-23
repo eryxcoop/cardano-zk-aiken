@@ -127,7 +127,7 @@ impl AikenZkCompiler {
         let mut circom_compiler = CircomCompiler::from(circom_src_filename_with_extension.clone());
 
         circom_compiler
-            .create_verification_key(random_seeds)
+            .generate_verification_key(random_seeds)
             .unwrap();
 
         let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
