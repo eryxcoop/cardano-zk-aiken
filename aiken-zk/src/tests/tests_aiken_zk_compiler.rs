@@ -179,6 +179,7 @@ fn test_it_can_generate_proof_for_the_mesh_js_spend() {
 
     assert_proof_component_format_is_correct(&mut reader, 96);
     assert_proof_component_format_is_correct(&mut reader, 192);
+    assert_proof_component_format_is_correct(&mut reader, 96);
 }
 
 fn assert_proof_component_format_is_correct(
