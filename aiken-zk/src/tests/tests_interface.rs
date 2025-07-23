@@ -83,9 +83,8 @@ fn create_original_aiken_file() {
 
 fn create_circom_and_inputs_file() {
     let mut circom_compiler = CircomCompiler::from(circom_file());
-    circom_compiler
-        .save_into_file("my_program.circom".to_string())
-        .expect("output file write failed");
+    fs::write("my_program.circom", circom_file()).unwrap();
+
     circom_compiler
         .create_verification_key("my_program.circom".to_string(), ("a", "b"))
         .unwrap();
