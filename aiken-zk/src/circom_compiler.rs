@@ -53,16 +53,15 @@ impl CircomCompiler {
 
     pub fn generate_proof(
         &self,
-        circom_path: &str,
         verification_key_path: &str,
         inputs_path: &str,
     ) -> CompressedGroth16ProofBls12_381 {
         let build_path = "build/".to_string();
         self.create_directory_if_not_exists(&build_path);
 
-        self.compile_witness_generator(circom_path, &build_path);
+        self.compile_witness_generator(&self.circom_source_code_path, &build_path);
 
-        self.generate_witness(circom_path, inputs_path, &build_path);
+        self.generate_witness(&self.circom_source_code_path, inputs_path, &build_path);
 
         self.execute_groth16_prove_command(verification_key_path, &build_path);
 
