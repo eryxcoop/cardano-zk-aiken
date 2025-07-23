@@ -5,7 +5,7 @@ mod tests_token_lexing;
 mod tests_create_circom_source_file;
 
 #[cfg(test)]
-mod tests_circom_compiler;
+mod tests_circom_circuit;
 
 #[cfg(test)]
 mod tests_aiken_zk_compiler;
