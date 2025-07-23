@@ -9,11 +9,15 @@ pub struct CircomCompiler {
 }
 
 impl CircomCompiler {
+    // constructor
+
     pub fn from(circom_source_code_path: String) -> Self {
         Self {
             circom_source_code_path,
         }
     }
+
+    // verification key generation
 
     pub fn create_verification_key(&mut self, rand: (&str, &str)) -> Result<(), Error> {
         let circuit_name = self
@@ -49,6 +53,8 @@ impl CircomCompiler {
         Ok(())
     }
 
+    // proof generation
+
     pub fn generate_proof(
         &self,
         verification_key_path: &str,
@@ -66,52 +72,13 @@ impl CircomCompiler {
         CompressedGroth16ProofBls12_381::from_json(&build_path)
     }
 
-    fn execute_groth16_prove_command(&self, verification_key_path: &str, build_path: &str) {
-        Command::new("snarkjs")
-            .arg("groth16")
-            .arg("prove")
-            .arg(verification_key_path)
-            .arg(build_path.to_string() + "witness.wtns")
-            .arg(build_path.to_string() + "proof.json")
-            .arg(build_path.to_string() + "public.json")
-            .output()
-            .unwrap();
-    }
-
-    fn generate_witness(&self, inputs_path: &str, build_path: &str) {
-        let circuit_filename = self.circuit_filename();
-        Command::new("node")
-            .arg(build_path.to_string() + circuit_filename + "_js/generate_witness.js")
-            .arg(build_path.to_string() + circuit_filename + "_js/" + circuit_filename + ".wasm")
-            .arg(inputs_path)
-            .arg(build_path.to_string() + "witness.wtns")
-            .output()
-            .unwrap();
-    }
-
-    fn circuit_filename(&self) -> &str {
-        &Self::filename_from_path(&self.circom_source_code_path)
-    }
+    // private - verification key generation    
 
     fn compile_circuit(&self, output_path: &str) {
         self.run_command_or_fail(
             Command::new("circom").args([
                 &self.circom_source_code_path,
                 "--r1cs",
-                "-p",
-                "bls12381",
-                "-o",
-                output_path,
-            ]),
-            "circom",
-        );
-    }
-
-    fn compile_witness_generator(&self, output_path: &str) {
-        self.run_command_or_fail(
-            Command::new("circom").args([
-                &self.circom_source_code_path,
-                "--wasm",
                 "-p",
                 "bls12381",
                 "-o",
@@ -194,6 +161,51 @@ impl CircomCompiler {
         );
     }
 
+    // private - proof generation
+
+    fn compile_witness_generator(&self, output_path: &str) {
+        self.run_command_or_fail(
+            Command::new("circom").args([
+                &self.circom_source_code_path,
+                "--wasm",
+                "-p",
+                "bls12381",
+                "-o",
+                output_path,
+            ]),
+            "circom",
+        );
+    }
+
+    fn generate_witness(&self, inputs_path: &str, build_path: &str) {
+        let circuit_filename = self.circuit_filename();
+        Command::new("node")
+            .arg(build_path.to_string() + circuit_filename + "_js/generate_witness.js")
+            .arg(build_path.to_string() + circuit_filename + "_js/" + circuit_filename + ".wasm")
+            .arg(inputs_path)
+            .arg(build_path.to_string() + "witness.wtns")
+            .output()
+            .unwrap();
+    }
+
+    fn execute_groth16_prove_command(&self, verification_key_path: &str, build_path: &str) {
+        Command::new("snarkjs")
+            .arg("groth16")
+            .arg("prove")
+            .arg(verification_key_path)
+            .arg(build_path.to_string() + "witness.wtns")
+            .arg(build_path.to_string() + "proof.json")
+            .arg(build_path.to_string() + "public.json")
+            .output()
+            .unwrap();
+    }
+
+    fn circuit_filename(&self) -> &str {
+        &Self::filename_from_path(&self.circom_source_code_path)
+    }
+
+    // file system
+    
     fn filename_from_path(path: &String) -> &str {
         Path::new(path)
             .file_stem()
