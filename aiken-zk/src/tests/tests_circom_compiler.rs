@@ -54,7 +54,7 @@ fn test_proof_object_is_correctly_created() {
         .unwrap();
     fs::write("inputs.json", "{\"a\":\"1\", \"b\":\"2\", \"c\":\"3\"}").unwrap();
 
-    let circom_compiler = CircomCompiler::from(circom_path.to_string());
+    let circom_compiler = CircomCompiler::from("".to_string());
     let proof =
         circom_compiler.generate_proof(circom_path, "my_verification_key.zkey", "inputs.json");
 

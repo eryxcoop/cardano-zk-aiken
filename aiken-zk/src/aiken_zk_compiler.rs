@@ -225,7 +225,7 @@ impl AikenZkCompiler {
         inputs_path: &str,
         output_path: &str,
     ) {
-        let circom_compiler = CircomCompiler::from(circom_path.to_string());
+        let circom_compiler = CircomCompiler::from("".to_string());
         let proof = circom_compiler.generate_proof(
             circom_path,
             verification_key_path,
