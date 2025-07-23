@@ -72,7 +72,7 @@ impl CircomCompiler {
         CompressedGroth16ProofBls12_381::from_json(&build_path)
     }
 
-    // private - verification key generation    
+    // private - verification key generation
 
     fn compile_to_r1cs(&self, output_path: &str) {
         self.run_command_or_fail(
@@ -205,7 +205,7 @@ impl CircomCompiler {
     }
 
     // file system
-    
+
     fn filename_from_path(path: &String) -> &str {
         Path::new(path)
             .file_stem()
