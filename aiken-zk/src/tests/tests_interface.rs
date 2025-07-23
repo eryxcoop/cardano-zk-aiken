@@ -1,4 +1,4 @@
-use crate::circom_compiler::CircomCompiler;
+use crate::circom_compiler::CircomCircuit;
 use crate::tests::utils::{create_sandbox_and_set_as_current_directory, manifest_path};
 use serial_test::serial;
 use std::fs::File;
@@ -84,7 +84,7 @@ fn create_original_aiken_file() {
 fn create_circom_and_inputs_file() {
     let circom_path = "my_program.circom";
     fs::write(circom_path, circom_file()).unwrap();
-    let mut circom_compiler = CircomCompiler::from(circom_path.to_string());
+    let mut circom_compiler = CircomCircuit::from(circom_path.to_string());
 
     circom_compiler
         .generate_verification_key(("a", "b"))

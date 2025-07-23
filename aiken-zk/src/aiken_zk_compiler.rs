@@ -1,5 +1,5 @@
 use crate::circom_compiler;
-use crate::circom_compiler::CircomCompiler;
+use crate::circom_compiler::CircomCircuit;
 use crate::component_creator::ComponentCreator;
 use crate::compressed_groth16_proof_bls12_381_aiken_presenter::CompressedGroth16ProofBls12_381AikenPresenter;
 use crate::lexer::{LexInfo, Lexer};
@@ -124,7 +124,7 @@ impl AikenZkCompiler {
 
         let circom_src_filename_with_extension = aiken_src_filename + ".circom";
         fs::write(&circom_src_filename_with_extension, circom_component_src).unwrap();
-        let mut circom_compiler = CircomCompiler::from(circom_src_filename_with_extension.clone());
+        let mut circom_compiler = CircomCircuit::from(circom_src_filename_with_extension.clone());
 
         circom_compiler
             .generate_verification_key(random_seeds)
@@ -224,7 +224,7 @@ impl AikenZkCompiler {
         inputs_path: &str,
         output_path: &str,
     ) {
-        let circom_compiler = CircomCompiler::from(circom_path.to_string());
+        let circom_compiler = CircomCircuit::from(circom_path.to_string());
         let proof = circom_compiler.generate_groth16_proof(verification_key_path, inputs_path);
 
         let aiken_presenter = CompressedGroth16ProofBls12_381AikenPresenter::new(proof);

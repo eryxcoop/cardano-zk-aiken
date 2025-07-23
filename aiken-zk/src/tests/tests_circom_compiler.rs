@@ -1,4 +1,4 @@
-use crate::circom_compiler::CircomCompiler;
+use crate::circom_compiler::CircomCircuit;
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
@@ -10,7 +10,7 @@ fn test_compiler_can_compile_the_generated_circom_component() {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let circom_program_filename = "test.circom".to_string();
     fs::write(&circom_program_filename, source_code_addition()).unwrap();
-    let mut compiler = CircomCompiler::from(circom_program_filename.clone());
+    let mut compiler = CircomCircuit::from(circom_program_filename.clone());
 
     let random_seeds = ("asdasd", "dsadsa");
     compiler
@@ -33,7 +33,7 @@ fn test_proof_object_is_correctly_created() {
 
     fs::write("inputs.json", "{\"a\":\"1\", \"b\":\"2\", \"c\":\"3\"}").unwrap();
 
-    let circom_compiler = CircomCompiler::from(circom_path.to_string());
+    let circom_compiler = CircomCircuit::from(circom_path.to_string());
     let proof =
         circom_compiler.generate_groth16_proof("my_verification_key.zkey", "inputs.json");
 

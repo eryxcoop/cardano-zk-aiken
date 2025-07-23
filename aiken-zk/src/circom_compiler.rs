@@ -4,11 +4,11 @@ use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-pub struct CircomCompiler {
+pub struct CircomCircuit {
     circom_source_code_path: String,
 }
 
-impl CircomCompiler {
+impl CircomCircuit {
     // constructor
 
     pub fn from(circom_source_code_path: String) -> Self {
