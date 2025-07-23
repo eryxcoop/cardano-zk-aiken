@@ -6,16 +6,14 @@ use std::fs;
 
 #[test]
 #[serial]
-fn test_compiler_can_compile_the_generated_circom_component() {
+fn test_circuit_can_generate_a_verification_key() {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let circom_program_filename = "test.circom".to_string();
     fs::write(&circom_program_filename, source_code_addition()).unwrap();
-    let mut compiler = CircomCircuit::from(circom_program_filename.clone());
-
+    let mut circuit = CircomCircuit::from(circom_program_filename.clone());
     let random_seeds = ("asdasd", "dsadsa");
-    compiler
-        .generate_verification_key(random_seeds)
-        .unwrap();
+
+    circuit.generate_verification_key(random_seeds).unwrap();
 
     let stored_vk =
         fs::read_to_string("build/verification_key.json").expect("No se pudo leer el archivo");
@@ -24,18 +22,15 @@ fn test_compiler_can_compile_the_generated_circom_component() {
 
 #[test]
 #[serial]
-fn test_proof_object_is_correctly_created() {
+fn test_circuit_can_generate_a_proof() {
     let circom_path = "test.circom";
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let circom_program_filename = circom_path.to_string();
-
     fs::write(&circom_program_filename, source_code_addition()).unwrap();
-
     fs::write("inputs.json", "{\"a\":\"1\", \"b\":\"2\", \"c\":\"3\"}").unwrap();
+    let circom_circuit = CircomCircuit::from(circom_path.to_string());
 
-    let circom_compiler = CircomCircuit::from(circom_path.to_string());
-    let proof =
-        circom_compiler.generate_groth16_proof("my_verification_key.zkey", "inputs.json");
+    let proof = circom_circuit.generate_groth16_proof("my_verification_key.zkey", "inputs.json");
 
     assert_proof_is_valid(proof);
 }
