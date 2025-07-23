@@ -177,20 +177,24 @@ fn test_it_can_generate_proof_for_the_mesh_js_spend() {
     reader.read_line(&mut line).unwrap();
     assert_eq!("        mProof(\n", line);
 
-    assert_proof_component_format_is_correct(&mut reader);
+    assert_proof_component_format_is_correct(&mut reader, 96);
 }
 
-fn assert_proof_component_format_is_correct(reader: &mut BufReader<File>) {
+fn assert_proof_component_format_is_correct(
+    reader: &mut BufReader<File>,
+    proof_component_length_as_byte_string: usize,
+) {
     let mut line = String::new();
     reader.read_line(&mut line).unwrap();
-    
+
     let expected_prefix = "            \"";
     let expected_suffix = "\",";
-    
+
     let prefix = &line[..expected_prefix.len()];
-    let pi_n = &line[expected_prefix.len()..expected_prefix.len() + 96];
-    let suffix = &line[expected_prefix.len() + 96..];
-    
+    let pi_n =
+        &line[expected_prefix.len()..expected_prefix.len() + proof_component_length_as_byte_string];
+    let suffix = &line[expected_prefix.len() + proof_component_length_as_byte_string..];
+
     assert_eq!(expected_prefix.to_string(), prefix);
     assert!(pi_n.chars().into_iter().all(|c| c.is_ascii_hexdigit()));
     assert_eq!(expected_suffix.to_string(), suffix);
