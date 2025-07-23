@@ -170,7 +170,6 @@ fn test_it_can_generate_proof_for_the_mesh_js_spend() {
     let bytes_read = reader.read(&mut buffer).unwrap();
     let text = String::from_utf8_lossy(&buffer[..bytes_read]);
 
-    // todo: check verification
     assert_eq!(xxx(), text);
 }
 
