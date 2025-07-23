@@ -79,44 +79,18 @@ impl CircomCompiler {
     }
 
     fn generate_witness(&self, inputs_path: &str, build_path: &str) {
-        let circuit_name = Path::new(&self.circom_source_code_path)
-            .file_stem()
-            .unwrap()
-            .to_str()
-            .unwrap();
+        let circuit_filename = self.circuit_filename();
         Command::new("node")
-            .arg(build_path.to_string() + circuit_name + "_js/generate_witness.js")
-            .arg(build_path.to_string() + circuit_name + "_js/" + circuit_name + ".wasm")
+            .arg(build_path.to_string() + circuit_filename + "_js/generate_witness.js")
+            .arg(build_path.to_string() + circuit_filename + "_js/" + circuit_filename + ".wasm")
             .arg(inputs_path)
             .arg(build_path.to_string() + "witness.wtns")
             .output()
             .unwrap();
     }
 
-    fn create_directory_if_not_exists(&self, build_path: &str) {
-        fs::create_dir(build_path)
-            .or_else(|error| {
-                if error.kind() == ErrorKind::AlreadyExists {
-                    Ok(())
-                } else {
-                    Err(error)
-                }
-            })
-            .expect("Couldnt create directory");
-    }
-
-    fn run_command_or_fail(&self, cmd: &mut Command, label: &str) {
-        let status = cmd
-            .stdout(Stdio::null())
-            .status()
-            .unwrap_or_else(|_| panic!("Failed to start command '{}'", label));
-        if !status.success() {
-            panic!(
-                "Command '{}' failed with exit code {:?}",
-                label,
-                status.code()
-            );
-        }
+    fn circuit_filename(&self) -> &str {
+        &Self::filename_from_path(&self.circom_source_code_path)
     }
 
     fn compile_circuit(&self, output_path: &str) {
@@ -218,5 +192,39 @@ impl CircomCompiler {
             Command::new("snarkjs").args(["zkey", "export", "verificationkey", zkey, output_json]),
             "export verification key",
         );
+    }
+
+    fn filename_from_path(path: &String) -> &str {
+        Path::new(path)
+            .file_stem()
+            .unwrap()
+            .to_str()
+            .unwrap()
+    }
+
+    fn create_directory_if_not_exists(&self, build_path: &str) {
+        fs::create_dir(build_path)
+            .or_else(|error| {
+                if error.kind() == ErrorKind::AlreadyExists {
+                    Ok(())
+                } else {
+                    Err(error)
+                }
+            })
+            .expect("Couldnt create directory");
+    }
+
+    fn run_command_or_fail(&self, cmd: &mut Command, label: &str) {
+        let status = cmd
+            .stdout(Stdio::null())
+            .status()
+            .unwrap_or_else(|_| panic!("Failed to start command '{}'", label));
+        if !status.success() {
+            panic!(
+                "Command '{}' failed with exit code {:?}",
+                label,
+                status.code()
+            );
+        }
     }
 }
