@@ -5,7 +5,7 @@ use crate::tests::aiken_program_factory::{
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
 use std::fs::File;
-use std::io::BufRead;
+use std::io::{BufRead, Read};
 use std::{fs, io};
 
 #[test]
@@ -144,6 +144,65 @@ fn test_it_can_generate_proof_for_aiken_testing() {
     assert!(lines[2].contains("piB: #"));
     assert!(lines[3].contains("piC: #"));
     assert_eq!("}", lines[4]);
+}
+
+#[test]
+#[serial]
+fn test_it_can_generate_proof_for_the_mesh_js_spend() {
+    let _temporal_directory = create_sandbox_and_set_as_current_directory();
+    let circom_path = "my_program.circom";
+    let verification_key_path = "my_verification_key.zkey";
+    let inputs_path = "inputs.json";
+
+    let output_path = "zk_redeemer.ts";
+    create_circom_and_inputs_file();
+
+    AikenZkCompiler::generate_mesh_js_zk_redeemer_library(
+        circom_path,
+        verification_key_path,
+        inputs_path,
+        output_path,
+    );
+
+    let file = File::open(output_path).unwrap();
+    let mut reader = io::BufReader::new(file);
+    let mut buffer = vec![0u8; xxx().len()]; // un buffer de N bytes
+    let bytes_read = reader.read(&mut buffer).unwrap();
+    let text = String::from_utf8_lossy(&buffer[..bytes_read]);
+
+    // todo: check verification
+    assert_eq!(xxx(), text);
+}
+
+fn xxx() -> String {
+    r#"import {MConStr} from "@meshsdk/common";
+import {Data, mConStr0} from "@meshsdk/core";
+
+type Proof = MConStr<any, string[]>;
+
+type ZKRedeemer = MConStr<any, Data[] | Proof[]>;
+
+function mProof(piA: string, piB: string, piC: string): Proof {
+    if (piA.length != 96 || piB.length != 192 || piC.length != 96) {
+        throw new Error("Wrong proof");
+    }
+
+    return mConStr0([piA, piB, piC]);
+}
+
+export function mZKRedeemer(redeemer: Data): ZKRedeemer {
+    return mConStr0([redeemer, proofs()]);
+}
+
+function proofs(): Proof[] {
+    return [
+"#.to_string()
+}
+
+fn yyy() -> String {
+    r#"    ];
+}
+"#.to_string()
 }
 
 fn create_circom_and_inputs_file() {

@@ -22,6 +22,35 @@ pub struct Groth16CompressedData {
 }
 
 pub struct AikenZkCompiler;
+
+impl AikenZkCompiler {
+    pub(crate) fn generate_mesh_js_zk_redeemer_library(p0: &str, p1: &str, p2: &str, p3: &str) {
+        let text = r#"import {MConStr} from "@meshsdk/common";
+import {Data, mConStr0} from "@meshsdk/core";
+
+type Proof = MConStr<any, string[]>;
+
+type ZKRedeemer = MConStr<any, Data[] | Proof[]>;
+
+function mProof(piA: string, piB: string, piC: string): Proof {
+    if (piA.length != 96 || piB.length != 192 || piC.length != 96) {
+        throw new Error("Wrong proof");
+    }
+
+    return mConStr0([piA, piB, piC]);
+}
+
+export function mZKRedeemer(redeemer: Data): ZKRedeemer {
+    return mConStr0([redeemer, proofs()]);
+}
+
+function proofs(): Proof[] {
+    return [
+"#.to_string();
+        fs::write(p3, text).expect("output file write failed");
+    }
+}
+
 impl AikenZkCompiler {
     fn find_offchain_token(tokens: Vec<(Token, Span)>) -> (Token, Span) {
         tokens
