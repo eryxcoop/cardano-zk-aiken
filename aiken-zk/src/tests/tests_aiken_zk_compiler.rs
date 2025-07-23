@@ -178,6 +178,7 @@ fn test_it_can_generate_proof_for_the_mesh_js_spend() {
     assert_eq!("        mProof(\n", line);
 
     assert_proof_component_format_is_correct(&mut reader, 96);
+    assert_proof_component_format_is_correct(&mut reader, 192);
 }
 
 fn assert_proof_component_format_is_correct(
@@ -188,7 +189,7 @@ fn assert_proof_component_format_is_correct(
     reader.read_line(&mut line).unwrap();
 
     let expected_prefix = "            \"";
-    let expected_suffix = "\",";
+    let expected_suffix = "\",\n";
 
     let prefix = &line[..expected_prefix.len()];
     let pi_n =

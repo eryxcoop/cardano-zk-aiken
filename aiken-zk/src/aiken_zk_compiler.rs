@@ -56,7 +56,8 @@ function proofs(): Proof[] {
             + "        mProof(\n";
         let circuit = CircomCircuit::from(circom_path.to_string());
         let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
-        zk_redeemer += &("            \"".to_string() + proof.piA_as_byte_string() + "\",");
+        zk_redeemer += &("            \"".to_string() + proof.piA_as_byte_string() + "\",\n");
+        zk_redeemer += &("            \"".to_string() + proof.piB_as_byte_string() + "\",\n");
         fs::write(output_path, zk_redeemer).expect("output file write failed");
     }
 }
