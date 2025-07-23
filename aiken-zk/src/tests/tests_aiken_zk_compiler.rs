@@ -7,6 +7,7 @@ use serial_test::serial;
 use std::fs::File;
 use std::io::{BufRead, Read};
 use std::{fs, io};
+use std::ptr::read;
 
 #[test]
 #[serial]
@@ -171,6 +172,10 @@ fn test_it_can_generate_proof_for_the_mesh_js_spend() {
     let text = String::from_utf8_lossy(&buffer[..bytes_read]);
 
     assert_eq!(xxx(), text);
+
+    let mut line = String::new();
+    reader.read_line(&mut line).unwrap();
+    assert_eq!("        mProof(", line);
 }
 
 fn xxx() -> String {
