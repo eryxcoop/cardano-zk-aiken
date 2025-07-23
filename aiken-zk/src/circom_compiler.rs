@@ -1,8 +1,8 @@
+use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 use std::fs;
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::process::{Command, Stdio};
-use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 
 pub struct CircomCompiler {
     circom_source_code_path: String,
@@ -15,18 +15,16 @@ impl CircomCompiler {
         }
     }
 
-    pub fn create_verification_key(
-        &mut self,
-        rand: (&str, &str),
-    ) -> Result<(), Error> {
-        let circuit_name = self.circom_source_code_path
+    pub fn create_verification_key(&mut self, rand: (&str, &str)) -> Result<(), Error> {
+        let circuit_name = self
+            .circom_source_code_path
             .strip_suffix(".circom")
             .unwrap();
         let output_path = "build/";
 
         fs::create_dir_all(output_path).expect("Failed to create output directory");
 
-        self.compile_circuit(&self.circom_source_code_path, output_path);
+        self.compile_circuit(output_path);
 
         let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
         let zkey_0 = format!("{}{}_0000.zkey", output_path, circuit_name);
@@ -59,9 +57,9 @@ impl CircomCompiler {
         let build_path = "build/".to_string();
         self.create_directory_if_not_exists(&build_path);
 
-        self.compile_witness_generator(&self.circom_source_code_path, &build_path);
+        self.compile_witness_generator(&build_path);
 
-        self.generate_witness(&self.circom_source_code_path, inputs_path, &build_path);
+        self.generate_witness(inputs_path, &build_path);
 
         self.execute_groth16_prove_command(verification_key_path, &build_path);
 
@@ -80,15 +78,15 @@ impl CircomCompiler {
             .unwrap();
     }
 
-    fn generate_witness(&self, circom_path: &str, inputs_path: &str, build_path: &str) {
-        let ciruit_name = Path::new(circom_path)
+    fn generate_witness(&self, inputs_path: &str, build_path: &str) {
+        let circuit_name = Path::new(&self.circom_source_code_path)
             .file_stem()
             .unwrap()
             .to_str()
             .unwrap();
         Command::new("node")
-            .arg(build_path.to_string() + ciruit_name + "_js/generate_witness.js")
-            .arg(build_path.to_string() + ciruit_name + "_js/" + ciruit_name + ".wasm")
+            .arg(build_path.to_string() + circuit_name + "_js/generate_witness.js")
+            .arg(build_path.to_string() + circuit_name + "_js/" + circuit_name + ".wasm")
             .arg(inputs_path)
             .arg(build_path.to_string() + "witness.wtns")
             .output()
@@ -121,10 +119,10 @@ impl CircomCompiler {
         }
     }
 
-    fn compile_circuit(&self, circuit_path: &str, output_path: &str) {
+    fn compile_circuit(&self, output_path: &str) {
         self.run_command_or_fail(
             Command::new("circom").args([
-                circuit_path,
+                &self.circom_source_code_path,
                 "--r1cs",
                 "-p",
                 "bls12381",
@@ -135,10 +133,10 @@ impl CircomCompiler {
         );
     }
 
-    fn compile_witness_generator(&self, circuit_path: &str, output_path: &str) {
+    fn compile_witness_generator(&self, output_path: &str) {
         self.run_command_or_fail(
             Command::new("circom").args([
-                circuit_path,
+                &self.circom_source_code_path,
                 "--wasm",
                 "-p",
                 "bls12381",
@@ -151,7 +149,13 @@ impl CircomCompiler {
 
     fn groth16_setup(&self, r1cs_path: &str, ceremony_path: &str, output_zkey: &str) {
         self.run_command_or_fail(
-            Command::new("snarkjs").args(["groth16", "setup", r1cs_path, ceremony_path, output_zkey]),
+            Command::new("snarkjs").args([
+                "groth16",
+                "setup",
+                r1cs_path,
+                ceremony_path,
+                output_zkey,
+            ]),
             "groth16 setup",
         );
     }
@@ -187,7 +191,14 @@ impl CircomCompiler {
         }
     }
 
-    fn beacon(&self, zkey_input: &str, zkey_output: &str, entropy_hex: &str, rounds: u32, name: &str) {
+    fn beacon(
+        &self,
+        zkey_input: &str,
+        zkey_output: &str,
+        entropy_hex: &str,
+        rounds: u32,
+        name: &str,
+    ) {
         self.run_command_or_fail(
             Command::new("snarkjs").args([
                 "zkey",
@@ -209,4 +220,3 @@ impl CircomCompiler {
         );
     }
 }
-
