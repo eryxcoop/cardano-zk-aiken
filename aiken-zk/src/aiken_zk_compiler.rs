@@ -8,6 +8,7 @@ use aiken_lang::ast::Span;
 use serde::Deserialize;
 use std::io::Error;
 use std::process::Command;
+use crate::circom_compiler;
 use crate::compressed_groth16_proof_bls12_381_aiken_presenter::CompressedGroth16ProofBls12_381AikenPresenter;
 
 #[derive(Deserialize, Debug)]
@@ -224,7 +225,8 @@ impl AikenZkCompiler {
         inputs_path: &str,
         output_path: &str,
     ) {
-        let proof = CircomCompiler::generate_proof(
+        let circom_compiler = CircomCompiler::from(circom_path.to_string());
+        let proof = circom_compiler.generate_proof(
             circom_path,
             verification_key_path,
             inputs_path,

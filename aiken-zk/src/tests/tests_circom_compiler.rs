@@ -45,16 +45,18 @@ fn test_compiler_can_compile_the_generated_circom_component() {
 #[test]
 #[serial]
 fn test_proof_object_is_correctly_created() {
+    let circom_path = "test.circom";
     let _temp_dir = create_sandbox_and_set_as_current_directory();
-    let circom_program_filename = "test.circom".to_string();
+    let circom_program_filename = circom_path.to_string();
     let mut compiler = CircomCompiler::from(source_code_addition());
     compiler
         .save_into_file(circom_program_filename.clone())
         .unwrap();
     fs::write("inputs.json", "{\"a\":\"1\", \"b\":\"2\", \"c\":\"3\"}").unwrap();
 
+    let circom_compiler = CircomCompiler::from(circom_path.to_string());
     let proof =
-        CircomCompiler::generate_proof("test.circom", "my_verification_key.zkey", "inputs.json");
+        circom_compiler.generate_proof(circom_path, "my_verification_key.zkey", "inputs.json");
 
     assert_proof_is_valid(proof);
 }
