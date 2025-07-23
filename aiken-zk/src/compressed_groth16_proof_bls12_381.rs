@@ -46,4 +46,3 @@ impl CompressedGroth16ProofBls12_381 {
         &self.pi_c
     }
 }
-
