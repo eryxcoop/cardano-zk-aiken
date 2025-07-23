@@ -1,4 +1,4 @@
-use crate::circom_compiler::CircomCircuit;
+use crate::circom_circuit::CircomCircuit;
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;

@@ -1,4 +1,4 @@
-use crate::circom_compiler::CircomCircuit;
+use crate::circom_circuit::CircomCircuit;
 use crate::tests::utils::{create_sandbox_and_set_as_current_directory, manifest_path};
 use serial_test::serial;
 use std::fs::File;

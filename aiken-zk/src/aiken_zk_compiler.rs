@@ -1,5 +1,5 @@
-use crate::circom_compiler;
-use crate::circom_compiler::CircomCircuit;
+use crate::circom_circuit;
+use crate::circom_circuit::CircomCircuit;
 use crate::component_creator::ComponentCreator;
 use crate::compressed_groth16_proof_bls12_381_aiken_presenter::CompressedGroth16ProofBls12_381AikenPresenter;
 use crate::lexer::{LexInfo, Lexer};
