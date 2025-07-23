@@ -5,7 +5,7 @@ use std::process::{Command, Stdio};
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 
 pub struct CircomCompiler {
-    pub circom_source_code_path: String,
+    circom_source_code_path: String,
 }
 
 impl CircomCompiler {
