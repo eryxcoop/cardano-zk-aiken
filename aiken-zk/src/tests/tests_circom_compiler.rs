@@ -35,7 +35,7 @@ fn test_proof_object_is_correctly_created() {
 
     let circom_compiler = CircomCompiler::from(circom_path.to_string());
     let proof =
-        circom_compiler.generate_proof("my_verification_key.zkey", "inputs.json");
+        circom_compiler.generate_groth16_proof("my_verification_key.zkey", "inputs.json");
 
     assert_proof_is_valid(proof);
 }

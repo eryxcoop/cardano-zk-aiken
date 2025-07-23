@@ -55,7 +55,7 @@ impl CircomCompiler {
 
     // proof generation
 
-    pub fn generate_proof(
+    pub fn generate_groth16_proof(
         &self,
         verification_key_path: &str,
         inputs_path: &str,
@@ -67,7 +67,7 @@ impl CircomCompiler {
 
         self.generate_witness(inputs_path, &build_path);
 
-        self.execute_groth16_prove_command(verification_key_path, &build_path);
+        self.generate_groth16_proof_from_witness(verification_key_path, &build_path);
 
         CompressedGroth16ProofBls12_381::from_json(&build_path)
     }
@@ -188,7 +188,7 @@ impl CircomCompiler {
             .unwrap();
     }
 
-    fn execute_groth16_prove_command(&self, verification_key_path: &str, build_path: &str) {
+    fn generate_groth16_proof_from_witness(&self, verification_key_path: &str, build_path: &str) {
         Command::new("snarkjs")
             .arg("groth16")
             .arg("prove")

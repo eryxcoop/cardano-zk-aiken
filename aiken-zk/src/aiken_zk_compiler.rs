@@ -225,7 +225,7 @@ impl AikenZkCompiler {
         output_path: &str,
     ) {
         let circom_compiler = CircomCompiler::from(circom_path.to_string());
-        let proof = circom_compiler.generate_proof(verification_key_path, inputs_path);
+        let proof = circom_compiler.generate_groth16_proof(verification_key_path, inputs_path);
 
         let aiken_presenter = CompressedGroth16ProofBls12_381AikenPresenter::new(proof);
 
