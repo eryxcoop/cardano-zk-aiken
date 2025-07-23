@@ -64,9 +64,7 @@ impl CircomCircuit {
         self.create_directory_if_not_exists(&build_path);
 
         self.compile_witness_generator(&build_path);
-
         self.generate_witness(inputs_path, &build_path);
-
         self.generate_groth16_proof_from_witness(verification_key_path, &build_path);
 
         CompressedGroth16ProofBls12_381::from_json(&build_path)
