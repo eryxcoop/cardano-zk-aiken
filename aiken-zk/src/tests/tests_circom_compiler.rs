@@ -48,10 +48,9 @@ fn test_proof_object_is_correctly_created() {
     let circom_path = "test.circom";
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let circom_program_filename = circom_path.to_string();
-    let mut compiler = CircomCompiler::from(source_code_addition());
-    compiler
-        .save_into_file(circom_program_filename.clone())
-        .unwrap();
+    
+    fs::write(&circom_program_filename, source_code_addition()).unwrap();
+
     fs::write("inputs.json", "{\"a\":\"1\", \"b\":\"2\", \"c\":\"3\"}").unwrap();
 
     let circom_compiler = CircomCompiler::from("".to_string());
