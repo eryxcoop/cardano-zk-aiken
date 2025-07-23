@@ -48,7 +48,7 @@ impl CircomCompiler {
             10,
             "Final Beacon phase2",
         );
-        self.export_verification_key(&verification_key_zkey, &verification_key_json);
+        self.export_to_json_verification_key(&verification_key_zkey, &verification_key_json);
 
         Ok(())
     }
@@ -154,7 +154,7 @@ impl CircomCompiler {
         );
     }
 
-    fn export_verification_key(&self, zkey: &str, output_json: &str) {
+    fn export_to_json_verification_key(&self, zkey: &str, output_json: &str) {
         self.run_command_or_fail(
             Command::new("snarkjs").args(["zkey", "export", "verificationkey", zkey, output_json]),
             "export verification key",
