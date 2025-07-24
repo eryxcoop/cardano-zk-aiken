@@ -169,19 +169,21 @@ fn test_it_can_generate_proof_for_the_meshjs_spend() {
 
     assert_text_matches(&mut reader, meshjs_file_prefix());
 
-    let mut opening_line = String::new();
-    reader.read_line(&mut opening_line).unwrap();
-    assert_eq!("\t\tmProof(\n", opening_line);
+    assert_line_matches(&mut reader, "\t\tmProof(\n");
 
     assert_proof_component_format_is_correct(&mut reader, 96);
     assert_proof_component_format_is_correct(&mut reader, 192);
     assert_proof_component_format_is_correct(&mut reader, 96);
 
-    let mut closing_line = String::new();
-    reader.read_line(&mut closing_line).unwrap();
-    assert_eq!("\t\t),\n", closing_line);
-    
+    assert_line_matches(&mut reader, "\t\t),\n");
+
     assert_text_matches(&mut reader, meshjs_file_suffix());
+}
+
+fn assert_line_matches(reader: &mut BufReader<File>, expected_line: &str) {
+    let mut line_to_assert = String::new();
+    reader.read_line(&mut line_to_assert).unwrap();
+    assert_eq!(expected_line, line_to_assert);
 }
 
 fn assert_text_matches(reader: &mut BufReader<File>, expected_text: String) {
