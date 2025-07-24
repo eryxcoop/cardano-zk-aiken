@@ -30,7 +30,17 @@ impl AikenZkCompiler {
         inputs_path: &str,
         output_path: &str,
     ) {
-        let mut zk_redeemer = r#"import {MConStr} from "@meshsdk/common";
+        let mut zk_redeemer = Self::file_prefix();
+        let circuit = CircomCircuit::from(circom_path.to_string());
+        let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
+        let mesh_js_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter::new(proof);
+        zk_redeemer += &mesh_js_presenter.present();
+
+        fs::write(output_path, zk_redeemer).expect("output file write failed");
+    }
+
+    fn file_prefix() -> String {
+        r#"import {MConStr} from "@meshsdk/common";
 import {Data, mConStr0} from "@meshsdk/core";
 
 type Proof = MConStr<any, string[]>;
@@ -52,13 +62,7 @@ export function mZKRedeemer(redeemer: Data): ZKRedeemer {
 function proofs(): Proof[] {
     return [
 "#
-        .to_string();
-        let circuit = CircomCircuit::from(circom_path.to_string());
-        let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
-        let mesh_js_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter::new(proof);
-        zk_redeemer += &mesh_js_presenter.present();
-
-        fs::write(output_path, zk_redeemer).expect("output file write failed");
+            .to_string()
     }
 }
 
