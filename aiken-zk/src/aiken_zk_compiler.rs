@@ -33,35 +33,9 @@ impl AikenZkCompiler {
         let circuit = CircomCircuit::from(circom_path.to_string());
         let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
         let mesh_js_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter::new(proof);
-        let zk_redeemer = mesh_js_presenter.present(Self::file_prefix());
+        let zk_redeemer = mesh_js_presenter.present();
 
         fs::write(output_path, zk_redeemer).expect("output file write failed");
-    }
-
-    fn file_prefix() -> String {
-        r#"import {MConStr} from "@meshsdk/common";
-import {Data, mConStr0} from "@meshsdk/core";
-
-type Proof = MConStr<any, string[]>;
-
-type ZKRedeemer = MConStr<any, Data[] | Proof[]>;
-
-function mProof(piA: string, piB: string, piC: string): Proof {
-    if (piA.length != 96 || piB.length != 192 || piC.length != 96) {
-        throw new Error("Wrong proof");
-    }
-
-    return mConStr0([piA, piB, piC]);
-}
-
-export function mZKRedeemer(redeemer: Data): ZKRedeemer {
-    return mConStr0([redeemer, proofs()]);
-}
-
-function proofs(): Proof[] {
-    return [
-"#
-            .to_string()
     }
 }
 

@@ -25,7 +25,7 @@ impl CompressedGroth16ProofBls12_381ToMeshJsPresenter {
         )
     }
 
-    pub fn present(&self, file_prefix: String) -> String {
+    pub fn present(&self) -> String {
         let mut presented_proof = self.file_prefix();
         presented_proof += "\t\tmProof(\n";
         presented_proof += &("\t\t\t\"".to_string() + self.proof.pi_a_as_byte_string() + "\",\n");
