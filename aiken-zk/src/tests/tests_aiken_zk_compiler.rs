@@ -148,7 +148,7 @@ fn test_it_can_generate_proof_for_aiken_testing() {
 
 #[test]
 #[serial]
-fn test_it_can_generate_proof_for_the_mesh_js_spend() {
+fn test_it_can_generate_proof_for_the_meshjs_spend() {
     let _temporal_directory = create_sandbox_and_set_as_current_directory();
     let circom_path = "my_program.circom";
     let verification_key_path = "my_verification_key.zkey";
@@ -157,7 +157,7 @@ fn test_it_can_generate_proof_for_the_mesh_js_spend() {
     let output_path = "zk_redeemer.ts";
     create_circom_and_inputs_file();
 
-    AikenZkCompiler::generate_mesh_js_zk_redeemer_library(
+    AikenZkCompiler::generate_meshjs_zk_redeemer_library(
         circom_path,
         verification_key_path,
         inputs_path,

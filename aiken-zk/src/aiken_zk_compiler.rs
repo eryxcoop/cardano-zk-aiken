@@ -1,6 +1,6 @@
 use crate::circom_circuit::CircomCircuit;
 use crate::component_creator::ComponentCreator;
-use crate::compressed_groth16_proof_bls12_381_aiken_presenter::CompressedGroth16ProofBls12_381AikenPresenter;
+use crate::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381AikenPresenter;
 use crate::lexer::{LexInfo, Lexer};
 use crate::token_zk::{TokenZK as Token, TokenZK};
 use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
@@ -23,7 +23,7 @@ pub struct Groth16CompressedData {
 pub struct AikenZkCompiler;
 
 impl AikenZkCompiler {
-    pub fn generate_mesh_js_zk_redeemer_library(
+    pub fn generate_meshjs_zk_redeemer_library(
         circom_path: &str,
         verification_key_path: &str,
         inputs_path: &str,
