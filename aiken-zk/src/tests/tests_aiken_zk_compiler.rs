@@ -195,7 +195,7 @@ fn assert_proof_component_format_is_correct(
     let mut line = String::new();
     reader.read_line(&mut line).unwrap();
 
-    let expected_prefix = "            \"";
+    let expected_prefix = "\t\t\t\"";
     let expected_suffix = "\",\n";
 
     let prefix = &line[..expected_prefix.len()];
