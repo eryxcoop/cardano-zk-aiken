@@ -33,7 +33,7 @@ impl AikenZkCompiler {
         let circuit = CircomCircuit::from(circom_path.to_string());
         let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
         let mesh_js_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter::new(proof);
-        let zk_redeemer = Self::file_prefix() + &mesh_js_presenter.present();
+        let zk_redeemer = mesh_js_presenter.present(Self::file_prefix());
 
         fs::write(output_path, zk_redeemer).expect("output file write failed");
     }
