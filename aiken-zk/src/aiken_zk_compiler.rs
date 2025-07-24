@@ -1,6 +1,6 @@
 use crate::circom_circuit::CircomCircuit;
 use crate::component_creator::ComponentCreator;
-use crate::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381AikenPresenter;
+use crate::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381ToAikenPresenter;
 use crate::lexer::{LexInfo, Lexer};
 use crate::token_zk::{TokenZK as Token, TokenZK};
 use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
@@ -275,7 +275,7 @@ impl AikenZkCompiler {
         let circom_compiler = CircomCircuit::from(circom_path.to_string());
         let proof = circom_compiler.generate_groth16_proof(verification_key_path, inputs_path);
 
-        let aiken_presenter = CompressedGroth16ProofBls12_381AikenPresenter::new(proof);
+        let aiken_presenter = CompressedGroth16ProofBls12_381ToAikenPresenter::new(proof);
 
         let aiken_proof = aiken_presenter.present();
         fs::write(output_path, aiken_proof).expect("failed to create output file");
