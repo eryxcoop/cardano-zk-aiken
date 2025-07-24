@@ -9,6 +9,7 @@ use serde::Deserialize;
 use std::fs;
 use std::io::Error;
 use std::process::Command;
+use crate::compressed_groth16_proof_bls12_381_to_meshjs_presenter::CompressedGroth16ProofBls12_381ToMeshJsPresenter;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -51,22 +52,13 @@ export function mZKRedeemer(redeemer: Data): ZKRedeemer {
 function proofs(): Proof[] {
     return [
 "#
-        .to_string()
-            + "        mProof(\n";
+        .to_string();
         let circuit = CircomCircuit::from(circom_path.to_string());
         let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
-        zk_redeemer += &("            \"".to_string() + proof.pi_a_as_byte_string() + "\",\n");
-        zk_redeemer += &("            \"".to_string() + proof.pi_b_as_byte_string() + "\",\n");
-        zk_redeemer += &("            \"".to_string() + proof.pi_c_as_byte_string() + "\",\n");
-        zk_redeemer += &Self::yyy();
+        let mesh_js_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter::new(proof);
+        zk_redeemer += &mesh_js_presenter.present();
 
         fs::write(output_path, zk_redeemer).expect("output file write failed");
-    }
-
-    fn yyy() -> String {
-        r#"    ];
-}
-"#.to_string()
     }
 }
 
