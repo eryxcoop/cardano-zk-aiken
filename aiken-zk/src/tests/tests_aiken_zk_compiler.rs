@@ -171,7 +171,7 @@ fn test_it_can_generate_proof_for_the_meshjs_spend() {
 
     let mut line = String::new();
     reader.read_line(&mut line).unwrap();
-    assert_eq!("        mProof(\n", line);
+    assert_eq!("\t\tmProof(\n", line);
 
     assert_proof_component_format_is_correct(&mut reader, 96);
     assert_proof_component_format_is_correct(&mut reader, 192);
