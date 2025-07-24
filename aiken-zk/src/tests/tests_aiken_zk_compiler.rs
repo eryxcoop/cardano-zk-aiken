@@ -167,17 +167,21 @@ fn test_it_can_generate_proof_for_the_meshjs_spend() {
     let file = File::open(output_path).unwrap();
     let mut reader = io::BufReader::new(file);
 
-    assert_text_matches(&mut reader, xxx());
+    assert_text_matches(&mut reader, meshjs_file_prefix());
 
-    let mut line = String::new();
-    reader.read_line(&mut line).unwrap();
-    assert_eq!("\t\tmProof(\n", line);
+    let mut opening_line = String::new();
+    reader.read_line(&mut opening_line).unwrap();
+    assert_eq!("\t\tmProof(\n", opening_line);
 
     assert_proof_component_format_is_correct(&mut reader, 96);
     assert_proof_component_format_is_correct(&mut reader, 192);
     assert_proof_component_format_is_correct(&mut reader, 96);
 
-    assert_text_matches(&mut reader, yyy());
+    let mut closing_line = String::new();
+    reader.read_line(&mut closing_line).unwrap();
+    assert_eq!("\t\t),\n", closing_line);
+    
+    assert_text_matches(&mut reader, meshjs_file_suffix());
 }
 
 fn assert_text_matches(reader: &mut BufReader<File>, expected_text: String) {
@@ -208,7 +212,7 @@ fn assert_proof_component_format_is_correct(
     assert_eq!(expected_suffix.to_string(), suffix);
 }
 
-fn xxx() -> String {
+fn meshjs_file_prefix() -> String {
     r#"import {MConStr} from "@meshsdk/common";
 import {Data, mConStr0} from "@meshsdk/core";
 
@@ -234,7 +238,7 @@ function proofs(): Proof[] {
     .to_string()
 }
 
-fn yyy() -> String {
+fn meshjs_file_suffix() -> String {
     r#"    ];
 }
 "#

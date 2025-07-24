@@ -31,6 +31,7 @@ impl CompressedGroth16ProofBls12_381ToMeshJsPresenter {
         presented_proof += &("\t\t\t\"".to_string() + self.proof.pi_a_as_byte_string() + "\",\n");
         presented_proof += &("\t\t\t\"".to_string() + self.proof.pi_b_as_byte_string() + "\",\n");
         presented_proof += &("\t\t\t\"".to_string() + self.proof.pi_c_as_byte_string() + "\",\n");
+        presented_proof += "\t\t),\n";
         presented_proof += &Self::yyy();
 
         presented_proof
