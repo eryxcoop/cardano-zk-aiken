@@ -1,15 +1,33 @@
 use crate::aiken_zk_compiler::AikenZkCompiler;
 use crate::create_validators_dir_lazy;
-use clap::{value_parser, Arg, ArgMatches, Command};
+use clap::{Arg, ArgMatches, Command, value_parser};
 use std::fs;
 use std::path::{Path, PathBuf};
 
-struct BuildCommand {
-}
+pub trait Subcommand {
+    //fn for_name(name: &str) -> bool;
 
+    fn get_argument_value<'a>(
+        subcommand_matches: &'a ArgMatches,
+        argument_id: &str,
+    ) -> &'a PathBuf {
+        subcommand_matches
+            .get_one::<PathBuf>(argument_id)
+            .expect("Value for command not found")
+    }
+}
+struct BuildCommand {}
+
+impl Subcommand for BuildCommand {
+/*    fn for_name(name: &str) -> bool {
+        name == "build"
+    }
+ */
+}
 impl BuildCommand {
     const BUILD_COMMAND_SOURCE_ARG_NAME: &'static str = "source_path";
     const BUILD_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_path";
+
     pub fn evaluate(&self, matches: &ArgMatches) {
         let (source_path, output_path) = Self::get_build_arguments(matches);
         create_validators_dir_lazy();
@@ -35,17 +53,6 @@ impl BuildCommand {
             Self::get_argument_value(subcommand_matches, Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
         (source_path, output_path)
     }
-
-    fn get_argument_value<'a>(
-        subcommand_matches: &'a ArgMatches,
-        argument_id: &str,
-    ) -> &'a PathBuf {
-        subcommand_matches
-            .get_one::<PathBuf>(argument_id)
-            .expect("Value for command not found")
-    }
-    
-
 }
 pub struct CommandLineInterface;
 impl CommandLineInterface {
@@ -77,7 +84,7 @@ impl CommandLineInterface {
                     inputs_path,
                     output_path,
                 );
-            })
+            }),
         ];
         let subcommand = main_command_matches.subcommand();
         if subcommand.is_some() {
