@@ -33,7 +33,7 @@ pub struct MeshJsZKRedeemerPresenter {
 
 impl MeshJsZKRedeemerPresenter {
 
-    pub fn new(compressed_groth16_proof_bls12_381: CompressedGroth16ProofBls12_381) -> Self {
+    pub fn new_for_proof(compressed_groth16_proof_bls12_381: CompressedGroth16ProofBls12_381) -> Self {
         Self {
             proof_presenter: CompressedGroth16ProofBls12_381ToMeshJsPresenter::new_for(compressed_groth16_proof_bls12_381)
         }
