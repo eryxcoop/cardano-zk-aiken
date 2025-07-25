@@ -5,6 +5,13 @@ pub struct CompressedGroth16ProofBls12_381ToMeshJsPresenter {
 }
 
 impl CompressedGroth16ProofBls12_381ToMeshJsPresenter {
+
+    pub fn new_for(proof: CompressedGroth16ProofBls12_381) -> Self {
+        Self {
+            proof
+        }
+    }
+
     pub fn present(&self) -> String {
         format!(
             "\t\tmProof(
@@ -40,7 +47,7 @@ impl MeshJsZKRedeemerPresenter {
     }
 
     fn present_proof(&self) -> String {
-        let proof_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter { proof: self.proof.clone()};
+        let proof_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter::new_for(self.proof.clone());
 
         proof_presenter.present()
     }
