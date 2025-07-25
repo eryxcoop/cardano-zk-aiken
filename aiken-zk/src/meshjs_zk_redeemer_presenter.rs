@@ -1,5 +1,25 @@
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 
+pub struct XXX {
+
+}
+
+impl XXX {
+    pub fn present(&self, proof: &CompressedGroth16ProofBls12_381) -> String {
+        format!(
+            "\t\tmProof(
+\t\t\t\"{}\",
+\t\t\t\"{}\",
+\t\t\t\"{}\",
+\t\t),
+",
+            proof.pi_a_as_byte_string(),
+            proof.pi_b_as_byte_string(),
+            proof.pi_c_as_byte_string()
+        )
+    }
+}
+
 pub struct MeshJsZKRedeemerPresenter {
     proof: CompressedGroth16ProofBls12_381
 }
@@ -20,17 +40,9 @@ impl MeshJsZKRedeemerPresenter {
     }
 
     fn present_proof(&self) -> String {
-        format!(
-            "\t\tmProof(
-\t\t\t\"{}\",
-\t\t\t\"{}\",
-\t\t\t\"{}\",
-\t\t),
-",
-            &self.proof.pi_a_as_byte_string(),
-            &self.proof.pi_b_as_byte_string(),
-            &self.proof.pi_c_as_byte_string()
-        )
+        let xxx = XXX {};
+
+        xxx.present(&self.proof)
     }
 
     fn file_prefix(&self) -> String {
