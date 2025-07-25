@@ -27,14 +27,7 @@ impl CommandLineInterface {
                 create_validators_dir_lazy();
                 Self::execute_build_command(source_path, output_path);
             }),
-            ("prove", |_: &ArgMatches| {})
-        ];
-        let subcommand = main_command_matches.subcommand();
-        if subcommand.is_some() {
-            let (name, matches) = subcommand.unwrap();
-            if name == subcommands[0].0 {
-                subcommands[0].1(matches);
-            } else if name == subcommands[1].0 {
+            ("prove", |matches| {
                 let (circom_path, verification_key_path, inputs_path, output_path) =
                     Self::get_prove_arguments(matches);
                 Self::execute_prove_command(
@@ -43,6 +36,15 @@ impl CommandLineInterface {
                     inputs_path,
                     output_path,
                 );
+            })
+        ];
+        let subcommand = main_command_matches.subcommand();
+        if subcommand.is_some() {
+            let (name, matches) = subcommand.unwrap();
+            if name == subcommands[0].0 {
+                subcommands[0].1(matches);
+            } else if name == subcommands[1].0 {
+                subcommands[1].1(matches);
             }
         } else {
         }
