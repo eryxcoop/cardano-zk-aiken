@@ -1,9 +1,8 @@
 use crate::aiken_zk_compiler::AikenZkCompiler;
 use crate::create_validators_dir_lazy;
-use clap::{Arg, ArgMatches, Command, value_parser};
+use clap::{value_parser, Arg, ArgMatches, Command};
 use std::fs;
 use std::path::{Path, PathBuf};
-use aiken_lang::tipo::Type::Tuple;
 
 pub struct CommandLineInterface;
 impl CommandLineInterface {
