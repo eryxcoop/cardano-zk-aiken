@@ -9,7 +9,7 @@ use serde::Deserialize;
 use std::fs;
 use std::io::Error;
 use std::process::Command;
-use crate::presenter::MeshJsZKRedeemerPresenter;
+use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
