@@ -3,6 +3,7 @@ use crate::create_validators_dir_lazy;
 use clap::{Arg, ArgMatches, Command, value_parser};
 use std::fs;
 use std::path::{Path, PathBuf};
+use aiken_lang::tipo::Type::Tuple;
 
 pub struct CommandLineInterface;
 impl CommandLineInterface {
@@ -20,14 +21,15 @@ impl CommandLineInterface {
         let main_command = Self::create_main_command();
         let main_command_matches = main_command.get_matches();
 
+        let subcommands: Vec<(&str, i8)> = vec![("build", 0), ("prove", 0)];
         let subcommand = main_command_matches.subcommand();
         if subcommand.is_some() {
             let (name, matches) = subcommand.unwrap();
-            if name == "build" {
+            if name == subcommands[0].0 {
                 let (source_path, output_path) = Self::get_build_arguments(matches);
                 create_validators_dir_lazy();
                 Self::execute_build_command(source_path, output_path);
-            } else if name == "prove" {
+            } else if name == subcommands[1].0 {
                 let (circom_path, verification_key_path, inputs_path, output_path) =
                     Self::get_prove_arguments(matches);
                 Self::execute_prove_command(
