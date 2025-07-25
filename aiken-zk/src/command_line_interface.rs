@@ -1,8 +1,8 @@
 use crate::aiken_zk_compiler::AikenZkCompiler;
+use crate::create_validators_dir_lazy;
 use clap::{Arg, ArgMatches, Command, value_parser};
 use std::fs;
 use std::path::{Path, PathBuf};
-use crate::create_validators_dir_lazy;
 
 pub struct CommandLineInterface;
 impl CommandLineInterface {
@@ -20,15 +20,16 @@ impl CommandLineInterface {
         let main_command = Self::create_main_command();
         let main_command_matches = main_command.get_matches();
 
-        match main_command_matches.subcommand() {
-            Some((Self::BUILD_COMMAND_NAME, subcommand_matches)) => {
-                let (source_path, output_path) = Self::get_build_arguments(subcommand_matches);
+        let subcommand = main_command_matches.subcommand();
+        if subcommand.is_some() {
+            let (name, matches) = subcommand.unwrap();
+            if name == "build" {
+                let (source_path, output_path) = Self::get_build_arguments(matches);
                 create_validators_dir_lazy();
                 Self::execute_build_command(source_path, output_path);
-            }
-            Some((Self::PROVE_COMMAND_NAME, subcommand_matches)) => {
+            } else if name == "prove" {
                 let (circom_path, verification_key_path, inputs_path, output_path) =
-                    Self::get_prove_arguments(subcommand_matches);
+                    Self::get_prove_arguments(matches);
                 Self::execute_prove_command(
                     circom_path,
                     verification_key_path,
@@ -36,7 +37,7 @@ impl CommandLineInterface {
                     output_path,
                 );
             }
-            _ => {}
+        } else {
         }
     }
 
