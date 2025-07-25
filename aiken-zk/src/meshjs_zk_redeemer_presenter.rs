@@ -25,8 +25,8 @@ impl MeshJsZKRedeemerPresenter {
             &self.proof.pi_b_as_byte_string(),
             &self.proof.pi_c_as_byte_string()
         );
-        let file_sufix = &self.file_suffix();
-        format!("{}{}{}", file_prefix, presented_proof, file_sufix)
+        let file_suffix = &self.file_suffix();
+        format!("{}{}{}", file_prefix, presented_proof, file_suffix)
     }
 
     fn file_prefix(&self) -> String {
