@@ -4,6 +4,49 @@ use clap::{value_parser, Arg, ArgMatches, Command};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+struct BuildCommand {
+}
+
+impl BuildCommand {
+    const BUILD_COMMAND_SOURCE_ARG_NAME: &'static str = "source_path";
+    const BUILD_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_path";
+    pub fn evaluate(&self, matches: &ArgMatches) {
+        let (source_path, output_path) = Self::get_build_arguments(matches);
+        create_validators_dir_lazy();
+        Self::execute_build_command(source_path, output_path);
+    }
+
+    fn execute_build_command(source_path: &PathBuf, output_path: &PathBuf) {
+        let source_offchain_aiken = fs::read_to_string(source_path).unwrap();
+
+        let output_zk_aiken = AikenZkCompiler::apply_modifications_to_src_for_token(
+            source_offchain_aiken,
+            "output".to_string(),
+            ("random1", "random2"),
+        );
+
+        fs::write(output_path, output_zk_aiken).expect("output file write failed");
+    }
+
+    fn get_build_arguments(subcommand_matches: &ArgMatches) -> (&PathBuf, &PathBuf) {
+        let source_path =
+            Self::get_argument_value(subcommand_matches, Self::BUILD_COMMAND_SOURCE_ARG_NAME);
+        let output_path =
+            Self::get_argument_value(subcommand_matches, Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
+        (source_path, output_path)
+    }
+
+    fn get_argument_value<'a>(
+        subcommand_matches: &'a ArgMatches,
+        argument_id: &str,
+    ) -> &'a PathBuf {
+        subcommand_matches
+            .get_one::<PathBuf>(argument_id)
+            .expect("Value for command not found")
+    }
+    
+
+}
 pub struct CommandLineInterface;
 impl CommandLineInterface {
     const BUILD_COMMAND_NAME: &'static str = "build";
@@ -22,9 +65,8 @@ impl CommandLineInterface {
 
         let subcommands: Vec<(&str, fn(&ArgMatches))> = vec![
             ("build", |matches| {
-                let (source_path, output_path) = Self::get_build_arguments(matches);
-                create_validators_dir_lazy();
-                Self::execute_build_command(source_path, output_path);
+                let x = BuildCommand {};
+                x.evaluate(matches);
             }),
             ("prove", |matches| {
                 let (circom_path, verification_key_path, inputs_path, output_path) =
