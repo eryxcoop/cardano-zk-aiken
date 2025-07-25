@@ -41,15 +41,10 @@ impl MeshJsZKRedeemerPresenter {
 
     pub fn present(&self) -> String {
         let file_prefix = self.file_prefix();
-        let presented_proof = self.present_proof();
+        let proof_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter::new_for(self.proof.clone());
+        let presented_proof = proof_presenter.present();
         let file_suffix = &self.file_suffix();
         format!("{}{}{}", file_prefix, presented_proof, file_suffix)
-    }
-
-    fn present_proof(&self) -> String {
-        let proof_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter::new_for(self.proof.clone());
-
-        proof_presenter.present()
     }
 
     fn file_prefix(&self) -> String {
