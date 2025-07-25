@@ -1,10 +1,10 @@
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 
-pub struct CompressedGroth16ProofBls12_381ToMeshJsPresenter {
+pub struct MeshJsZKRedeemerPresenter {
     proof: CompressedGroth16ProofBls12_381
 }
 
-impl CompressedGroth16ProofBls12_381ToMeshJsPresenter {
+impl MeshJsZKRedeemerPresenter {
 
     pub fn new(compressed_groth16_proof_bls12_381: CompressedGroth16ProofBls12_381) -> Self {
         Self {

@@ -9,7 +9,7 @@ use serde::Deserialize;
 use std::fs;
 use std::io::Error;
 use std::process::Command;
-use crate::compressed_groth16_proof_bls12_381_to_meshjs_presenter::CompressedGroth16ProofBls12_381ToMeshJsPresenter;
+use crate::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -32,7 +32,7 @@ impl AikenZkCompiler {
     ) {
         let circuit = CircomCircuit::from(circom_path.to_string());
         let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
-        let mesh_js_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter::new(proof);
+        let mesh_js_presenter = MeshJsZKRedeemerPresenter::new(proof);
         let zk_redeemer = mesh_js_presenter.present();
 
         fs::write(output_path, zk_redeemer).expect("output file write failed");
