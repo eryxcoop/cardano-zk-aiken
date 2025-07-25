@@ -1,10 +1,10 @@
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 
-pub struct XXX {
+pub struct CompressedGroth16ProofBls12_381ToMeshJsPresenter {
 
 }
 
-impl XXX {
+impl CompressedGroth16ProofBls12_381ToMeshJsPresenter {
     pub fn present(&self, proof: &CompressedGroth16ProofBls12_381) -> String {
         format!(
             "\t\tmProof(
@@ -40,7 +40,7 @@ impl MeshJsZKRedeemerPresenter {
     }
 
     fn present_proof(&self) -> String {
-        let xxx = XXX {};
+        let xxx = CompressedGroth16ProofBls12_381ToMeshJsPresenter {};
 
         xxx.present(&self.proof)
     }
