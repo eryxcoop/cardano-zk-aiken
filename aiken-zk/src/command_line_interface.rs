@@ -126,26 +126,6 @@ impl CommandLineInterface {
         (circom_path, verification_key_path, inputs_path, output_path)
     }
 
-    fn execute_build_command(source_path: &PathBuf, output_path: &PathBuf) {
-        let source_offchain_aiken = fs::read_to_string(source_path).unwrap();
-
-        let output_zk_aiken = AikenZkCompiler::apply_modifications_to_src_for_token(
-            source_offchain_aiken,
-            "output".to_string(),
-            ("random1", "random2"),
-        );
-
-        fs::write(output_path, output_zk_aiken).expect("output file write failed");
-    }
-
-    fn get_build_arguments(subcommand_matches: &ArgMatches) -> (&PathBuf, &PathBuf) {
-        let source_path =
-            Self::get_argument_value(subcommand_matches, Self::BUILD_COMMAND_SOURCE_ARG_NAME);
-        let output_path =
-            Self::get_argument_value(subcommand_matches, Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
-        (source_path, output_path)
-    }
-
     fn create_main_command() -> Command {
         Command::new("aiken-zk")
             .subcommand_required(true)
