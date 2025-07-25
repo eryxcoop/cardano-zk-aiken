@@ -1,6 +1,6 @@
 use crate::circom_circuit::CircomCircuit;
 use crate::component_creator::ComponentCreator;
-use crate::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381ToAikenPresenter;
+use crate::presenter::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381ToAikenPresenter;
 use crate::lexer::{LexInfo, Lexer};
 use crate::token_zk::{TokenZK as Token, TokenZK};
 use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
