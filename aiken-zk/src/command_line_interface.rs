@@ -20,23 +20,23 @@ impl CommandLineInterface {
         let main_command = Self::create_main_command();
         let main_command_matches = main_command.get_matches();
 
-        if let Some(subcommand_matches) =
-            main_command_matches.subcommand_matches(Self::BUILD_COMMAND_NAME)
-        {
-            let (source_path, output_path) = Self::get_build_arguments(subcommand_matches);
-            create_validators_dir_lazy();
-            Self::execute_build_command(source_path, output_path);
-        } else if let Some(subcommand_matches) =
-            main_command_matches.subcommand_matches(Self::PROVE_COMMAND_NAME)
-        {
-            let (circom_path, verification_key_path, inputs_path, output_path) =
-                Self::get_prove_arguments(subcommand_matches);
-            Self::execute_prove_command(
-                circom_path,
-                verification_key_path,
-                inputs_path,
-                output_path,
-            );
+        match main_command_matches.subcommand() {
+            Some((Self::BUILD_COMMAND_NAME, subcommand_matches)) => {
+                let (source_path, output_path) = Self::get_build_arguments(subcommand_matches);
+                create_validators_dir_lazy();
+                Self::execute_build_command(source_path, output_path);
+            }
+            Some((Self::PROVE_COMMAND_NAME, subcommand_matches)) => {
+                let (circom_path, verification_key_path, inputs_path, output_path) =
+                    Self::get_prove_arguments(subcommand_matches);
+                Self::execute_prove_command(
+                    circom_path,
+                    verification_key_path,
+                    inputs_path,
+                    output_path,
+                );
+            }
+            _ => {}
         }
     }
 
