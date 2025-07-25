@@ -14,7 +14,13 @@ impl MeshJsZKRedeemerPresenter {
 
     pub fn present(&self) -> String {
         let file_prefix = self.file_prefix();
-        let presented_proof = format!(
+        let presented_proof = self.present_proof();
+        let file_suffix = &self.file_suffix();
+        format!("{}{}{}", file_prefix, presented_proof, file_suffix)
+    }
+
+    fn present_proof(&self) -> String {
+        format!(
             "\t\tmProof(
 \t\t\t\"{}\",
 \t\t\t\"{}\",
@@ -24,9 +30,7 @@ impl MeshJsZKRedeemerPresenter {
             &self.proof.pi_a_as_byte_string(),
             &self.proof.pi_b_as_byte_string(),
             &self.proof.pi_c_as_byte_string()
-        );
-        let file_suffix = &self.file_suffix();
-        format!("{}{}{}", file_prefix, presented_proof, file_suffix)
+        )
     }
 
     fn file_prefix(&self) -> String {
