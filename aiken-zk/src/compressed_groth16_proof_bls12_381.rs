@@ -1,4 +1,5 @@
 use std::process::{Command, Output};
+#[derive(Clone)]
 pub struct CompressedGroth16ProofBls12_381 {
     pi_a: String,
     pi_b: String,
