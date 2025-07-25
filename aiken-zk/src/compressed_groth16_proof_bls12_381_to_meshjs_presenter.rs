@@ -12,29 +12,21 @@ impl CompressedGroth16ProofBls12_381ToMeshJsPresenter {
         }
     }
 
-    pub fn future_present(&self) -> String {
-        format!(
-            "        mProof(
-\tpiA: #\"{}\",
-\tpiB: #\"{}\",
-\tpiC: #\"{}\",
-}}",
+    pub fn present(&self) -> String {
+        let file_prefix = self.file_prefix();
+        let presented_proof = format!(
+            "\t\tmProof(
+\t\t\t\"{}\",
+\t\t\t\"{}\",
+\t\t\t\"{}\",
+\t\t),
+",
             &self.proof.pi_a_as_byte_string(),
             &self.proof.pi_b_as_byte_string(),
             &self.proof.pi_c_as_byte_string()
-        )
-    }
-
-    pub fn present(&self) -> String {
-        let mut presented_proof = self.file_prefix();
-        presented_proof += "\t\tmProof(\n";
-        presented_proof += &("\t\t\t\"".to_string() + self.proof.pi_a_as_byte_string() + "\",\n");
-        presented_proof += &("\t\t\t\"".to_string() + self.proof.pi_b_as_byte_string() + "\",\n");
-        presented_proof += &("\t\t\t\"".to_string() + self.proof.pi_c_as_byte_string() + "\",\n");
-        presented_proof += "\t\t),\n";
-        presented_proof += &self.file_suffix();
-
-        presented_proof
+        );
+        let file_sufix = &self.file_suffix();
+        format!("{}{}{}", file_prefix, presented_proof, file_sufix)
     }
 
     fn file_prefix(&self) -> String {
