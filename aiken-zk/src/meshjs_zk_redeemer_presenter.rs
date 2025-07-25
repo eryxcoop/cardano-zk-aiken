@@ -28,21 +28,20 @@ impl CompressedGroth16ProofBls12_381ToMeshJsPresenter {
 }
 
 pub struct MeshJsZKRedeemerPresenter {
-    proof: CompressedGroth16ProofBls12_381
+    proof_presenter: CompressedGroth16ProofBls12_381ToMeshJsPresenter
 }
 
 impl MeshJsZKRedeemerPresenter {
 
     pub fn new(compressed_groth16_proof_bls12_381: CompressedGroth16ProofBls12_381) -> Self {
         Self {
-            proof: compressed_groth16_proof_bls12_381
+            proof_presenter: CompressedGroth16ProofBls12_381ToMeshJsPresenter::new_for(compressed_groth16_proof_bls12_381)
         }
     }
 
     pub fn present(&self) -> String {
         let file_prefix = self.file_prefix();
-        let proof_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter::new_for(self.proof.clone());
-        let presented_proof = proof_presenter.present();
+        let presented_proof = self.proof_presenter.present();
         let file_suffix = &self.file_suffix();
         format!("{}{}{}", file_prefix, presented_proof, file_suffix)
     }
