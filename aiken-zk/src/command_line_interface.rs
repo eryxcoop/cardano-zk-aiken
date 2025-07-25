@@ -39,12 +39,12 @@ impl CommandLineInterface {
         ];
         let subcommand = main_command_matches.subcommand();
         if subcommand.is_some() {
-            let (name, matches) = subcommand.unwrap();
-            if name == subcommands[0].0 {
-                subcommands[0].1(matches);
-            } else if name == subcommands[1].0 {
-                subcommands[1].1(matches);
-            }
+            let (match_name, matches) = subcommand.unwrap();
+            subcommands.iter().for_each(|(name, subcommand_do)| {
+                if match_name.to_string() == name.to_string() {
+                    subcommand_do(matches);
+                }
+            });
         } else {
         }
     }
