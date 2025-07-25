@@ -5,7 +5,7 @@ pub struct CompressedGroth16ProofBls12_381ToMeshJsPresenter {
 }
 
 impl CompressedGroth16ProofBls12_381ToMeshJsPresenter {
-    pub fn present(&self, proof: CompressedGroth16ProofBls12_381) -> String {
+    pub fn present(&self) -> String {
         format!(
             "\t\tmProof(
 \t\t\t\"{}\",
@@ -14,8 +14,8 @@ impl CompressedGroth16ProofBls12_381ToMeshJsPresenter {
 \t\t),
 ",
             self.proof.pi_a_as_byte_string(),
-            proof.pi_b_as_byte_string(),
-            proof.pi_c_as_byte_string()
+            self.proof.pi_b_as_byte_string(),
+            self.proof.pi_c_as_byte_string()
         )
     }
 }
@@ -40,9 +40,9 @@ impl MeshJsZKRedeemerPresenter {
     }
 
     fn present_proof(&self) -> String {
-        let xxx = CompressedGroth16ProofBls12_381ToMeshJsPresenter { proof: self.proof.clone()};
+        let proof_presenter = CompressedGroth16ProofBls12_381ToMeshJsPresenter { proof: self.proof.clone()};
 
-        xxx.present(self.proof.clone())
+        proof_presenter.present()
     }
 
     fn file_prefix(&self) -> String {
