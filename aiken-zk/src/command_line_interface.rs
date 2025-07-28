@@ -29,8 +29,8 @@ macro_rules! execute_subcommand {
 impl CommandLineInterface {
     pub fn parse_inputs_and_execute_command() {
         let main_command = Self::create_main_command();
+        
         let main_command_matches = main_command.get_matches();
-
         match main_command_matches.subcommand() {
             Some(subcommand) => {
                 execute_subcommand!(subcommand, BuildCommand, ProveCommand);

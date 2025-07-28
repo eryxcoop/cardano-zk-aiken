@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 pub trait Subcommand {
     const SUBCOMMAND_NAME: &'static str;
-    
+
     fn create_subcommand() -> Command;
 
     fn for_name(name: &str) -> bool;
