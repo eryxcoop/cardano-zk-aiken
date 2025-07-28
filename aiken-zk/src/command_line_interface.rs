@@ -1,7 +1,6 @@
-use std::any::Any;
 use crate::aiken_zk_compiler::AikenZkCompiler;
 use crate::create_validators_dir_lazy;
-use clap::{Arg, ArgMatches, Command, value_parser};
+use clap::{value_parser, Arg, ArgMatches, Command};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -38,9 +37,7 @@ impl Subcommand for BuildCommand {
 impl BuildCommand {
     const BUILD_COMMAND_SOURCE_ARG_NAME: &'static str = "source_path";
     const BUILD_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_path";
-    fn new() -> Self {
-        Self {}
-    }
+
     fn execute_command(source_path: &PathBuf, output_path: &PathBuf) {
         let source_offchain_aiken = fs::read_to_string(source_path).unwrap();
 
@@ -78,9 +75,7 @@ impl ProveCommand {
     const PROVE_COMMAND_VK_ARG_NAME: &'static str = "verification_key_path";
     const PROVE_COMMAND_INPUT_ARG_NAME: &'static str = "inputs_path";
     const PROVE_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_proof_path";
-    fn new() -> Self {
-        Self {}
-    }
+
     fn execute_prove_command(
         circom_path: &Path,
         verification_key_path: &Path,
@@ -112,20 +107,22 @@ impl ProveCommand {
 
 
 macro_rules! xxx {
-    ( $name: ident, $matches: ident, $a_command: ident, $( $others_commands:ident ),* ) => {
+    ( $subcommand: ident, $a_command: ident, $( $others_commands:ident ),* ) => {
         {
-            if ($a_command::for_name($name)) {
+            let (match_name, matches) = $subcommand.unwrap();
+
+            if ($a_command::for_name(match_name)) {
                     let command = $a_command {};
-                    command.evaluate($matches);
+                    command.evaluate(matches);
             }
             $(
-                else if ($others_commands::for_name($name)) {
+                else if ($others_commands::for_name(match_name)) {
                     let command = $others_commands {};
-                    command.evaluate($matches);
+                    command.evaluate(matches);
                 }
             )*
             else {
-                panic!("Unknown command: {}", stringify!($name));
+                panic!("Unknown command: {}", stringify!(match_name));
             }
         };
     };
@@ -149,9 +146,9 @@ impl CommandLineInterface {
 
         let subcommand = main_command_matches.subcommand();
         if subcommand.is_some() {
-            let (match_name, matches) = subcommand.unwrap();
-            xxx!(match_name, matches, BuildCommand, ProveCommand);
+            xxx!(subcommand, BuildCommand, ProveCommand);
         } else {
+            panic!("No command given");
         }
     }
 
@@ -160,15 +157,6 @@ impl CommandLineInterface {
             .subcommand_required(true)
             .subcommand(Self::create_build_subcommand())
             .subcommand(Self::create_prove_subcommand())
-    }
-
-    fn get_argument_value<'a>(
-        subcommand_matches: &'a ArgMatches,
-        argument_id: &str,
-    ) -> &'a PathBuf {
-        subcommand_matches
-            .get_one::<PathBuf>(argument_id)
-            .expect("Value for command not found")
     }
 
     fn create_build_subcommand() -> Command {
