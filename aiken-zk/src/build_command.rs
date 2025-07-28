@@ -8,17 +8,19 @@ use std::path::PathBuf;
 pub struct BuildCommand {}
 
 impl Subcommand for BuildCommand {
+    const SUBCOMMAND_NAME: &'static str = "build";
+    
     fn create_subcommand() -> Command {
         let input = Self::create_required_argument_with_id(Self::BUILD_COMMAND_SOURCE_ARG_NAME);
         let output = Self::create_required_argument_with_id(Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
 
-        Command::new(Self::BUILD_COMMAND_NAME)
+        Command::new(Self::SUBCOMMAND_NAME)
             .arg(input.clone())
             .arg(output.clone())
     }
 
     fn for_name(name: &str) -> bool {
-        name.to_string() == "build".to_string()
+        name.to_string() == Self::SUBCOMMAND_NAME.to_string()
     }
 
     fn evaluate(&self, matches: &ArgMatches) {
@@ -29,7 +31,6 @@ impl Subcommand for BuildCommand {
 }
 
 impl BuildCommand {
-    const BUILD_COMMAND_NAME: &'static str = "build";
     const BUILD_COMMAND_SOURCE_ARG_NAME: &'static str = "source_path";
     const BUILD_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_path";
 
