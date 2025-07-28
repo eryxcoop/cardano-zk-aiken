@@ -48,7 +48,6 @@ impl Subcommand for BuildCommand {
         create_validators_dir_lazy();
         Self::execute_command(source_path, output_path);
     }
-
 }
 
 impl BuildCommand {
@@ -97,13 +96,14 @@ impl Subcommand for ProveCommand {
             .arg(output_path)
     }
 
+    fn for_name(name: &str) -> bool {
+        "prove".to_string() == name.to_string()
+    }
+
     fn evaluate(&self, matches: &ArgMatches) {
         let (circom_path, verification_key_path, inputs_path, output_path) =
             Self::get_prove_arguments(matches);
         Self::execute_prove_command(circom_path, verification_key_path, inputs_path, output_path);
-    }
-    fn for_name(name: &str) -> bool {
-        "prove".to_string() == name.to_string()
     }
 }
 
