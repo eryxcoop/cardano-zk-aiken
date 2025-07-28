@@ -143,6 +143,8 @@ impl ProveCommand {
     }
 }
 
+pub struct CommandLineInterface;
+
 macro_rules! execute_subcommand {
     ( $subcommand: ident, $a_command: ident, $( $others_commands:ident ),* ) => {
         {
@@ -164,16 +166,7 @@ macro_rules! execute_subcommand {
         };
     };
 }
-
-pub struct CommandLineInterface;
 impl CommandLineInterface {
-    fn create_main_command() -> Command {
-        Command::new("aiken-zk")
-            .subcommand_required(true)
-            .subcommand(BuildCommand::create_subcommand())
-            .subcommand(ProveCommand::create_subcommand())
-    }
-
     pub fn parse_inputs_and_execute_command() {
         let main_command = Self::create_main_command();
         let main_command_matches = main_command.get_matches();
@@ -186,5 +179,12 @@ impl CommandLineInterface {
                 panic!("No command given");
             }
         }
+    }
+
+    fn create_main_command() -> Command {
+        Command::new("aiken-zk")
+            .subcommand_required(true)
+            .subcommand(BuildCommand::create_subcommand())
+            .subcommand(ProveCommand::create_subcommand())
     }
 }
