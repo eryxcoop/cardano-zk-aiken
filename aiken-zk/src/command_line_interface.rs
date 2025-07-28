@@ -34,6 +34,7 @@ impl Subcommand for BuildCommand {
         Self::execute_command(source_path, output_path);
     }
 }
+
 impl BuildCommand {
     const BUILD_COMMAND_SOURCE_ARG_NAME: &'static str = "source_path";
     const BUILD_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_path";
@@ -110,17 +111,23 @@ impl ProveCommand {
 }
 
 
-#[macro_export]
 macro_rules! xxx {
-    ( $name: ident, $matches: ident, $( $x:expr ),* ) => {
+    ( $name: ident, $matches: ident, $a_command: ident, $( $others_commands:ident ),* ) => {
         {
+            if ($a_command::for_name($name)) {
+                    let command = $a_command {};
+                    command.evaluate($matches);
+            }
             $(
-                if ($x::for_name(name)) {
-                    let command = $x {};
-                    command.evaluate(&$matches)
+                else if ($others_commands::for_name($name)) {
+                    let command = $others_commands {};
+                    command.evaluate($matches);
                 }
             )*
-        }
+            else {
+                panic!("Unknown command: {}", stringify!($name));
+            }
+        };
     };
 }
 
@@ -143,18 +150,7 @@ impl CommandLineInterface {
         let subcommand = main_command_matches.subcommand();
         if subcommand.is_some() {
             let (match_name, matches) = subcommand.unwrap();
-            //xxx!(match_name, matches, BuildCommand, ProveCommand);
-            {
-                if BuildCommand::for_name(match_name) {
-                    let command = BuildCommand {};
-                    command.evaluate(matches)
-                }
-                if ProveCommand::for_name(match_name) {
-                    let command = ProveCommand {};
-                    command.evaluate(matches)
-                }
-                panic!("Unknown command");
-            }
+            xxx!(match_name, matches, BuildCommand, ProveCommand);
         } else {
         }
     }
