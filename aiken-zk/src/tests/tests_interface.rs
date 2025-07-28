@@ -41,7 +41,7 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
 
 #[test]
 #[serial]
-fn test_user_can_generate_a_proof() {
+fn test_user_can_generate_an_aiken_proof() {
     let _temporal_directory = create_sandbox_and_set_as_current_directory();
     let aiken_zk_binary_path = manifest_path() + "/target/debug/aiken-zk";
     let circom_path = "my_program.circom";
@@ -52,6 +52,7 @@ fn test_user_can_generate_a_proof() {
 
     Command::new(aiken_zk_binary_path)
         .arg("prove")
+        .arg("aiken")
         .arg(circom_path)
         .arg(verification_key_path)
         .arg(inputs_path)

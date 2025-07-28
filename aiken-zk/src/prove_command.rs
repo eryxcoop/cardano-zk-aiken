@@ -19,10 +19,15 @@ impl Subcommand for ProveCommand {
             Self::create_required_argument_with_id(Self::PROVE_COMMAND_OUTPUT_ARG_NAME);
 
         Command::new(Self::SUBCOMMAND_NAME)
-            .arg(circom_path)
-            .arg(verification_key_path)
-            .arg(inputs_path)
-            .arg(output_path)
+            .subcommand_required(true)
+            .subcommand(
+                Command::new("aiken")
+                    .arg(circom_path)
+                    .arg(verification_key_path)
+                    .arg(inputs_path)
+                    .arg(output_path)
+            )
+
     }
 
     fn for_name(name: &str) -> bool {
@@ -30,9 +35,16 @@ impl Subcommand for ProveCommand {
     }
 
     fn evaluate(&self, matches: &ArgMatches) {
-        let (circom_path, verification_key_path, inputs_path, output_path) =
-            Self::get_prove_arguments(matches);
-        Self::execute_prove_command(circom_path, verification_key_path, inputs_path, output_path);
+        match matches.subcommand() {
+            Some(("aiken", sub_matches)) => {
+                let (circom_path, verification_key_path, inputs_path, output_path) =
+                    Self::get_prove_arguments(sub_matches);
+                Self::execute_prove_command(circom_path, verification_key_path, inputs_path, output_path);
+            }
+            _ => {
+                panic!("Unknown or missing subcommand for `prove`");
+            }
+        }
     }
 }
 
