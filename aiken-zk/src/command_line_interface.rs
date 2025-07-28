@@ -1,3 +1,4 @@
+use std::any::Any;
 use crate::aiken_zk_compiler::AikenZkCompiler;
 use crate::create_validators_dir_lazy;
 use clap::{Arg, ArgMatches, Command, value_parser};
@@ -5,7 +6,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 pub trait Subcommand {
-    //fn for_name(name: &str) -> bool;
+    fn for_name(name: &str) -> bool;
 
     fn get_argument_value<'a>(
         subcommand_matches: &'a ArgMatches,
@@ -15,26 +16,31 @@ pub trait Subcommand {
             .get_one::<PathBuf>(argument_id)
             .expect("Value for command not found")
     }
+
+    fn evaluate(&self, matches: &ArgMatches);
 }
+
 struct BuildCommand {}
 
 impl Subcommand for BuildCommand {
-/*    fn for_name(name: &str) -> bool {
-        name == "build"
+
+    fn for_name(name: &str) -> bool {
+        name.to_string() == "build".to_string()
     }
- */
+
+    fn evaluate(&self, matches: &ArgMatches) {
+        let (source_path, output_path) = Self::get_arguments(matches);
+        create_validators_dir_lazy();
+        Self::execute_command(source_path, output_path);
+    }
 }
 impl BuildCommand {
     const BUILD_COMMAND_SOURCE_ARG_NAME: &'static str = "source_path";
     const BUILD_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_path";
-
-    pub fn evaluate(&self, matches: &ArgMatches) {
-        let (source_path, output_path) = Self::get_build_arguments(matches);
-        create_validators_dir_lazy();
-        Self::execute_build_command(source_path, output_path);
+    fn new() -> Self {
+        Self {}
     }
-
-    fn execute_build_command(source_path: &PathBuf, output_path: &PathBuf) {
+    fn execute_command(source_path: &PathBuf, output_path: &PathBuf) {
         let source_offchain_aiken = fs::read_to_string(source_path).unwrap();
 
         let output_zk_aiken = AikenZkCompiler::apply_modifications_to_src_for_token(
@@ -46,7 +52,7 @@ impl BuildCommand {
         fs::write(output_path, output_zk_aiken).expect("output file write failed");
     }
 
-    fn get_build_arguments(subcommand_matches: &ArgMatches) -> (&PathBuf, &PathBuf) {
+    fn get_arguments(subcommand_matches: &ArgMatches) -> (&PathBuf, &PathBuf) {
         let source_path =
             Self::get_argument_value(subcommand_matches, Self::BUILD_COMMAND_SOURCE_ARG_NAME);
         let output_path =
@@ -55,27 +61,24 @@ impl BuildCommand {
     }
 }
 
-struct ProveCommand {
+struct ProveCommand {}
 
+impl Subcommand for ProveCommand {
+    fn evaluate(&self, matches: &ArgMatches) {
+        let (circom_path, verification_key_path, inputs_path, output_path) =
+            Self::get_prove_arguments(matches);
+        Self::execute_prove_command(circom_path, verification_key_path, inputs_path, output_path);
+    }
+fn for_name(name: &str) -> bool { "prove".to_string() == name.to_string() }
 }
-
-impl Subcommand for ProveCommand {}
 
 impl ProveCommand {
     const PROVE_COMMAND_CIRCOM_ARG_NAME: &'static str = "circom_path";
     const PROVE_COMMAND_VK_ARG_NAME: &'static str = "verification_key_path";
     const PROVE_COMMAND_INPUT_ARG_NAME: &'static str = "inputs_path";
     const PROVE_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_proof_path";
-
-    pub fn evaluate(&self, matches: &ArgMatches) {
-        let (circom_path, verification_key_path, inputs_path, output_path) =
-            Self::get_prove_arguments(matches);
-        Self::execute_prove_command(
-            circom_path,
-            verification_key_path,
-            inputs_path,
-            output_path,
-        );
+    fn new() -> Self {
+        Self {}
     }
     fn execute_prove_command(
         circom_path: &Path,
@@ -104,8 +107,23 @@ impl ProveCommand {
             Self::get_argument_value(subcommand_matches, Self::PROVE_COMMAND_OUTPUT_ARG_NAME);
         (circom_path, verification_key_path, inputs_path, output_path)
     }
-
 }
+
+
+#[macro_export]
+macro_rules! xxx {
+    ( $name: ident, $matches: ident, $( $x:expr ),* ) => {
+        {
+            $(
+                if ($x::for_name(name)) {
+                    let command = $x {};
+                    command.evaluate(&$matches)
+                }
+            )*
+        }
+    };
+}
+
 pub struct CommandLineInterface;
 impl CommandLineInterface {
     const BUILD_COMMAND_NAME: &'static str = "build";
@@ -122,24 +140,21 @@ impl CommandLineInterface {
         let main_command = Self::create_main_command();
         let main_command_matches = main_command.get_matches();
 
-        let subcommands: Vec<(&str, fn(&ArgMatches))> = vec![
-            ("build", |matches| {
-                let x = BuildCommand {};
-                x.evaluate(matches);
-            }),
-            ("prove", |matches| {
-                let x = ProveCommand {};
-                x.evaluate(matches);
-            }),
-        ];
         let subcommand = main_command_matches.subcommand();
         if subcommand.is_some() {
             let (match_name, matches) = subcommand.unwrap();
-            subcommands.iter().for_each(|(name, subcommand_do)| {
-                if match_name.to_string() == name.to_string() {
-                    subcommand_do(matches);
+            //xxx!(match_name, matches, BuildCommand, ProveCommand);
+            {
+                if BuildCommand::for_name(match_name) {
+                    let command = BuildCommand {};
+                    command.evaluate(matches)
                 }
-            });
+                if ProveCommand::for_name(match_name) {
+                    let command = ProveCommand {};
+                    command.evaluate(matches)
+                }
+                panic!("Unknown command");
+            }
         } else {
         }
     }
