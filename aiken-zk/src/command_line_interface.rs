@@ -106,7 +106,7 @@ impl ProveCommand {
 }
 
 
-macro_rules! xxx {
+macro_rules! executeSubcommand {
     ( $subcommand: ident, $a_command: ident, $( $others_commands:ident ),* ) => {
         {
             let (match_name, matches) = $subcommand.unwrap();
@@ -146,7 +146,7 @@ impl CommandLineInterface {
 
         let subcommand = main_command_matches.subcommand();
         if subcommand.is_some() {
-            xxx!(subcommand, BuildCommand, ProveCommand);
+            executeSubcommand!(subcommand, BuildCommand, ProveCommand);
         } else {
             panic!("No command given");
         }
