@@ -5,6 +5,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 pub trait Subcommand {
+    fn create_subcommand() -> Command;
+
     fn for_name(name: &str) -> bool;
 
     fn get_argument_value<'a>(
@@ -17,11 +19,26 @@ pub trait Subcommand {
     }
 
     fn evaluate(&self, matches: &ArgMatches);
+
+    fn create_required_argument_with_id(id: &'static str) -> Arg {
+        Arg::new(id)
+            .required(true)
+            .value_parser(value_parser!(PathBuf))
+    }
 }
 
 struct BuildCommand {}
 
 impl Subcommand for BuildCommand {
+    fn create_subcommand() -> Command {
+        let input = Self::create_required_argument_with_id(Self::BUILD_COMMAND_SOURCE_ARG_NAME);
+        let output = Self::create_required_argument_with_id(Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
+
+        Command::new(Self::BUILD_COMMAND_NAME)
+            .arg(input.clone())
+            .arg(output.clone())
+    }
+
     fn for_name(name: &str) -> bool {
         name.to_string() == "build".to_string()
     }
@@ -31,9 +48,11 @@ impl Subcommand for BuildCommand {
         create_validators_dir_lazy();
         Self::execute_command(source_path, output_path);
     }
+
 }
 
 impl BuildCommand {
+    const BUILD_COMMAND_NAME: &'static str = "build";
     const BUILD_COMMAND_SOURCE_ARG_NAME: &'static str = "source_path";
     const BUILD_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_path";
 
@@ -61,6 +80,23 @@ impl BuildCommand {
 struct ProveCommand {}
 
 impl Subcommand for ProveCommand {
+    fn create_subcommand() -> Command {
+        let circom_path =
+            Self::create_required_argument_with_id(Self::PROVE_COMMAND_CIRCOM_ARG_NAME);
+        let verification_key_path =
+            Self::create_required_argument_with_id(Self::PROVE_COMMAND_VK_ARG_NAME);
+        let inputs_path =
+            Self::create_required_argument_with_id(Self::PROVE_COMMAND_INPUT_ARG_NAME);
+        let output_path =
+            Self::create_required_argument_with_id(Self::PROVE_COMMAND_OUTPUT_ARG_NAME);
+
+        Command::new(Self::PROVE_COMMAND_NAME)
+            .arg(circom_path)
+            .arg(verification_key_path)
+            .arg(inputs_path)
+            .arg(output_path)
+    }
+
     fn evaluate(&self, matches: &ArgMatches) {
         let (circom_path, verification_key_path, inputs_path, output_path) =
             Self::get_prove_arguments(matches);
@@ -72,6 +108,7 @@ impl Subcommand for ProveCommand {
 }
 
 impl ProveCommand {
+    const PROVE_COMMAND_NAME: &'static str = "prove";
     const PROVE_COMMAND_CIRCOM_ARG_NAME: &'static str = "circom_path";
     const PROVE_COMMAND_VK_ARG_NAME: &'static str = "verification_key_path";
     const PROVE_COMMAND_INPUT_ARG_NAME: &'static str = "inputs_path";
@@ -130,16 +167,6 @@ macro_rules! execute_subcommand {
 
 pub struct CommandLineInterface;
 impl CommandLineInterface {
-    const BUILD_COMMAND_NAME: &'static str = "build";
-    const BUILD_COMMAND_SOURCE_ARG_NAME: &'static str = "source_path";
-    const BUILD_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_path";
-
-    const PROVE_COMMAND_NAME: &'static str = "prove";
-    const PROVE_COMMAND_CIRCOM_ARG_NAME: &'static str = "circom_path";
-    const PROVE_COMMAND_VK_ARG_NAME: &'static str = "verification_key_path";
-    const PROVE_COMMAND_INPUT_ARG_NAME: &'static str = "inputs_path";
-    const PROVE_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_proof_path";
-
     pub fn parse_inputs_and_execute_command() {
         let main_command = Self::create_main_command();
         let main_command_matches = main_command.get_matches();
@@ -157,39 +184,7 @@ impl CommandLineInterface {
     fn create_main_command() -> Command {
         Command::new("aiken-zk")
             .subcommand_required(true)
-            .subcommand(Self::create_build_subcommand())
-            .subcommand(Self::create_prove_subcommand())
-    }
-
-    fn create_build_subcommand() -> Command {
-        let input = Self::create_required_argument_with_id(Self::BUILD_COMMAND_SOURCE_ARG_NAME);
-        let output = Self::create_required_argument_with_id(Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
-
-        Command::new(Self::BUILD_COMMAND_NAME)
-            .arg(input.clone())
-            .arg(output.clone())
-    }
-
-    fn create_prove_subcommand() -> Command {
-        let circom_path =
-            Self::create_required_argument_with_id(Self::PROVE_COMMAND_CIRCOM_ARG_NAME);
-        let verification_key_path =
-            Self::create_required_argument_with_id(Self::PROVE_COMMAND_VK_ARG_NAME);
-        let inputs_path =
-            Self::create_required_argument_with_id(Self::PROVE_COMMAND_INPUT_ARG_NAME);
-        let output_path =
-            Self::create_required_argument_with_id(Self::PROVE_COMMAND_OUTPUT_ARG_NAME);
-
-        Command::new(Self::PROVE_COMMAND_NAME)
-            .arg(circom_path)
-            .arg(verification_key_path)
-            .arg(inputs_path)
-            .arg(output_path)
-    }
-
-    fn create_required_argument_with_id(id: &'static str) -> Arg {
-        Arg::new(id)
-            .required(true)
-            .value_parser(value_parser!(PathBuf))
+            .subcommand(BuildCommand::create_subcommand())
+            .subcommand(ProveCommand::create_subcommand())
     }
 }
