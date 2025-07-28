@@ -1,9 +1,9 @@
-use clap::{ArgMatches, Command};
-use std::path::PathBuf;
-use std::fs;
 use crate::aiken_zk_compiler::AikenZkCompiler;
-use crate::command_line_interface::Subcommand;
 use crate::create_validators_dir_lazy;
+use crate::subcommand::Subcommand;
+use clap::{ArgMatches, Command};
+use std::fs;
+use std::path::PathBuf;
 
 pub struct BuildCommand {}
 

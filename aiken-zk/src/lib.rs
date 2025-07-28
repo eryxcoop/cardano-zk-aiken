@@ -16,6 +16,8 @@ pub mod component_creator;
 mod compressed_groth16_proof_bls12_381;
 mod presenter;
 mod build_command;
+mod prove_command;
+mod subcommand;
 
 pub fn create_validators_dir_lazy() {
     fs::create_dir("validators")
