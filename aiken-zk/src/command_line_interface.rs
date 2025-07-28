@@ -29,7 +29,7 @@ macro_rules! execute_subcommand {
     };
 }
 impl CommandLineInterface {
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let main_command = Command::new("aiken-zk")
             .subcommand_required(true)
             .subcommand(BuildCommand::create_subcommand())
