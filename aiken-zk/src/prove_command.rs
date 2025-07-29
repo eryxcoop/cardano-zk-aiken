@@ -22,9 +22,15 @@ impl Subcommand for ProveCommand {
             .subcommand_required(true)
             .subcommand(
                 Command::new("aiken")
-                    .arg(circom_path)
-                    .arg(verification_key_path)
-                    .arg(inputs_path)
+                    .arg(circom_path.clone())
+                    .arg(verification_key_path.clone())
+                    .arg(inputs_path.clone())
+                    .arg(output_path.clone())
+            ).subcommand(
+                Command::new("meshjs")
+                    .arg(circom_path.clone())
+                    .arg(verification_key_path.clone())
+                    .arg(inputs_path.clone())
                     .arg(output_path)
             )
 
@@ -36,10 +42,17 @@ impl Subcommand for ProveCommand {
 
     fn evaluate(&self, matches: &ArgMatches) {
         match matches.subcommand() {
-            Some(("aiken", sub_matches)) => {
+            Some(subcommand) => {
+                let (match_name, sub_matches) = subcommand;
                 let (circom_path, verification_key_path, inputs_path, output_path) =
                     Self::get_prove_arguments(sub_matches);
-                Self::execute_prove_command(circom_path, verification_key_path, inputs_path, output_path);
+
+                if match_name == "aiken" {
+                    Self::execute_aiken_prove_command(circom_path, verification_key_path, inputs_path, output_path);
+                }
+                else if match_name == "meshjs" {
+                    Self::execute_meshjs_prove_command(circom_path, verification_key_path, inputs_path, output_path);
+                }
             }
             _ => {
                 panic!("Unknown or missing subcommand for `prove`");
@@ -54,7 +67,7 @@ impl ProveCommand {
     const PROVE_COMMAND_INPUT_ARG_NAME: &'static str = "inputs_path";
     const PROVE_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_proof_path";
 
-    fn execute_prove_command(
+    fn execute_aiken_prove_command(
         circom_path: &Path,
         verification_key_path: &Path,
         inputs_path: &Path,
@@ -80,5 +93,14 @@ impl ProveCommand {
         let output_path =
             Self::get_argument_value(subcommand_matches, Self::PROVE_COMMAND_OUTPUT_ARG_NAME);
         (circom_path, verification_key_path, inputs_path, output_path)
+    }
+
+    fn execute_meshjs_prove_command(circom_path: &PathBuf, verification_key_path: &PathBuf, inputs_path: &PathBuf, output_path: &PathBuf) {
+        AikenZkCompiler::generate_meshjs_zk_redeemer_library(
+            circom_path.to_str().unwrap(),
+            verification_key_path.to_str().unwrap(),
+            inputs_path.to_str().unwrap(),
+            output_path.to_str().unwrap()
+        )
     }
 }
