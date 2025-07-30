@@ -8,7 +8,7 @@ pub struct CommandLineInterface {
 }
 
 macro_rules! execute_subcommand {
-    ( $subcommand: ident, $a_command: ident, $( $others_commands:ident ),* ) => {
+    ( $subcommand: ident, [$a_command: ident, $( $others_commands:ident ),*] ) => {
         {
             let (match_name, matches) = $subcommand;
 
@@ -43,7 +43,7 @@ impl CommandLineInterface {
         let main_command_matches = self.main_command.clone().get_matches();
         match main_command_matches.subcommand() {
             Some(subcommand) => {
-                execute_subcommand!(subcommand, BuildCommand, ProveCommand);
+                execute_subcommand!(subcommand, [BuildCommand, ProveCommand]);
             }
             None => {
                 panic!("No command given");
