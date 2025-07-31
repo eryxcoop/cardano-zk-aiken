@@ -5,25 +5,17 @@ pub type ZK<redeemer_type> {
   proofs: List<Proof>,
 }
 
-pub type ZkDatum<datum_type> {
-    public_inputs: List<Int>,
-    datum: datum_type
-}
-
-type Datum = Void
 type Redeemer = Void
 
 validator example {
   spend(
-    datum: Option<ZkDatum<Datum>>,
+    datum: Option<Int>,
     redeemer: ZK<Redeemer>,
     _own_ref: OutputReference,
     _self: Transaction,
   ) {
-    expect Some(datum2) = datum
-    let public_inputs = datum2.public_inputs
-    expect Some(b) = list.head(public_inputs)
-    expect _zk_redeemer = offchain addition(priv a, b, 10)
+    expect Some(b) = datum
+    expect _zk_redeemer = offchain fibonacci(priv _, priv _, 5, pub b)
     True
   }
 
@@ -43,12 +35,12 @@ test test_example() {
 }
 
 fn test_proof_is_valid(proof: Proof) -> Bool {
-  let pi_value = 7
+  let utxo_datum = 13
 
   let utxo_reference = OutputReference { transaction_id: "", output_index: 0 }
 
   example.spend(
-    Some(ZkDatum {public_inputs: [pi_value], datum: Void}),
+    Some(utxo_datum),
     ZK { redeemer: Void, proofs: [proof] },
     utxo_reference,
     Transaction { ..transaction.placeholder, inputs: [], outputs: [] },
