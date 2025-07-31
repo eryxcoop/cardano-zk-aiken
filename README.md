@@ -5,5 +5,5 @@ It is done in the context of [this proposal](https://milestones.projectcatalyst.
 
 For details on the chosen proving system, please refer to the Research document.
 
-### Milestone 2
+### Current progress
 See details on ```aiken-zk/README.md```
