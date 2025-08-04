@@ -190,7 +190,7 @@ This step assumes that you made a contract deployment and you have its transacti
 Once you have a script for unlocking purposes, run the following command to generate a library
 to be used on it:
 
-```cargo run -- prove meshjs output.circom verification_key.zkey inputs.json deployment/zk_redeemer.ts```
+```cargo run -- prove meshjs output.circom verification_key.zkey inputs.json zk_redeemer.ts```
 
 Your unlocking code script might look like:
 
