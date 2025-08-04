@@ -1,7 +1,5 @@
-import {mConStr0} from "@meshsdk/core";
 import {BlockchainProvider} from "./blockchain_provider";
-import {Contract, mVoid} from "./contract";
-import {mZKRedeemer} from "./zk_redeemer";
+import {Contract} from "./contract";
 
 async function main() {
     const compiledContractPath = "../plutus.json";
@@ -12,7 +10,7 @@ async function main() {
 
     const contract = new Contract(compiledContractPath, blockchain_provider, wallet);
     const second_fibonacci = 3;
-    await contract.spend(validatorScriptIndex, txHashFromDeposit, mZKRedeemer(second_fibonacci));
+    await contract.spend(validatorScriptIndex, txHashFromDeposit, second_fibonacci);
 }
 
 main();
