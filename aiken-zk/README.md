@@ -109,7 +109,7 @@ pub type ZK<redeemer_type> {
 }
 ```
 
-And the redeemer variable must be named as zk_redeemer:
+And the redeemer variable must be named as ```zk_redeemer```.
 
 ## Convertion to Aiken
 
