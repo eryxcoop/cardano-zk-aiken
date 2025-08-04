@@ -11,8 +11,8 @@ async function main() {
     const wallet = blockchain_provider.getWalletUsing("me.sk");
 
     const contract = new Contract(compiledContractPath, blockchain_provider, wallet);
-    const second_fibonacci = 3
-    await contract.spend(validatorScriptIndex, txHashFromDeposit, mZKRedeemer(second_fibonacci))
+    const second_fibonacci = 3;
+    await contract.spend(validatorScriptIndex, txHashFromDeposit, mZKRedeemer(second_fibonacci));
 }
 
 main();

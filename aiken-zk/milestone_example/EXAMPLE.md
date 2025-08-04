@@ -67,6 +67,52 @@ Then, running an ```aiken check``` should execute successfully.
 
 #### MeshJS unlocking (Milestone 3)
 
-...
+Asumimos que tenes credenciales nombradas como me.addr y me.sk, sino las podes generar con generate-credentials.ts
+
+Although the example provides scripts for locking and unlocking the contract, the tool is useful only for the unlocking
+step.
+
+To lock the contract, first compile the Aiken code with:
+
+```aiken build```
+
+Then, enter the subdirectory ```deployment``` and run:
+
+```npx tsx lock.ts```
+
+This will output the transaction hash, save it for the next step.
+
+Now, it's time to unlock. For this task we provide the ```unlock.ts``` file, but it lacks the proof on the redeemer yet.
+
+To generate this proof, you can use the aiken-zk tool.
+
+To accomplish this task, go back and run:
+
+```cargo run -- prove meshjs output.circom verification_key.zkey inputs.json deployment/zk_redeemer.ts```
+
+Go to ```deployment/unlock.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
+
+```javascript
+ import {mZKRedeemer} from "./zk_redeemer";
+ ```
+
+As the last step before unlocking, use the exported function to wrap the redeemer.
+The spend should look like:
+
+```javascript
+await contract.spend(validatorScriptIndex, txHashFromDeposit, mZKRedeemer(second_fibonacci))
+```
+
+This function will wrap your redeemer with additional information about the proof.
+
+Now you have all you need to deploy the script into the blockchain.
+
+Finally, to unlock the contract run the following command (use the hash that you copied in the lock step):
+
+```npx tsx unlock.ts lockTxHash```
+
+Now you can program, deploy and spend a validator with offchain capabilities!
+
+For more information, read the README.
 
 
