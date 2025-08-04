@@ -164,7 +164,7 @@ As the redeemer has type ZK<Redeemer>, a proof is needed to complete the variabl
 
 So, if you run the following:
 
-```cargo run -- prove aiken circuit.circom verification_key.zkey inputs.json proof.ak```
+```cargo run -- prove aiken output.circom verification_key.zkey inputs.json proof.ak```
 
 You'll get a proof.ak ready to be copy&paste on the Aiken test.
 
