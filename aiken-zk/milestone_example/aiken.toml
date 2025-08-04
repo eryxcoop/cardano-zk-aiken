@@ -1,13 +1,13 @@
-name = "aiken-lang/counter"
+name = "aiken-lang/offchain-example"
 version = "0.0.0"
 compiler = "v1.1.17"
 plutus = "v3"
 license = "Apache-2.0"
-description = "Aiken contracts for project 'aiken-lang/counter'"
+description = "Aiken contracts for project 'aiken-lang/offchain-example'"
 
 [repository]
 user = "aiken-lang"
-project = "counter"
+project = "offchain-example"
 platform = "github"
 
 [[dependencies]]
