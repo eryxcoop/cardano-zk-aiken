@@ -24,22 +24,6 @@ pub struct Groth16CompressedData {
 pub struct AikenZkCompiler;
 
 impl AikenZkCompiler {
-    pub fn generate_meshjs_zk_redeemer_library(
-        circom_path: &str,
-        verification_key_path: &str,
-        inputs_path: &str,
-        output_path: &str,
-    ) {
-        let circuit = CircomCircuit::from(circom_path.to_string());
-        let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
-        let mesh_js_presenter = MeshJsZKRedeemerPresenter::new_for_proof(proof);
-        let zk_redeemer = mesh_js_presenter.present();
-
-        fs::write(output_path, zk_redeemer).expect("output file write failed");
-    }
-}
-
-impl AikenZkCompiler {
     fn find_offchain_token(tokens: Vec<(Token, Span)>) -> (Token, Span) {
         tokens
             .iter()
@@ -241,12 +225,26 @@ impl AikenZkCompiler {
         inputs_path: &str,
         output_path: &str,
     ) {
-        let circom_compiler = CircomCircuit::from(circom_path.to_string());
-        let proof = circom_compiler.generate_groth16_proof(verification_key_path, inputs_path);
+        let circuit = CircomCircuit::from(circom_path.to_string());
+        let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
 
         let aiken_presenter = CompressedGroth16ProofBls12_381ToAikenPresenter::new(proof);
 
         let aiken_proof = aiken_presenter.present();
         fs::write(output_path, aiken_proof).expect("failed to create output file");
+    }
+
+    pub fn generate_meshjs_zk_redeemer_library(
+        circom_path: &str,
+        verification_key_path: &str,
+        inputs_path: &str,
+        output_path: &str,
+    ) {
+        let circuit = CircomCircuit::from(circom_path.to_string());
+        let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
+        let mesh_js_presenter = MeshJsZKRedeemerPresenter::new_for_proof(proof);
+        let zk_redeemer = mesh_js_presenter.present();
+
+        fs::write(output_path, zk_redeemer).expect("output file write failed");
     }
 }
