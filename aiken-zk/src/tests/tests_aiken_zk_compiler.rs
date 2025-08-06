@@ -5,7 +5,7 @@ use crate::tests::aiken_program_factory::{
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
 use std::fs::File;
-use std::io::BufRead;
+use std::io::{BufRead, BufReader, Read};
 use std::{fs, io};
 
 #[test]
@@ -116,7 +116,7 @@ fn test_compiler_can_replace_assert_eq_of_mixed_variables_and_constants_by_the_c
 
 #[test]
 #[serial]
-fn test_tool_can_generate_proof() {
+fn test_it_can_generate_proof_for_aiken_testing() {
     let _temporal_directory = create_sandbox_and_set_as_current_directory();
     let circom_path = "my_program.circom";
     let verification_key_path = "my_verification_key.zkey";
@@ -144,6 +144,107 @@ fn test_tool_can_generate_proof() {
     assert!(lines[2].contains("piB: #"));
     assert!(lines[3].contains("piC: #"));
     assert_eq!("}", lines[4]);
+}
+
+#[test]
+#[serial]
+fn test_it_can_generate_proof_for_the_meshjs_spend() {
+    let _temporal_directory = create_sandbox_and_set_as_current_directory();
+    let circom_path = "my_program.circom";
+    let verification_key_path = "my_verification_key.zkey";
+    let inputs_path = "inputs.json";
+
+    let output_path = "zk_redeemer.ts";
+    create_circom_and_inputs_file();
+
+    AikenZkCompiler::generate_meshjs_zk_redeemer_library(
+        circom_path,
+        verification_key_path,
+        inputs_path,
+        output_path,
+    );
+
+    let file = File::open(output_path).unwrap();
+    let mut reader = io::BufReader::new(file);
+
+    assert_text_matches(&mut reader, meshjs_file_prefix());
+
+    assert_line_matches(&mut reader, "\t\tmProof(\n");
+
+    assert_proof_component_format_is_correct(&mut reader, 96);
+    assert_proof_component_format_is_correct(&mut reader, 192);
+    assert_proof_component_format_is_correct(&mut reader, 96);
+
+    assert_line_matches(&mut reader, "\t\t),\n");
+
+    assert_text_matches(&mut reader, meshjs_file_suffix());
+}
+
+fn assert_line_matches(reader: &mut BufReader<File>, expected_line: &str) {
+    let mut line_to_assert = String::new();
+    reader.read_line(&mut line_to_assert).unwrap();
+    assert_eq!(expected_line, line_to_assert);
+}
+
+fn assert_text_matches(reader: &mut BufReader<File>, expected_text: String) {
+    let mut buffer = vec![0u8; expected_text.len()]; // un buffer de N bytes
+    let bytes_read = reader.read(&mut buffer).unwrap();
+    let text = String::from_utf8_lossy(&buffer[..bytes_read]);
+
+    assert_eq!(expected_text, text);
+}
+
+fn assert_proof_component_format_is_correct(
+    reader: &mut BufReader<File>,
+    proof_component_length_as_byte_string: usize,
+) {
+    let mut line = String::new();
+    reader.read_line(&mut line).unwrap();
+
+    let expected_prefix = "\t\t\t\"";
+    let expected_suffix = "\",\n";
+
+    let prefix = &line[..expected_prefix.len()];
+    let pi_n =
+        &line[expected_prefix.len()..expected_prefix.len() + proof_component_length_as_byte_string];
+    let suffix = &line[expected_prefix.len() + proof_component_length_as_byte_string..];
+
+    assert_eq!(expected_prefix.to_string(), prefix);
+    assert!(pi_n.chars().into_iter().all(|c| c.is_ascii_hexdigit()));
+    assert_eq!(expected_suffix.to_string(), suffix);
+}
+
+fn meshjs_file_prefix() -> String {
+    r#"import {MConStr} from "@meshsdk/common";
+import {Data, mConStr0} from "@meshsdk/core";
+
+type Proof = MConStr<any, string[]>;
+
+type ZKRedeemer = MConStr<any, Data[] | Proof[]>;
+
+function mProof(piA: string, piB: string, piC: string): Proof {
+    if (piA.length != 96 || piB.length != 192 || piC.length != 96) {
+        throw new Error("Wrong proof");
+    }
+
+    return mConStr0([piA, piB, piC]);
+}
+
+export function mZKRedeemer(redeemer: Data): ZKRedeemer {
+    return mConStr0([redeemer, proofs()]);
+}
+
+function proofs(): Proof[] {
+    return [
+"#
+    .to_string()
+}
+
+fn meshjs_file_suffix() -> String {
+    r#"    ];
+}
+"#
+    .to_string()
 }
 
 fn create_circom_and_inputs_file() {

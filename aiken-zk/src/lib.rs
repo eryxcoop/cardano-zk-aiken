@@ -10,9 +10,14 @@ pub mod zk_examples;
 mod tests;
 
 pub mod aiken_zk_compiler;
-pub mod circom_compiler;
+pub mod circom_circuit;
 pub mod command_line_interface;
 pub mod component_creator;
+mod compressed_groth16_proof_bls12_381;
+mod presenter;
+mod build_command;
+mod prove_command;
+mod subcommand;
 
 pub fn create_validators_dir_lazy() {
     fs::create_dir("validators")

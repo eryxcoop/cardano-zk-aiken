@@ -1,12 +1,15 @@
-use crate::circom_compiler::CircomCompiler;
+use crate::circom_circuit::CircomCircuit;
 use crate::component_creator::ComponentCreator;
+use crate::presenter::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381ToAikenPresenter;
 use crate::lexer::{LexInfo, Lexer};
 use crate::token_zk::{TokenZK as Token, TokenZK};
 use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
 use aiken_lang::ast::Span;
 use serde::Deserialize;
+use std::fs;
 use std::io::Error;
 use std::process::Command;
+use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -19,6 +22,23 @@ pub struct Groth16CompressedData {
 }
 
 pub struct AikenZkCompiler;
+
+impl AikenZkCompiler {
+    pub fn generate_meshjs_zk_redeemer_library(
+        circom_path: &str,
+        verification_key_path: &str,
+        inputs_path: &str,
+        output_path: &str,
+    ) {
+        let circuit = CircomCircuit::from(circom_path.to_string());
+        let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
+        let mesh_js_presenter = MeshJsZKRedeemerPresenter::new_for_proof(proof);
+        let zk_redeemer = mesh_js_presenter.present();
+
+        fs::write(output_path, zk_redeemer).expect("output file write failed");
+    }
+}
+
 impl AikenZkCompiler {
     fn find_offchain_token(tokens: Vec<(Token, Span)>) -> (Token, Span) {
         tokens
@@ -119,13 +139,12 @@ impl AikenZkCompiler {
         let (token, span) = Self::find_offchain_token(tokens);
         let circom_component_src = ComponentCreator::from_token(token.clone()).create();
 
-        let mut circom_compiler = CircomCompiler::from(circom_component_src);
         let circom_src_filename_with_extension = aiken_src_filename + ".circom";
+        fs::write(&circom_src_filename_with_extension, circom_component_src).unwrap();
+        let mut circom_compiler = CircomCircuit::from(circom_src_filename_with_extension.clone());
+
         circom_compiler
-            .save_into_file(circom_src_filename_with_extension.clone())
-            .unwrap();
-        circom_compiler
-            .create_verification_key(circom_src_filename_with_extension, random_seeds)
+            .generate_verification_key(random_seeds)
             .unwrap();
 
         let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
@@ -222,11 +241,12 @@ impl AikenZkCompiler {
         inputs_path: &str,
         output_path: &str,
     ) {
-        CircomCompiler::generate_aiken_proof(
-            circom_path,
-            verification_key_path,
-            inputs_path,
-            output_path,
-        )
+        let circom_compiler = CircomCircuit::from(circom_path.to_string());
+        let proof = circom_compiler.generate_groth16_proof(verification_key_path, inputs_path);
+
+        let aiken_presenter = CompressedGroth16ProofBls12_381ToAikenPresenter::new(proof);
+
+        let aiken_proof = aiken_presenter.present();
+        fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
 }

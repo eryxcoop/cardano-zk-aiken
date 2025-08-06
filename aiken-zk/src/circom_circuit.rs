@@ -1,0 +1,240 @@
+use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
+use std::fs;
+use std::io::{Error, ErrorKind};
+use std::path::Path;
+use std::process::{Command, Stdio};
+
+pub struct CircomCircuit {
+    circom_source_code_path: String,
+}
+
+impl CircomCircuit {
+    // constructor
+
+    pub fn from(circom_source_code_path: String) -> Self {
+        Self {
+            circom_source_code_path,
+        }
+    }
+
+    // verification key generation
+
+    pub fn generate_verification_key(&mut self, rand: (&str, &str)) -> Result<(), Error> {
+        let circuit_name = self
+            .circom_source_code_path
+            .strip_suffix(".circom")
+            .unwrap();
+        let output_path = "build/";
+
+        fs::create_dir_all(output_path).expect("Failed to create output directory");
+
+        self.compile_to_r1cs(output_path);
+
+        let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
+        let zkey_0 = format!("{}{}_0000.zkey", output_path, circuit_name);
+        let zkey_1 = format!("{}{}_0001.zkey", output_path, circuit_name);
+        let zkey_2 = format!("{}{}_0002.zkey", output_path, circuit_name);
+        let verification_key_zkey = "verification_key.zkey".to_string();
+        let verification_key_json = format!("{}verification_key.json", output_path);
+
+        self.groth16_setup(&r1cs_path, "ceremony.ptau", &zkey_0);
+        self.contribute(&zkey_0, &zkey_1, "1st Contributor Name", rand.0);
+        self.contribute(&zkey_1, &zkey_2, "Second contribution Name", rand.1);
+        let hex_entr = "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+        self.beacon(
+            &zkey_0,
+            &verification_key_zkey,
+            hex_entr,
+            10,
+            "Final Beacon phase2",
+        );
+        self.export_to_json_verification_key(&verification_key_zkey, &verification_key_json);
+
+        Ok(())
+    }
+
+    // proof generation
+
+    pub fn generate_groth16_proof(
+        &self,
+        verification_key_path: &str,
+        inputs_path: &str,
+    ) -> CompressedGroth16ProofBls12_381 {
+        let build_path = "build/".to_string();
+        self.create_directory_if_not_exists(&build_path);
+
+        self.compile_witness_generator(&build_path);
+        self.generate_witness(inputs_path, &build_path);
+        self.generate_groth16_proof_from_witness(verification_key_path, &build_path);
+
+        CompressedGroth16ProofBls12_381::from_json(&build_path)
+    }
+
+    // private - verification key generation
+
+    fn compile_to_r1cs(&self, output_path: &str) {
+        self.run_command_or_fail(
+            Command::new("circom").args([
+                &self.circom_source_code_path,
+                "--r1cs",
+                "-p",
+                "bls12381",
+                "-o",
+                output_path,
+            ]),
+            "circom",
+        );
+    }
+
+    fn groth16_setup(&self, r1cs_path: &str, ceremony_path: &str, output_zkey: &str) {
+        self.run_command_or_fail(
+            Command::new("snarkjs").args([
+                "groth16",
+                "setup",
+                r1cs_path,
+                ceremony_path,
+                output_zkey,
+            ]),
+            "groth16 setup",
+        );
+    }
+
+    fn contribute(&self, input_zkey: &str, output_zkey: &str, name: &str, entropy: &str) {
+        let new_entropy = &format!("{}\n", entropy);
+        let mut child = Command::new("snarkjs")
+            .args([
+                "zkey",
+                "contribute",
+                input_zkey,
+                output_zkey,
+                &format!("--name={}", name),
+                "-v",
+            ])
+            .stdin(Stdio::piped())
+            .spawn()
+            .expect("Failed to start zkey contribute");
+
+        use std::io::Write;
+        let stdin = child.stdin.as_mut().expect("Failed to open stdin");
+        stdin
+            .write_all(new_entropy.as_bytes())
+            .expect("Failed to write entropy");
+
+        let status = child.wait().expect("Failed to wait on zkey contribute");
+        if !status.success() {
+            panic!(
+                "zkey contribute '{}' failed with exit code {:?}",
+                name,
+                status.code()
+            );
+        }
+    }
+
+    fn beacon(
+        &self,
+        zkey_input: &str,
+        zkey_output: &str,
+        entropy_hex: &str,
+        rounds: u32,
+        name: &str,
+    ) {
+        self.run_command_or_fail(
+            Command::new("snarkjs").args([
+                "zkey",
+                "beacon",
+                zkey_input,
+                zkey_output,
+                entropy_hex,
+                &rounds.to_string(),
+                &format!("-n={}", name),
+            ]),
+            "zkey beacon",
+        );
+    }
+
+    fn export_to_json_verification_key(&self, zkey: &str, output_json: &str) {
+        self.run_command_or_fail(
+            Command::new("snarkjs").args(["zkey", "export", "verificationkey", zkey, output_json]),
+            "export verification key",
+        );
+    }
+
+    // private - proof generation
+
+    fn compile_witness_generator(&self, output_path: &str) {
+        self.run_command_or_fail(
+            Command::new("circom").args([
+                &self.circom_source_code_path,
+                "--wasm",
+                "-p",
+                "bls12381",
+                "-o",
+                output_path,
+            ]),
+            "circom",
+        );
+    }
+
+    fn generate_witness(&self, inputs_path: &str, build_path: &str) {
+        let circuit_filename = self.circuit_filename();
+        Command::new("node")
+            .arg(build_path.to_string() + circuit_filename + "_js/generate_witness.js")
+            .arg(build_path.to_string() + circuit_filename + "_js/" + circuit_filename + ".wasm")
+            .arg(inputs_path)
+            .arg(build_path.to_string() + "witness.wtns")
+            .output()
+            .unwrap();
+    }
+
+    fn generate_groth16_proof_from_witness(&self, verification_key_path: &str, build_path: &str) {
+        Command::new("snarkjs")
+            .arg("groth16")
+            .arg("prove")
+            .arg(verification_key_path)
+            .arg(build_path.to_string() + "witness.wtns")
+            .arg(build_path.to_string() + "proof.json")
+            .arg(build_path.to_string() + "public.json")
+            .output()
+            .unwrap();
+    }
+
+    fn circuit_filename(&self) -> &str {
+        &Self::filename_from_path(&self.circom_source_code_path)
+    }
+
+    // file system
+
+    fn filename_from_path(path: &String) -> &str {
+        Path::new(path)
+            .file_stem()
+            .unwrap()
+            .to_str()
+            .unwrap()
+    }
+
+    fn create_directory_if_not_exists(&self, build_path: &str) {
+        fs::create_dir(build_path)
+            .or_else(|error| {
+                if error.kind() == ErrorKind::AlreadyExists {
+                    Ok(())
+                } else {
+                    Err(error)
+                }
+            })
+            .expect("Couldnt create directory");
+    }
+
+    fn run_command_or_fail(&self, cmd: &mut Command, label: &str) {
+        let status = cmd
+            .stdout(Stdio::null())
+            .status()
+            .unwrap_or_else(|_| panic!("Failed to start command '{}'", label));
+        if !status.success() {
+            panic!(
+                "Command '{}' failed with exit code {:?}",
+                label,
+                status.code()
+            );
+        }
+    }
+}
