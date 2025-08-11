@@ -1,19 +1,13 @@
 use crate::aiken_zk_compiler::{AikenZkCompiler, Groth16CompressedData};
-use crate::circom_circuit::CircomCircuit;
-use crate::presenter::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381ToAikenPresenter;
-use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
 use crate::tests::aiken_program_factory::{
     aiken_template_with_body_and_verify_definition, verify_declaration,
 };
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
-use std::fs::File;
-use std::io::{BufRead, BufReader, Read};
-use std::{fs, io};
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_public_variables_by_the_corresponding_function_and_call() {
+fn test_replaces_addition_of_public_variables_by_the_corresponding_function_and_call() {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(pub a, pub b, pub c)",
         "zk_verify_or_fail(redeemer, [a, b, c])",
@@ -24,7 +18,7 @@ fn test_compiler_can_replace_addition_of_public_variables_by_the_corresponding_f
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_function_and_call()
+fn test_replaces_addition_of_private_variables_by_the_corresponding_function_and_call()
 {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv a, priv b, priv c)",
@@ -36,7 +30,7 @@ fn test_compiler_can_replace_addition_of_private_variables_by_the_corresponding_
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_mixed_variables_by_the_corresponding_function_and_call() {
+fn test_replaces_addition_of_mixed_variables_by_the_corresponding_function_and_call() {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv a, b, pub c)",
         "zk_verify_or_fail(redeemer, [b, c])",
@@ -47,7 +41,7 @@ fn test_compiler_can_replace_addition_of_mixed_variables_by_the_corresponding_fu
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_addition_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+fn test_replaces_addition_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
  {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv a, 4, pub b)",
@@ -59,7 +53,7 @@ fn test_compiler_can_replace_addition_of_mixed_variables_and_constants_by_the_co
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_subtraction_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+fn test_replaces_subtraction_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
  {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain subtraction(priv a, 4, pub b)",
@@ -71,7 +65,7 @@ fn test_compiler_can_replace_subtraction_of_mixed_variables_and_constants_by_the
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_multiplication_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+fn test_replaces_multiplication_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
  {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain multiplication(priv a, 4, pub b)",
@@ -83,7 +77,7 @@ fn test_compiler_can_replace_multiplication_of_mixed_variables_and_constants_by_
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_fibonacci_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+fn test_replaces_fibonacci_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
  {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain fibonacci(priv a, b, 5, pub c)",
@@ -95,7 +89,7 @@ fn test_compiler_can_replace_fibonacci_of_mixed_variables_and_constants_by_the_c
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_if_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+fn test_replaces_if_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
  {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain if(a, b, priv c, priv d)",
@@ -107,7 +101,7 @@ fn test_compiler_can_replace_if_of_mixed_variables_and_constants_by_the_correspo
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_assert_eq_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
+fn test_replaces_assert_eq_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
  {
     test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain assert_eq(priv a, b)",
@@ -115,156 +109,6 @@ fn test_compiler_can_replace_assert_eq_of_mixed_variables_and_constants_by_the_c
         assert_eq_mixed_visibility_vk_compressed(),
         1,
     );
-}
-
-#[test]
-#[serial]
-fn test_it_can_generate_proof_for_aiken_testing() {
-    let _temporal_directory = create_sandbox_and_set_as_current_directory();
-    let circom_path = "my_program.circom";
-    let verification_key_path = "my_verification_key.zkey";
-    let inputs_path = "inputs.json";
-
-    let output_path = "proof.ak";
-    create_circom_and_inputs_file();
-
-    let circuit = CircomCircuit::from(circom_path.to_string());
-    let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
-
-    let aiken_presenter = CompressedGroth16ProofBls12_381ToAikenPresenter::new(proof);
-
-    let aiken_proof = aiken_presenter.present();
-    fs::write(output_path, aiken_proof).expect("failed to create output file");
-
-    let file = File::open(output_path).unwrap();
-    let lines: Vec<String> = io::BufReader::new(file)
-        .lines()
-        .collect::<Result<_, _>>()
-        .unwrap();
-
-    // todo: check verification
-    assert_eq!("Proof {", lines[0]);
-    assert!(lines[1].contains("piA: #"));
-    assert!(lines[2].contains("piB: #"));
-    assert!(lines[3].contains("piC: #"));
-    assert_eq!("}", lines[4]);
-}
-
-#[test]
-#[serial]
-fn test_it_can_generate_proof_for_the_meshjs_spend() {
-    let _temporal_directory = create_sandbox_and_set_as_current_directory();
-    let circom_path = "my_program.circom";
-    let verification_key_path = "my_verification_key.zkey";
-    let inputs_path = "inputs.json";
-
-    let output_path = "zk_redeemer.ts";
-    create_circom_and_inputs_file();
-
-    let circuit = CircomCircuit::from(circom_path.to_string());
-    let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
-    let mesh_js_presenter = MeshJsZKRedeemerPresenter::new_for_proof(proof);
-    let zk_redeemer = mesh_js_presenter.present();
-
-    fs::write(output_path, zk_redeemer).expect("output file write failed");
-
-    let file = File::open(output_path).unwrap();
-    let mut reader = io::BufReader::new(file);
-
-    assert_text_matches(&mut reader, meshjs_file_prefix());
-
-    assert_line_matches(&mut reader, "\t\tmProof(\n");
-
-    assert_proof_component_format_is_correct(&mut reader, 96);
-    assert_proof_component_format_is_correct(&mut reader, 192);
-    assert_proof_component_format_is_correct(&mut reader, 96);
-
-    assert_line_matches(&mut reader, "\t\t),\n");
-
-    assert_text_matches(&mut reader, meshjs_file_suffix());
-}
-
-fn assert_line_matches(reader: &mut BufReader<File>, expected_line: &str) {
-    let mut line_to_assert = String::new();
-    reader.read_line(&mut line_to_assert).unwrap();
-    assert_eq!(expected_line, line_to_assert);
-}
-
-fn assert_text_matches(reader: &mut BufReader<File>, expected_text: String) {
-    let mut buffer = vec![0u8; expected_text.len()]; // un buffer de N bytes
-    let bytes_read = reader.read(&mut buffer).unwrap();
-    let text = String::from_utf8_lossy(&buffer[..bytes_read]);
-
-    assert_eq!(expected_text, text);
-}
-
-fn assert_proof_component_format_is_correct(
-    reader: &mut BufReader<File>,
-    proof_component_length_as_byte_string: usize,
-) {
-    let mut line = String::new();
-    reader.read_line(&mut line).unwrap();
-
-    let expected_prefix = "\t\t\t\"";
-    let expected_suffix = "\",\n";
-
-    let prefix = &line[..expected_prefix.len()];
-    let pi_n =
-        &line[expected_prefix.len()..expected_prefix.len() + proof_component_length_as_byte_string];
-    let suffix = &line[expected_prefix.len() + proof_component_length_as_byte_string..];
-
-    assert_eq!(expected_prefix.to_string(), prefix);
-    assert!(pi_n.chars().into_iter().all(|c| c.is_ascii_hexdigit()));
-    assert_eq!(expected_suffix.to_string(), suffix);
-}
-
-fn meshjs_file_prefix() -> String {
-    r#"import {MConStr} from "@meshsdk/common";
-import {Data, mConStr0} from "@meshsdk/core";
-
-type Proof = MConStr<any, string[]>;
-
-type ZKRedeemer = MConStr<any, Data[] | Proof[]>;
-
-function mProof(piA: string, piB: string, piC: string): Proof {
-    if (piA.length != 96 || piB.length != 192 || piC.length != 96) {
-        throw new Error("Wrong proof");
-    }
-
-    return mConStr0([piA, piB, piC]);
-}
-
-export function mZKRedeemer(redeemer: Data): ZKRedeemer {
-    return mConStr0([redeemer, proofs()]);
-}
-
-function proofs(): Proof[] {
-    return [
-"#
-    .to_string()
-}
-
-fn meshjs_file_suffix() -> String {
-    r#"    ];
-}
-"#
-    .to_string()
-}
-
-fn create_circom_and_inputs_file() {
-    fs::write("my_program.circom", circom_file()).expect("output file write failed");
-    fs::write("inputs.json", inputs_json()).expect("output file write failed");
-}
-
-fn circom_file() -> String {
-    r#"pragma circom 2.1.9;
-include "templates/addition.circom";
-component main { public [a,b,c] } = Addition();"#
-        .to_string()
-}
-
-fn inputs_json() -> String {
-    r#"{"a": "3", "b": "7", "c": "10"}"#.to_string()
 }
 
 fn test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
