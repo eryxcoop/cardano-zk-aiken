@@ -116,6 +116,18 @@ fn test_compiler_can_replace_assert_eq_of_mixed_variables_and_constants_by_the_c
 
 #[test]
 #[serial]
+fn test_compiler_can_replace_custom_circom_by_the_corresponding_function_and_call()
+ {
+    test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
+        r#"offchain custom("./test.circom", [a, 5])"#,
+        "zk_verify_or_fail(redeemer, [a, 5])",
+        assert_eq_mixed_visibility_vk_compressed(),
+        2,
+    );
+}
+
+#[test]
+#[serial]
 fn test_it_can_generate_proof_for_aiken_testing() {
     let _temporal_directory = create_sandbox_and_set_as_current_directory();
     let circom_path = "my_program.circom";
