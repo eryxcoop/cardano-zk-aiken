@@ -16,6 +16,7 @@ bb -> 5
 cc -> priv
 dd -> c
 ee -> 4
+
 -------------- autogenerado deseado -----------------
 component main { public [aa,bb] } = MyTemplate(4, 5)
 
@@ -26,6 +27,7 @@ component main = MyTemplate(4,5) (todos privados)
 
 
 --------------------------------
+
 1) El usuario declara en el .ak algo de la pinta
     offchain custom('path/to/circom', MyTemplate, [4, 5], [pub a, pub 5, priv], [pub c, 4])
         * la primera lista son los parámetros del template (tienen que ser constantes)

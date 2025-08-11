@@ -328,3 +328,19 @@ fn test_lexer_translates_assert_eq_parameters_with_mixed_visibility_and_input_ty
         *offchain_token
     );
 }
+
+#[test]
+fn test_lexer_translates_custom_circom() {
+    let program = "offchain custom('path/to/circom/with/main.circom', [a, 5])";
+    let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
+    let offchain_token = &tokens[0].0;
+    assert_eq!(
+        Token::Offchain {
+            example: ZkExample::CustomCircom {
+                path: String::from("path/to/circom/with/main.circom"),
+                public_input_identifiers: vec![variable_token("a"), int_token(5)]
+                },
+        },
+        *offchain_token
+    );
+}

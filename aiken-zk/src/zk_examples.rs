@@ -80,6 +80,10 @@ pub enum ZkExample {
         lhs: InputZK,
         rhs: InputZK,
     },
+    CustomCircom {
+        path: String,
+        public_input_identifiers: Vec<Box<Token>>
+    }
 }
 
 impl ZkExample {
@@ -188,6 +192,17 @@ impl ZkExample {
             })
     }
 
+    fn custom_circom_parser() -> impl Parser<char, Token, Error = ParseError> {
+        let string_literal_parser = just('"').
+            ignore_then(filter(|c|*c!='"').repeated().collect::<String>()).
+            then_ignore(just('"'));
+
+        just("custom")
+            .padded()
+            .ignore_then(Self::parameters(2))
+            .
+    }
+
     pub fn parser() -> impl Parser<char, Token, Error = ParseError> {
         choice((
             Self::addition_parser(),
@@ -196,6 +211,7 @@ impl ZkExample {
             Self::fibonacci_parser(),
             Self::if_parser(),
             Self::assert_eq_parser(),
+            Self::custom_circom_parser(),
         ))
     }
 }
