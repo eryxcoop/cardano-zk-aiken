@@ -1,0 +1,53 @@
+offchain custom('path/to/circom', MyTemplate, [4, 5], [pub a, pub 5, priv], [pub c, 4])
+------------template-------------------
+
+template MyTemplate(A, B){
+    signal input aa,
+    signal input bb,
+    signal input cc,
+    signal output dd,
+    signal output ee,
+}
+-------------------------------
+A -> 4
+B -> 5
+aa -> a
+bb -> 5
+cc -> priv
+dd -> c
+ee -> 4
+-------------- autogenerado deseado -----------------
+component main { public [aa,bb] } = MyTemplate(4, 5)
+-------------- dummy -----------------
+component main = MyTemplate(4,5) (todos privados)
+
+
+--------------------------------
+1) El usuario declara en el .ak algo de la pinta
+    offchain custom('path/to/circom', MyTemplate, [4, 5], [pub a, pub 5, priv], [pub c, 4])
+        * la primera lista son los parámetros del template (tienen que ser constantes)
+        * la segunda lista son los inputs privados o públicos, en el orden que aparecen declarados en el template
+        * la tercera lista son los outputs
+    Se le va a pedir al usuario que coincidan las cantidades, sino puede fallar o tener comportamiento inesperado
+
+2) Generamos un componente dummy de la pinta
+    component main = MyComponent(4,5),
+   asumiendo que todos son privados
+
+3) Compilamos este componente con
+        circom dummy.circom --O0 --sym
+   esto va a generar un archivo dummy.sym que va a tener algo de la pinta
+        1,1,0,main.ee
+        2,2,0,main.dd
+        3,3,0,main.aa
+        4,4,0,main.zz
+        5,5,0,main.bb
+        6,6,0,main.cc
+
+   donde los primeros son los nombres de las variables de los outputs y después de los inputs. con esto podemos obtener los nombres de las signals
+
+4) A partir de los nombres de las signals, creamos el componente
+
+    component main {public [aa, bb]} = MyTemplate(4, 5)
+
+y desde ahí se sigue con el flujo normal.
