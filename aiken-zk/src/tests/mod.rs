@@ -16,3 +16,4 @@ mod tests_interface;
 mod aiken_program_factory;
 mod token_factory;
 mod utils;
+mod circom_component_factory;

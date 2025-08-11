@@ -137,6 +137,21 @@ impl AikenZkCompiler {
     ) -> String {
         let LexInfo { tokens, .. } = Lexer::new().run(&aiken_src).unwrap();
         let (token, span) = Self::find_offchain_token(tokens);
+
+        match token {
+            TokenZK::Offchain {
+                example:ZkExample::CustomCircom {
+                    path,
+                    public_input_identifiers,
+                }
+            } => {"".to_string()}
+            _ => {
+                Self::yyy(&aiken_src, aiken_src_filename, random_seeds, &token, &span)
+            }
+        }
+    }
+
+    fn yyy(aiken_src: &String, aiken_src_filename: String, random_seeds: (&str, &str), token: &TokenZK, span: &Span) -> String {
         let circom_component_src = ComponentCreator::from_token(token.clone()).create();
 
         let circom_src_filename_with_extension = aiken_src_filename + ".circom";

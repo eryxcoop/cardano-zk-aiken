@@ -152,8 +152,8 @@ impl ComponentCreator {
                     &[],
                 )
             }
-            ZkExample::CustomCircom { path, public_input_identifiers} => {
-                panic!("Not implemented")
+            ZkExample::CustomCircom { .. } => {
+                panic!("You shouldn't be here")
             }
         }
     }

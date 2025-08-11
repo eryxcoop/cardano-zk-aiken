@@ -7,6 +7,7 @@ use serial_test::serial;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read};
 use std::{fs, io};
+use crate::tests::circom_component_factory::addition_custom_circom_template_and_component;
 
 #[test]
 #[serial]
@@ -118,13 +119,31 @@ fn test_compiler_can_replace_assert_eq_of_mixed_variables_and_constants_by_the_c
 #[serial]
 fn test_compiler_can_replace_custom_circom_by_the_corresponding_function_and_call()
  {
-    test_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
-        r#"offchain custom("./test.circom", [a, 5])"#,
-        "zk_verify_or_fail(redeemer, [a, 5])",
-        assert_eq_mixed_visibility_vk_compressed(),
-        2,
-    );
-}
+     let vk_compressed_data = xxx_vk_compressed();
+     let _temp_dir = create_sandbox_and_set_as_current_directory();
+     fs::write("./test.circom", addition_custom_circom_template_and_component()).unwrap();
+     let aiken_src = aiken_template_with_body_and_verify_definition("", r#"offchain custom("./test.circom", [a, 5])"#, "");
+     let output_filename = "my_program".to_string();
+     let random_seeds = ("asdasd", "dsadsa");
+
+     let aiken_zk_src = AikenZkCompiler::apply_modifications_to_src_for_token(
+         aiken_src,
+         output_filename,
+         random_seeds,
+     );
+
+     let verify_declaration1 = verify_declaration(2, vk_compressed_data);
+     let expected_aiken_src = aiken_template_with_body_and_verify_definition(
+         import_header(),
+         "zk_verify_or_fail(redeemer, [a, 5])",
+         &verify_declaration1,
+     );
+
+     assert_eq!(
+         without_delta(expected_aiken_src),
+         without_delta(aiken_zk_src)
+     );
+ }
 
 #[test]
 #[serial]
@@ -393,6 +412,19 @@ fn if_mixed_visibility_vk_compressed() -> Groth16CompressedData {
 }
 
 fn assert_eq_mixed_visibility_vk_compressed() -> Groth16CompressedData {
+    Groth16CompressedData {
+        vk_alpha_1: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
+        vk_beta_2: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),
+        vk_gamma_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
+        vk_delta_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
+        IC: vec![
+            "b8fcac9bb8eebddd4daf43519eb65d952436f5e98be287e246d70fc27f267379e132a156f6a4a742ece62fbb7c5e220d".to_string(),
+            "99f6c043cc37650767938eb567327aca0e82fb1dcab833778a6b8d5c8d13a8f53d784e7dfbcba6d3c71b57b908530048".to_string(),
+        ],
+    }
+}
+
+fn xxx_vk_compressed() -> Groth16CompressedData {
     Groth16CompressedData {
         vk_alpha_1: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
         vk_beta_2: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),
