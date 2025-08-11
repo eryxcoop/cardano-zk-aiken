@@ -3,8 +3,6 @@ use crate::presenter::compressed_groth16_proof_bls12_381_to_aiken_presenter::Com
 use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
-use std::fs::File;
-use std::io::{BufRead, BufReader, Read};
 use std::fs;
 
 #[test]
@@ -87,40 +85,6 @@ component main { public [a,b,c] } = Addition();"#
 
 fn inputs_json() -> String {
     r#"{"a": "3", "b": "7", "c": "10"}"#.to_string()
-}
-
-fn assert_line_matches(reader: &mut BufReader<File>, expected_line: &str) {
-    let mut line_to_assert = String::new();
-    reader.read_line(&mut line_to_assert).unwrap();
-    assert_eq!(expected_line, line_to_assert);
-}
-
-fn assert_text_matches(reader: &mut BufReader<File>, expected_text: String) {
-    let mut buffer = vec![0u8; expected_text.len()]; // un buffer de N bytes
-    let bytes_read = reader.read(&mut buffer).unwrap();
-    let text = String::from_utf8_lossy(&buffer[..bytes_read]);
-
-    assert_eq!(expected_text, text);
-}
-
-fn assert_proof_component_format_is_correct(
-    reader: &mut BufReader<File>,
-    proof_component_length_as_byte_string: usize,
-) {
-    let mut line = String::new();
-    reader.read_line(&mut line).unwrap();
-
-    let expected_prefix = "\t\t\t\"";
-    let expected_suffix = "\",\n";
-
-    let prefix = &line[..expected_prefix.len()];
-    let pi_n =
-        &line[expected_prefix.len()..expected_prefix.len() + proof_component_length_as_byte_string];
-    let suffix = &line[expected_prefix.len() + proof_component_length_as_byte_string..];
-
-    assert_eq!(expected_prefix.to_string(), prefix);
-    assert!(pi_n.chars().into_iter().all(|c| c.is_ascii_hexdigit()));
-    assert_eq!(expected_suffix.to_string(), suffix);
 }
 
 fn meshjs_file_prefix() -> String {
