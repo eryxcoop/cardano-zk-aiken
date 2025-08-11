@@ -18,6 +18,9 @@ dd -> c
 ee -> 4
 -------------- autogenerado deseado -----------------
 component main { public [aa,bb] } = MyTemplate(4, 5)
+
+
+
 -------------- dummy -----------------
 component main = MyTemplate(4,5) (todos privados)
 
@@ -37,10 +40,9 @@ component main = MyTemplate(4,5) (todos privados)
 3) Compilamos este componente con
         circom dummy.circom --O0 --sym
    esto va a generar un archivo dummy.sym que va a tener algo de la pinta
-        1,1,0,main.ee
         2,2,0,main.dd
+        1,1,0,main.ee
         3,3,0,main.aa
-        4,4,0,main.zz
         5,5,0,main.bb
         6,6,0,main.cc
 
@@ -51,3 +53,26 @@ component main = MyTemplate(4,5) (todos privados)
     component main {public [aa, bb]} = MyTemplate(4, 5)
 
 y desde ahí se sigue con el flujo normal.
+
+--------------------------------------------------------
+
+-------- programa.ak --------
+offchain custom('path/to/circom/with/main.circom', [pub a, pub 5])
+
+-------- path/to/circom/with/main.circom --------
+template MyComponent(A,B){
+    input signal aa;
+    input signal bb;
+    input signal cc;
+    output signal oo;
+}
+
+component main { public [aa, cc] } = MyComponent(4, 5);
+
+--------- inputs.json ---------
+{
+    aa: --,
+    bb: --,
+    cc: --,
+    oo: --,
+}
