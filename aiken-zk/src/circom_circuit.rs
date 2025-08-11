@@ -19,7 +19,7 @@ impl CircomCircuit {
 
     // verification key generation
 
-    pub fn generate_verification_key(&mut self, rand: (&str, &str)) -> Result<(), Error> {
+    pub fn generate_verification_key(&self, rand: (&str, &str)) -> Result<(), Error> {
         let circuit_name = self
             .circom_source_code_path
             .strip_suffix(".circom")

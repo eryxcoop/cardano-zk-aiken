@@ -22,6 +22,61 @@ pub struct Groth16CompressedData {
 pub struct AikenZkCompiler;
 
 impl AikenZkCompiler {
+    pub fn apply_modifications_to_src_for_token(
+        aiken_src: String,
+        aiken_src_filename: String,
+        random_seeds: (&str, &str),
+    ) -> String {
+        let (offchain_token, offchain_token_span) = Self::detect_code_to_replace(&aiken_src);
+        Self::output_offchain_circuit_reference(aiken_src_filename, random_seeds, &offchain_token);
+        Self::output_aiken_code(&aiken_src, &offchain_token, &offchain_token_span)
+    }
+
+    fn detect_code_to_replace(aiken_src: &String) -> (TokenZK, Span) {
+        // Detect offchain token
+        let LexInfo { tokens, .. } = Lexer::new().run(&aiken_src).unwrap();
+        let (offchain_token, offchain_token_span) = Self::find_offchain_token(tokens);
+        (offchain_token, offchain_token_span)
+    }
+
+    fn output_offchain_circuit_reference(
+        aiken_src_filename: String,
+        random_seeds: (&str, &str),
+        offchain_token: &TokenZK,
+    ) {
+        // Create circom circuit source code for offchain token
+        let circom_component_src = ComponentCreator::from_token(offchain_token.clone()).create();
+        let circom_src_filename_with_extension = aiken_src_filename + ".circom";
+        fs::write(&circom_src_filename_with_extension, circom_component_src).unwrap();
+
+        // Create verification key for circom circuit
+        let circom_compiler = CircomCircuit::from(circom_src_filename_with_extension.clone());
+        circom_compiler
+            .generate_verification_key(random_seeds)
+            .unwrap();
+    }
+
+    fn output_aiken_code(
+        aiken_src: &String,
+        offchain_token: &TokenZK,
+        offchain_token_span: &Span,
+    ) -> String {
+        // Replace offchain with groth16 verifier
+        let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
+        let mut aiken_zk_src = Self::replace_keyword_with_function_call(
+            &aiken_src,
+            &offchain_token,
+            &offchain_token_span,
+        );
+        aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
+        aiken_zk_src = Self::append_verify_function_declaration(
+            aiken_zk_src,
+            &offchain_token,
+            &vk_compressed_data,
+        );
+        aiken_zk_src
+    }
+
     fn find_offchain_token(tokens: Vec<(Token, Span)>) -> (Token, Span) {
         tokens
             .iter()
@@ -30,14 +85,21 @@ impl AikenZkCompiler {
             .clone()
     }
 
-    fn replace_keyword_with_function_call(aiken_src: &str, token: &Token, span: &Span) -> String {
+    fn replace_keyword_with_function_call(
+        aiken_src: &str,
+        token: &Token,
+        offchain_token_span: &Span,
+    ) -> String {
         let mut aiken_zk_src = String::from(aiken_src);
         let public_identifiers = Self::extract_public_identifiers_from_token(token);
         let replacement = format!(
             "zk_verify_or_fail(redeemer, [{}])",
             public_identifiers.join(", ")
         );
-        aiken_zk_src.replace_range(span.start..span.end, &replacement);
+        aiken_zk_src.replace_range(
+            offchain_token_span.start..offchain_token_span.end,
+            &replacement,
+        );
         aiken_zk_src
     }
 
@@ -110,32 +172,6 @@ impl AikenZkCompiler {
                 acc
             }
         }
-    }
-
-    pub fn apply_modifications_to_src_for_token(
-        aiken_src: String,
-        aiken_src_filename: String,
-        random_seeds: (&str, &str),
-    ) -> String {
-        let LexInfo { tokens, .. } = Lexer::new().run(&aiken_src).unwrap();
-        let (token, span) = Self::find_offchain_token(tokens);
-        let circom_component_src = ComponentCreator::from_token(token.clone()).create();
-
-        let circom_src_filename_with_extension = aiken_src_filename + ".circom";
-        fs::write(&circom_src_filename_with_extension, circom_component_src).unwrap();
-        let mut circom_compiler = CircomCircuit::from(circom_src_filename_with_extension.clone());
-
-        circom_compiler
-            .generate_verification_key(random_seeds)
-            .unwrap();
-
-        let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
-
-        let mut aiken_zk_src = Self::replace_keyword_with_function_call(&aiken_src, &token, &span);
-        aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
-        aiken_zk_src =
-            Self::append_verify_function_declaration(aiken_zk_src, &token, &vk_compressed_data);
-        aiken_zk_src
     }
 
     fn append_verify_function_declaration(
