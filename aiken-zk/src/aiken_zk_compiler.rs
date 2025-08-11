@@ -1,6 +1,5 @@
 use crate::circom_circuit::CircomCircuit;
 use crate::component_creator::ComponentCreator;
-use crate::presenter::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381ToAikenPresenter;
 use crate::lexer::{LexInfo, Lexer};
 use crate::token_zk::{TokenZK as Token, TokenZK};
 use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
@@ -9,7 +8,6 @@ use serde::Deserialize;
 use std::fs;
 use std::io::Error;
 use std::process::Command;
-use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -217,34 +215,5 @@ impl AikenZkCompiler {
 
     fn prepend_imports(aiken_src: &str) -> String {
         "use aiken/collection/list\nuse ak_381/groth16.{Proof, SnarkVerificationKey, groth_verify}\n".to_string() + aiken_src
-    }
-
-    pub fn generate_aiken_proof(
-        circom_path: &str,
-        verification_key_path: &str,
-        inputs_path: &str,
-        output_path: &str,
-    ) {
-        let circuit = CircomCircuit::from(circom_path.to_string());
-        let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
-
-        let aiken_presenter = CompressedGroth16ProofBls12_381ToAikenPresenter::new(proof);
-
-        let aiken_proof = aiken_presenter.present();
-        fs::write(output_path, aiken_proof).expect("failed to create output file");
-    }
-
-    pub fn generate_meshjs_zk_redeemer_library(
-        circom_path: &str,
-        verification_key_path: &str,
-        inputs_path: &str,
-        output_path: &str,
-    ) {
-        let circuit = CircomCircuit::from(circom_path.to_string());
-        let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
-        let mesh_js_presenter = MeshJsZKRedeemerPresenter::new_for_proof(proof);
-        let zk_redeemer = mesh_js_presenter.present();
-
-        fs::write(output_path, zk_redeemer).expect("output file write failed");
     }
 }

@@ -1,4 +1,7 @@
 use crate::aiken_zk_compiler::{AikenZkCompiler, Groth16CompressedData};
+use crate::circom_circuit::CircomCircuit;
+use crate::presenter::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381ToAikenPresenter;
+use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
 use crate::tests::aiken_program_factory::{
     aiken_template_with_body_and_verify_definition, verify_declaration,
 };
@@ -125,12 +128,13 @@ fn test_it_can_generate_proof_for_aiken_testing() {
     let output_path = "proof.ak";
     create_circom_and_inputs_file();
 
-    AikenZkCompiler::generate_aiken_proof(
-        circom_path,
-        verification_key_path,
-        inputs_path,
-        output_path,
-    );
+    let circuit = CircomCircuit::from(circom_path.to_string());
+    let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
+
+    let aiken_presenter = CompressedGroth16ProofBls12_381ToAikenPresenter::new(proof);
+
+    let aiken_proof = aiken_presenter.present();
+    fs::write(output_path, aiken_proof).expect("failed to create output file");
 
     let file = File::open(output_path).unwrap();
     let lines: Vec<String> = io::BufReader::new(file)
@@ -157,12 +161,12 @@ fn test_it_can_generate_proof_for_the_meshjs_spend() {
     let output_path = "zk_redeemer.ts";
     create_circom_and_inputs_file();
 
-    AikenZkCompiler::generate_meshjs_zk_redeemer_library(
-        circom_path,
-        verification_key_path,
-        inputs_path,
-        output_path,
-    );
+    let circuit = CircomCircuit::from(circom_path.to_string());
+    let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
+    let mesh_js_presenter = MeshJsZKRedeemerPresenter::new_for_proof(proof);
+    let zk_redeemer = mesh_js_presenter.present();
+
+    fs::write(output_path, zk_redeemer).expect("output file write failed");
 
     let file = File::open(output_path).unwrap();
     let mut reader = io::BufReader::new(file);
