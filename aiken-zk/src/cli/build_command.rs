@@ -1,8 +1,8 @@
 use crate::aiken_zk_compiler::AikenZkCompiler;
-use crate::create_validators_dir_lazy;
-use crate::subcommand::Subcommand;
+use crate::cli::subcommand::Subcommand;
 use clap::{ArgMatches, Command};
 use std::fs;
+use std::io::ErrorKind;
 use std::path::PathBuf;
 
 pub struct BuildCommand {}
@@ -25,7 +25,7 @@ impl Subcommand for BuildCommand {
 
     fn evaluate(&self, matches: &ArgMatches) {
         let (source_path, output_path) = Self::get_arguments(matches);
-        create_validators_dir_lazy();
+        Self::create_validators_dir_lazy();
         Self::execute_command(source_path, output_path);
     }
 }
@@ -52,5 +52,17 @@ impl BuildCommand {
         let output_path =
             Self::get_argument_value(subcommand_matches, Self::BUILD_COMMAND_OUTPUT_ARG_NAME);
         (source_path, output_path)
+    }
+
+    pub fn create_validators_dir_lazy() {
+        fs::create_dir("validators")
+            .or_else(|error| {
+                if error.kind() == ErrorKind::AlreadyExists {
+                    Ok(())
+                } else {
+                    Err(error)
+                }
+            })
+            .expect("Couldnt create dir");
     }
 }

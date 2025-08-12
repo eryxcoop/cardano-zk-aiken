@@ -1,6 +1,6 @@
-use crate::build_command::BuildCommand;
-use crate::prove_command::ProveCommand;
-use crate::subcommand::Subcommand;
+use crate::cli::build_command::BuildCommand;
+use crate::cli::prove_command::ProveCommand;
+use crate::cli::subcommand::Subcommand;
 use clap::Command;
 
 pub struct CommandLineInterface {

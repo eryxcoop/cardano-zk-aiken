@@ -1,8 +1,8 @@
 use crate::circom_circuit::CircomCircuit;
 use crate::presenter::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381ToAikenPresenter;
 use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
-use crate::subcommand::Subcommand;
-use clap::{ArgMatches, Command};
+use crate::cli::subcommand::Subcommand;
+use clap::{Arg, ArgMatches, Command};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -23,20 +23,18 @@ impl Subcommand for ProveCommand {
 
         Command::new(Self::SUBCOMMAND_NAME)
             .subcommand_required(true)
-            .subcommand(
-                Command::new("aiken")
-                    .arg(circom_path.clone())
-                    .arg(verification_key_path.clone())
-                    .arg(inputs_path.clone())
-                    .arg(output_path.clone()),
-            )
-            .subcommand(
-                Command::new("meshjs")
-                    .arg(circom_path.clone())
-                    .arg(verification_key_path.clone())
-                    .arg(inputs_path.clone())
-                    .arg(output_path),
-            )
+            .subcommand(Self::create_proof_for_aiken_command(
+                &circom_path,
+                &verification_key_path,
+                &inputs_path,
+                &output_path,
+            ))
+            .subcommand(Self::create_library_for_meshjs_command(
+                circom_path,
+                verification_key_path,
+                inputs_path,
+                output_path,
+            ))
     }
 
     fn for_name(name: &str) -> bool {
@@ -79,6 +77,32 @@ impl ProveCommand {
     const PROVE_COMMAND_INPUT_ARG_NAME: &'static str = "inputs_path";
     const PROVE_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_proof_path";
 
+    fn create_proof_for_aiken_command(
+        circom_path: &Arg,
+        verification_key_path: &Arg,
+        inputs_path: &Arg,
+        output_path: &Arg,
+    ) -> Command {
+        Command::new("aiken")
+            .arg(circom_path.clone())
+            .arg(verification_key_path.clone())
+            .arg(inputs_path.clone())
+            .arg(output_path.clone())
+    }
+
+    fn create_library_for_meshjs_command(
+        circom_path: Arg,
+        verification_key_path: Arg,
+        inputs_path: Arg,
+        output_path: Arg,
+    ) -> Command {
+        Command::new("meshjs")
+            .arg(circom_path.clone())
+            .arg(verification_key_path.clone())
+            .arg(inputs_path.clone())
+            .arg(output_path)
+    }
+
     fn get_prove_arguments(
         subcommand_matches: &ArgMatches,
     ) -> (&PathBuf, &PathBuf, &PathBuf, &PathBuf) {
@@ -105,7 +129,8 @@ impl ProveCommand {
         let output_path_string = output_path.to_str().unwrap();
 
         let circuit = CircomCircuit::from(circom_path_string.to_string());
-        let proof = circuit.generate_groth16_proof(verification_key_path_string, inputs_path_string);
+        let proof =
+            circuit.generate_groth16_proof(verification_key_path_string, inputs_path_string);
 
         let aiken_presenter = CompressedGroth16ProofBls12_381ToAikenPresenter::new(proof);
 
@@ -125,7 +150,8 @@ impl ProveCommand {
         let output_path_string = output_path.to_str().unwrap();
 
         let circuit = CircomCircuit::from(circom_path_string.to_string());
-        let proof = circuit.generate_groth16_proof(verification_key_path_string, inputs_path_string);
+        let proof =
+            circuit.generate_groth16_proof(verification_key_path_string, inputs_path_string);
 
         let mesh_js_presenter = MeshJsZKRedeemerPresenter::new_for_proof(proof);
         let zk_redeemer = mesh_js_presenter.present();
