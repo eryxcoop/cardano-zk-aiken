@@ -1,4 +1,4 @@
-use crate::aiken_zk_compiler::AikenZkCompiler;
+use crate::compiler::aiken_zk_compiler::AikenZkCompiler;
 use crate::cli::subcommand::Subcommand;
 use clap::{ArgMatches, Command};
 use std::fs;

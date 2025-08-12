@@ -1,4 +1,4 @@
-use crate::aiken_zk_compiler::Groth16CompressedData;
+use crate::compiler::aiken_zk_compiler::Groth16CompressedData;
 
 pub fn aiken_template_with_body_and_verify_definition(
     header: &str,

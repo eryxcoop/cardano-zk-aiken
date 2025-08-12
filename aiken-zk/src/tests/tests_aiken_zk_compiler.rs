@@ -1,5 +1,5 @@
 use std::fs;
-use crate::aiken_zk_compiler::{AikenZkCompiler, Groth16CompressedData};
+use crate::compiler::aiken_zk_compiler::{AikenZkCompiler, Groth16CompressedData};
 use crate::tests::aiken_program_factory::{
     aiken_template_with_body_and_verify_definition, verify_declaration,
 };

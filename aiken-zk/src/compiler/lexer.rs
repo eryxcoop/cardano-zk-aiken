@@ -1,5 +1,5 @@
-use crate::parsers::int_parser;
-use crate::token_zk::TokenZK as Token;
+use crate::compiler::parsers::int_parser;
+use crate::compiler::token_zk::TokenZK as Token;
 use crate::zk_examples::ZkExample;
 use aiken_lang::ast::Span;
 use aiken_lang::parser::{error::ParseError, extra::ModuleExtra};

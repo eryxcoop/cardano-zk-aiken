@@ -1,4 +1,4 @@
-use crate::token_zk;
+use crate::compiler::token_zk;
 use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
 use aiken_lang::parser::token::Base;
 

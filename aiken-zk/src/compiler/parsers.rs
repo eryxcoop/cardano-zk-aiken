@@ -1,4 +1,4 @@
-use crate::token_zk::TokenZK as Token;
+use crate::compiler::token_zk::TokenZK as Token;
 use aiken_lang::parser::error::ParseError;
 use aiken_lang::parser::token::Base;
 use chumsky::primitive::{choice, just, one_of};

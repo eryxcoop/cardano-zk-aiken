@@ -2,8 +2,8 @@ use chumsky::prelude::*;
 use std::fmt;
 use std::fmt::Formatter;
 
-use crate::parsers::int_parser;
-use crate::token_zk::TokenZK as Token;
+use crate::compiler::parsers::int_parser;
+use crate::compiler::token_zk::TokenZK as Token;
 use aiken_lang::parser::error::ParseError;
 use chumsky::{
     Parser,

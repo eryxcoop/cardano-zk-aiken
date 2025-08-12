@@ -1,6 +1,6 @@
-use crate::lexer;
+use crate::compiler::lexer;
 use crate::tests::token_factory::{int_token, variable_token};
-use crate::token_zk::TokenZK as Token;
+use crate::compiler::token_zk::TokenZK as Token;
 use crate::zk_examples::*;
 // --------- Addition --------- //
 

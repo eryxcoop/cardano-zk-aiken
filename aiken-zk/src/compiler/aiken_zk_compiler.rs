@@ -1,7 +1,7 @@
 use crate::circom_circuit::CircomCircuit;
 use crate::component_creator::ComponentCreator;
-use crate::lexer::{LexInfo, Lexer};
-use crate::token_zk::{TokenZK as Token, TokenZK};
+use crate::compiler::lexer::{LexInfo, Lexer};
+use crate::compiler::token_zk::{TokenZK as Token, TokenZK};
 use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
 use aiken_lang::ast::Span;
 use serde::Deserialize;
