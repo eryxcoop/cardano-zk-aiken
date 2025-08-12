@@ -10,7 +10,7 @@ fn test_circuit_can_generate_a_verification_key() {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let circom_program_filename = "test.circom".to_string();
     fs::write(&circom_program_filename, source_code_addition()).unwrap();
-    let mut circuit = CircomCircuit::from(circom_program_filename.clone());
+    let circuit = CircomCircuit::from(circom_program_filename.clone());
     let random_seeds = ("asdasd", "dsadsa");
 
     circuit.generate_verification_key(random_seeds).unwrap();

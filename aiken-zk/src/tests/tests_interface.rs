@@ -190,7 +190,7 @@ fn create_original_aiken_file() {
 fn create_circom_and_inputs_file() {
     let circom_path = "my_program.circom";
     fs::write(circom_path, circom_file()).unwrap();
-    let mut circom_compiler = CircomCircuit::from(circom_path.to_string());
+    let circom_compiler = CircomCircuit::from(circom_path.to_string());
     circom_compiler
         .generate_verification_key(("a", "b"))
         .unwrap();

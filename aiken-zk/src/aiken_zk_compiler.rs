@@ -1,6 +1,5 @@
 use crate::circom_circuit::CircomCircuit;
 use crate::component_creator::ComponentCreator;
-use crate::presenter::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381ToAikenPresenter;
 use crate::lexer::{LexInfo, Lexer};
 use crate::token_zk::{TokenZK as Token, TokenZK};
 use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
@@ -9,7 +8,6 @@ use serde::Deserialize;
 use std::fs;
 use std::io::Error;
 use std::process::Command;
-use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -24,22 +22,74 @@ pub struct Groth16CompressedData {
 pub struct AikenZkCompiler;
 
 impl AikenZkCompiler {
-    pub fn generate_meshjs_zk_redeemer_library(
-        circom_path: &str,
-        verification_key_path: &str,
-        inputs_path: &str,
-        output_path: &str,
-    ) {
-        let circuit = CircomCircuit::from(circom_path.to_string());
-        let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
-        let mesh_js_presenter = MeshJsZKRedeemerPresenter::new_for_proof(proof);
-        let zk_redeemer = mesh_js_presenter.present();
+    pub fn apply_modifications_to_src_for_token(
+        aiken_src: String,
+        aiken_src_filename: String,
+        random_seeds: (&str, &str),
+    ) -> String {
+        let (offchain_token, offchain_token_span) = Self::detect_code_to_replace(&aiken_src);
+        match offchain_token {
+            TokenZK::Offchain {
+                example:ZkExample::CustomCircom {
+                    path,
+                    public_input_identifiers,
+                }
+            } => {"".to_string()}
+            _ => {
+                Self::yyy(&aiken_src, aiken_src_filename, random_seeds, &offchain_token, &offchain_token_span)
+            }
+        }
+        }
 
-        fs::write(output_path, zk_redeemer).expect("output file write failed");
+    fn yyy(aiken_src: &String, aiken_src_filename: String, random_seeds: (&str, &str), offchain_token: &TokenZK, offchain_token_span: &Span) -> String {
+        Self::output_offchain_circuit_reference(aiken_src_filename, random_seeds, &offchain_token);
+        Self::output_aiken_code(&aiken_src, &offchain_token, &offchain_token_span)
     }
-}
+    fn detect_code_to_replace(aiken_src: &String) -> (TokenZK, Span) {
+        // Detect offchain token
+        let LexInfo { tokens, .. } = Lexer::new().run(&aiken_src).unwrap();
+        let (offchain_token, offchain_token_span) = Self::find_offchain_token(tokens);
+        (offchain_token, offchain_token_span)
+    }
 
-impl AikenZkCompiler {
+    fn output_offchain_circuit_reference(
+        aiken_src_filename: String,
+        random_seeds: (&str, &str),
+        offchain_token: &TokenZK,
+    ) {
+        // Create circom circuit source code for offchain token
+        let circom_component_src = ComponentCreator::from_token(offchain_token.clone()).create();
+        let circom_src_filename_with_extension = aiken_src_filename + ".circom";
+        fs::write(&circom_src_filename_with_extension, circom_component_src).unwrap();
+
+        // Create verification key for circom circuit
+        let circom_circuit = CircomCircuit::from(circom_src_filename_with_extension.clone());
+        circom_circuit
+            .generate_verification_key(random_seeds)
+            .unwrap();
+    }
+
+    fn output_aiken_code(
+        aiken_src: &String,
+        offchain_token: &TokenZK,
+        offchain_token_span: &Span,
+    ) -> String {
+        // Replace offchain with groth16 verifier
+        let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
+        let mut aiken_zk_src = Self::replace_keyword_with_function_call(
+            &aiken_src,
+            &offchain_token,
+            &offchain_token_span,
+        );
+        aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
+        aiken_zk_src = Self::append_verify_function_declaration(
+            aiken_zk_src,
+            &offchain_token,
+            &vk_compressed_data,
+        );
+        aiken_zk_src
+    }
+
     fn find_offchain_token(tokens: Vec<(Token, Span)>) -> (Token, Span) {
         tokens
             .iter()
@@ -48,14 +98,21 @@ impl AikenZkCompiler {
             .clone()
     }
 
-    fn replace_keyword_with_function_call(aiken_src: &str, token: &Token, span: &Span) -> String {
+    fn replace_keyword_with_function_call(
+        aiken_src: &str,
+        token: &Token,
+        offchain_token_span: &Span,
+    ) -> String {
         let mut aiken_zk_src = String::from(aiken_src);
         let public_identifiers = Self::extract_public_identifiers_from_token(token);
         let replacement = format!(
             "zk_verify_or_fail(redeemer, [{}])",
             public_identifiers.join(", ")
         );
-        aiken_zk_src.replace_range(span.start..span.end, &replacement);
+        aiken_zk_src.replace_range(
+            offchain_token_span.start..offchain_token_span.end,
+            &replacement,
+        );
         aiken_zk_src
     }
 
@@ -128,47 +185,6 @@ impl AikenZkCompiler {
                 acc
             }
         }
-    }
-
-    pub fn apply_modifications_to_src_for_token(
-        aiken_src: String,
-        aiken_src_filename: String,
-        random_seeds: (&str, &str),
-    ) -> String {
-        let LexInfo { tokens, .. } = Lexer::new().run(&aiken_src).unwrap();
-        let (token, span) = Self::find_offchain_token(tokens);
-
-        match token {
-            TokenZK::Offchain {
-                example:ZkExample::CustomCircom {
-                    path,
-                    public_input_identifiers,
-                }
-            } => {"".to_string()}
-            _ => {
-                Self::yyy(&aiken_src, aiken_src_filename, random_seeds, &token, &span)
-            }
-        }
-    }
-
-    fn yyy(aiken_src: &String, aiken_src_filename: String, random_seeds: (&str, &str), token: &TokenZK, span: &Span) -> String {
-        let circom_component_src = ComponentCreator::from_token(token.clone()).create();
-
-        let circom_src_filename_with_extension = aiken_src_filename + ".circom";
-        fs::write(&circom_src_filename_with_extension, circom_component_src).unwrap();
-        let mut circom_compiler = CircomCircuit::from(circom_src_filename_with_extension.clone());
-
-        circom_compiler
-            .generate_verification_key(random_seeds)
-            .unwrap();
-
-        let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
-
-        let mut aiken_zk_src = Self::replace_keyword_with_function_call(&aiken_src, &token, &span);
-        aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
-        aiken_zk_src =
-            Self::append_verify_function_declaration(aiken_zk_src, &token, &vk_compressed_data);
-        aiken_zk_src
     }
 
     fn append_verify_function_declaration(
@@ -248,20 +264,5 @@ impl AikenZkCompiler {
 
     fn prepend_imports(aiken_src: &str) -> String {
         "use aiken/collection/list\nuse ak_381/groth16.{Proof, SnarkVerificationKey, groth_verify}\n".to_string() + aiken_src
-    }
-
-    pub fn generate_aiken_proof(
-        circom_path: &str,
-        verification_key_path: &str,
-        inputs_path: &str,
-        output_path: &str,
-    ) {
-        let circom_compiler = CircomCircuit::from(circom_path.to_string());
-        let proof = circom_compiler.generate_groth16_proof(verification_key_path, inputs_path);
-
-        let aiken_presenter = CompressedGroth16ProofBls12_381ToAikenPresenter::new(proof);
-
-        let aiken_proof = aiken_presenter.present();
-        fs::write(output_path, aiken_proof).expect("failed to create output file");
     }
 }

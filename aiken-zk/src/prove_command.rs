@@ -1,6 +1,9 @@
-use crate::aiken_zk_compiler::AikenZkCompiler;
+use crate::circom_circuit::CircomCircuit;
+use crate::presenter::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381ToAikenPresenter;
+use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
 use crate::subcommand::Subcommand;
 use clap::{ArgMatches, Command};
+use std::fs;
 use std::path::{Path, PathBuf};
 
 pub struct ProveCommand {}
@@ -25,15 +28,15 @@ impl Subcommand for ProveCommand {
                     .arg(circom_path.clone())
                     .arg(verification_key_path.clone())
                     .arg(inputs_path.clone())
-                    .arg(output_path.clone())
-            ).subcommand(
+                    .arg(output_path.clone()),
+            )
+            .subcommand(
                 Command::new("meshjs")
                     .arg(circom_path.clone())
                     .arg(verification_key_path.clone())
                     .arg(inputs_path.clone())
-                    .arg(output_path)
+                    .arg(output_path),
             )
-
     }
 
     fn for_name(name: &str) -> bool {
@@ -48,10 +51,19 @@ impl Subcommand for ProveCommand {
                     Self::get_prove_arguments(sub_matches);
 
                 if match_name == "aiken" {
-                    Self::execute_aiken_prove_command(circom_path, verification_key_path, inputs_path, output_path);
-                }
-                else if match_name == "meshjs" {
-                    Self::execute_meshjs_prove_command(circom_path, verification_key_path, inputs_path, output_path);
+                    Self::execute_aiken_prove_command(
+                        circom_path,
+                        verification_key_path,
+                        inputs_path,
+                        output_path,
+                    );
+                } else if match_name == "meshjs" {
+                    Self::execute_meshjs_prove_command(
+                        circom_path,
+                        verification_key_path,
+                        inputs_path,
+                        output_path,
+                    );
                 }
             }
             _ => {
@@ -67,20 +79,6 @@ impl ProveCommand {
     const PROVE_COMMAND_INPUT_ARG_NAME: &'static str = "inputs_path";
     const PROVE_COMMAND_OUTPUT_ARG_NAME: &'static str = "output_proof_path";
 
-    fn execute_aiken_prove_command(
-        circom_path: &Path,
-        verification_key_path: &Path,
-        inputs_path: &Path,
-        output_path: &Path,
-    ) {
-        AikenZkCompiler::generate_aiken_proof(
-            circom_path.to_str().unwrap(),
-            verification_key_path.to_str().unwrap(),
-            inputs_path.to_str().unwrap(),
-            output_path.to_str().unwrap(),
-        );
-    }
-
     fn get_prove_arguments(
         subcommand_matches: &ArgMatches,
     ) -> (&PathBuf, &PathBuf, &PathBuf, &PathBuf) {
@@ -95,12 +93,43 @@ impl ProveCommand {
         (circom_path, verification_key_path, inputs_path, output_path)
     }
 
-    fn execute_meshjs_prove_command(circom_path: &PathBuf, verification_key_path: &PathBuf, inputs_path: &PathBuf, output_path: &PathBuf) {
-        AikenZkCompiler::generate_meshjs_zk_redeemer_library(
-            circom_path.to_str().unwrap(),
-            verification_key_path.to_str().unwrap(),
-            inputs_path.to_str().unwrap(),
-            output_path.to_str().unwrap()
-        )
+    fn execute_aiken_prove_command(
+        circom_path: &Path,
+        verification_key_path: &Path,
+        inputs_path: &Path,
+        output_path: &Path,
+    ) {
+        let circom_path_string = circom_path.to_str().unwrap();
+        let verification_key_path_string = verification_key_path.to_str().unwrap();
+        let inputs_path_string = inputs_path.to_str().unwrap();
+        let output_path_string = output_path.to_str().unwrap();
+
+        let circuit = CircomCircuit::from(circom_path_string.to_string());
+        let proof = circuit.generate_groth16_proof(verification_key_path_string, inputs_path_string);
+
+        let aiken_presenter = CompressedGroth16ProofBls12_381ToAikenPresenter::new(proof);
+
+        let presented_aiken_proof = aiken_presenter.present();
+        fs::write(output_path_string, presented_aiken_proof).expect("failed to create output file");
+    }
+
+    fn execute_meshjs_prove_command(
+        circom_path: &PathBuf,
+        verification_key_path: &PathBuf,
+        inputs_path: &PathBuf,
+        output_path: &PathBuf,
+    ) {
+        let circom_path_string = circom_path.to_str().unwrap();
+        let verification_key_path_string = verification_key_path.to_str().unwrap();
+        let inputs_path_string = inputs_path.to_str().unwrap();
+        let output_path_string = output_path.to_str().unwrap();
+
+        let circuit = CircomCircuit::from(circom_path_string.to_string());
+        let proof = circuit.generate_groth16_proof(verification_key_path_string, inputs_path_string);
+
+        let mesh_js_presenter = MeshJsZKRedeemerPresenter::new_for_proof(proof);
+        let zk_redeemer = mesh_js_presenter.present();
+
+        fs::write(output_path_string, zk_redeemer).expect("output file write failed");
     }
 }
