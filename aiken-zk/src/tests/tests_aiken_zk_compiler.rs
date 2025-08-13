@@ -115,12 +115,11 @@ fn test_replaces_assert_eq_of_mixed_variables_and_constants_by_the_corresponding
 
 #[test]
 #[serial]
-fn test_replaces_custom_circom_by_the_corresponding_function_and_call()
-{
-    let vk_compressed_data = xxx_vk_compressed();
+fn test_replaces_custom_circom_by_the_corresponding_function_and_call() {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     fs::write("./test.circom", addition_custom_circom_template_and_component()).unwrap();
-    let aiken_src = aiken_template_with_body_and_verify_definition("", r#"offchain custom("./test.circom", [a, 5])"#, "");
+    let aiken_src = aiken_template_with_body_and_verify_definition(
+        "", r#"offchain custom("test.circom", [a, 5])"#, "");
     let output_filename = "my_program".to_string();
     let random_seeds = ("asdasd", "dsadsa");
 
@@ -130,11 +129,10 @@ fn test_replaces_custom_circom_by_the_corresponding_function_and_call()
         random_seeds,
     );
 
-    let verify_declaration1 = verify_declaration(2, vk_compressed_data);
     let expected_aiken_src = aiken_template_with_body_and_verify_definition(
         import_header(),
         "zk_verify_or_fail(redeemer, [a, 5])",
-        &verify_declaration1,
+        &verify_declaration(2, addition_custom_circom_vk_compressed()),
     );
 
     assert_eq!(
@@ -274,7 +272,7 @@ fn assert_eq_mixed_visibility_vk_compressed() -> Groth16CompressedData {
     }
 }
 
-fn xxx_vk_compressed() -> Groth16CompressedData {
+fn addition_custom_circom_vk_compressed() -> Groth16CompressedData {
     Groth16CompressedData {
         vk_alpha_1: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
         vk_beta_2: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),

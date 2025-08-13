@@ -338,7 +338,7 @@ fn test_lexer_translates_custom_circom() {
         Token::Offchain {
             example: ZkExample::CustomCircom {
                 path: String::from("path/to/circom/with/main.circom"),
-                public_input: vec![variable_token("a"), int_token(5)]
+                public_inputs: vec![variable_token("a"), int_token(5)]
                 },
         },
         *offchain_token
