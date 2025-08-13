@@ -82,7 +82,7 @@ pub enum ZkExample {
     },
     CustomCircom {
         path: String,
-        public_input_identifiers: Vec<Box<Token>>,
+        public_inputs: Vec<Box<Token>>,
     },
 }
 
@@ -203,7 +203,7 @@ impl ZkExample {
             string_literal_parser.padded()
                 .then_ignore(just(",").padded())
                 .then(public_input_identifiers_list_parser)
-                .delimited_by(just("(").padded(), just(")").padded());
+                .delimited_by(just("(").padded(), just(")").padded_by(just(" ").repeated()));
 
         just("custom")
             .padded()
@@ -212,7 +212,7 @@ impl ZkExample {
                 Token::Offchain {
                     example: ZkExample::CustomCircom {
                         path,
-                        public_input_identifiers : public_input_identifiers
+                        public_inputs: public_input_identifiers
                             .iter()
                             .map(|token| {
                                 Box::new(token.clone())
