@@ -28,13 +28,42 @@ impl AikenZkCompiler {
         random_seeds: (&str, &str),
     ) -> String {
         let (offchain_token, offchain_token_span) = Self::detect_code_to_replace(&aiken_src);
-        match offchain_token {
+        match &offchain_token {
             TokenZK::Offchain {
                 example:ZkExample::CustomCircom {
                     path,
-                    public_input_identifiers,
+                    public_input,
                 }
-            } => {"".to_string()}
+            } => {
+                let circom_circuit = CircomCircuit::from(path.clone());
+                circom_circuit
+                    .generate_verification_key(random_seeds)
+                    .unwrap();
+                // Replace offchain with groth16 verifier
+                let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
+                let public_input_identifiers: Vec<String> = public_input.iter()
+                    .map(|token| {
+                        Self::extract_identifier_from_token(token)
+                    })
+                    .collect();
+
+                let mut aiken_zk_src = String::from(&aiken_src);
+                let replacement = format!(
+                    "zk_verify_or_fail(redeemer, [{}])",
+                    public_input_identifiers.join(", ")
+                );
+                aiken_zk_src.replace_range(
+                    offchain_token_span.start..offchain_token_span.end,
+                    &replacement,
+                );
+                aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
+                aiken_zk_src = Self::append_verify_function_declaration(
+                    aiken_zk_src,
+                    &offchain_token,
+                    &vk_compressed_data,
+                );
+                aiken_zk_src
+            }
             _ => {
                 Self::yyy(&aiken_src, aiken_src_filename, random_seeds, &offchain_token, &offchain_token_span)
             }

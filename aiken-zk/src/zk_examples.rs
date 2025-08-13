@@ -82,7 +82,7 @@ pub enum ZkExample {
     },
     CustomCircom {
         path: String,
-        public_input_identifiers: Vec<Box<Token>>,
+        public_input: Vec<Box<Token>>,
     },
 }
 
@@ -212,7 +212,7 @@ impl ZkExample {
                 Token::Offchain {
                     example: ZkExample::CustomCircom {
                         path,
-                        public_input_identifiers : public_input_identifiers
+                        public_input: public_input_identifiers
                             .iter()
                             .map(|token| {
                                 Box::new(token.clone())
