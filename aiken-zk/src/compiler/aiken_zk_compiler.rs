@@ -30,7 +30,7 @@ impl AikenZkCompiler {
         let (offchain_token, offchain_token_span) = Self::detect_code_to_replace(&aiken_src);
         match &offchain_token {
             TokenZK::Offchain { example:ZkExample::CustomCircom { path, public_inputs: public_input } } => {
-                Self::apply_modifications_to_src_for_custom_token(&aiken_src, random_seeds, &offchain_token, offchain_token_span, path, public_input)
+                Self::apply_modifications_to_src_for_custom_token(&aiken_src, random_seeds, offchain_token_span, path, public_input)
             }
             _ => {
                 Self::apply_modifications_to_src_for_example_token(&aiken_src, aiken_src_filename, random_seeds, &offchain_token, &offchain_token_span)
@@ -41,22 +41,16 @@ impl AikenZkCompiler {
     fn apply_modifications_to_src_for_custom_token(
         aiken_src: &str,
         random_seeds: (&str, &str),
-        offchain_token: &TokenZK,
         offchain_token_span: Span,
         path: &str,
-        public_input: &Vec<Box<TokenZK>>) -> String
+        public_inputs: &Vec<Box<TokenZK>>) -> String
     {
         let circom_circuit = CircomCircuit::from(path.to_string());
-        circom_circuit
-            .generate_verification_key(random_seeds)
-            .unwrap();
-        // Replace offchain with groth16 verifier
+        circom_circuit.generate_verification_key(random_seeds).unwrap();
         let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
-        let public_input_identifiers: Vec<String> = public_input.iter()
-            .map(|token| {
-                Self::extract_identifier_from_token(token)
-            })
-            .collect();
+        let public_input_identifiers: Vec<String> = public_inputs.iter().map(|token| {
+            Self::extract_identifier_from_token(token)
+        }).collect();
 
         let mut aiken_zk_src = aiken_src.to_string();
         let replacement = format!(
@@ -68,11 +62,10 @@ impl AikenZkCompiler {
             &replacement,
         );
         aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
-        aiken_zk_src = Self::append_verify_function_declaration(
-            aiken_zk_src,
-            &offchain_token,
-            &vk_compressed_data,
-        );
+        let public_input_count = public_input_identifiers.len();
+        let full_verify_function_declaration =
+            Self::create_verify_function_declaration_from(&vk_compressed_data, public_input_count);
+        aiken_zk_src = aiken_zk_src + &full_verify_function_declaration;
         aiken_zk_src
     }
 

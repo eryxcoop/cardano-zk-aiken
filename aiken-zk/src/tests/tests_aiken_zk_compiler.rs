@@ -119,7 +119,7 @@ fn test_replaces_custom_circom_by_the_corresponding_function_and_call() {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     fs::write("./test.circom", addition_custom_circom_template_and_component()).unwrap();
     let aiken_src = aiken_template_with_body_and_verify_definition(
-        "", r#"offchain custom("test.circom", [a, 5])"#, "");
+        "", "offchain custom(\"test.circom\", [a, 5])", "");
     let output_filename = "my_program".to_string();
     let random_seeds = ("asdasd", "dsadsa");
 
