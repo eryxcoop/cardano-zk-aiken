@@ -42,9 +42,10 @@ impl AikenZkCompiler {
         }
 
     fn yyy(aiken_src: &String, aiken_src_filename: String, random_seeds: (&str, &str), offchain_token: &TokenZK, offchain_token_span: &Span) -> String {
-        Self::output_offchain_circuit_reference(aiken_src_filename, random_seeds, &offchain_token);
+        Self::output_offchain_circuit_and_reference(aiken_src_filename, random_seeds, &offchain_token);
         Self::output_aiken_code(&aiken_src, &offchain_token, &offchain_token_span)
     }
+
     fn detect_code_to_replace(aiken_src: &String) -> (TokenZK, Span) {
         // Detect offchain token
         let LexInfo { tokens, .. } = Lexer::new().run(&aiken_src).unwrap();
@@ -52,7 +53,7 @@ impl AikenZkCompiler {
         (offchain_token, offchain_token_span)
     }
 
-    fn output_offchain_circuit_reference(
+    fn output_offchain_circuit_and_reference(
         aiken_src_filename: String,
         random_seeds: (&str, &str),
         offchain_token: &TokenZK,

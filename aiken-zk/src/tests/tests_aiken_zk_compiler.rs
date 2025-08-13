@@ -115,7 +115,7 @@ fn test_replaces_assert_eq_of_mixed_variables_and_constants_by_the_corresponding
 
 #[test]
 #[serial]
-fn test_compiler_can_replace_custom_circom_by_the_corresponding_function_and_call()
+fn test_replaces_custom_circom_by_the_corresponding_function_and_call()
 {
     let vk_compressed_data = xxx_vk_compressed();
     let _temp_dir = create_sandbox_and_set_as_current_directory();
