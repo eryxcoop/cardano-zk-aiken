@@ -64,20 +64,9 @@ impl AikenZkCompiler {
         let circuit_name = path.strip_suffix(".circom").unwrap();
         let circom_circuit = CircomCircuit::from(path.to_string());
 
-        let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
-        let r1cs_json_path = format!("{}.json", r1cs_path);
-
         circom_circuit
             .generate_verification_key(random_seeds)
             .unwrap();
-        circom_circuit.run_command_or_fail(
-            Command::new("snarkjs").args(["r1cs", "export", "json", &r1cs_path, &r1cs_json_path]),
-            "export r1cs",
-        );
-
-        let r1cs_json_str = fs::read_to_string(&r1cs_json_path).unwrap();
-        let json: Value = serde_json::from_str(&r1cs_json_str).unwrap();
-        let public_inputs_amount = json["nPubInputs"].as_u64().unwrap();
 
         let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
         let public_input_identifiers: Vec<String> = public_inputs
@@ -85,10 +74,11 @@ impl AikenZkCompiler {
             .map(|token| Self::extract_identifier_from_token(token))
             .collect();
 
-        assert_eq!(
-            public_input_identifiers.len(),
-            public_inputs_amount as usize,
-            "Amount of public inputs doesnt match"
+        Self::assert_equal_number_of_public_inputs(
+            output_path,
+            circuit_name,
+            circom_circuit,
+            &public_input_identifiers,
         );
 
         let mut aiken_zk_src = aiken_src.to_string();
@@ -106,6 +96,28 @@ impl AikenZkCompiler {
             Self::create_verify_function_declaration_from(&vk_compressed_data, public_input_count);
         aiken_zk_src = aiken_zk_src + &full_verify_function_declaration;
         aiken_zk_src
+    }
+
+    fn assert_equal_number_of_public_inputs(
+        output_path: &str,
+        circuit_name: &str,
+        circom_circuit: CircomCircuit,
+        public_input_identifiers: &Vec<String>,
+    ) {
+        let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
+        let r1cs_json_path = format!("{}.json", r1cs_path);
+        circom_circuit.run_command_or_fail(
+            Command::new("snarkjs").args(["r1cs", "export", "json", &r1cs_path, &r1cs_json_path]),
+            "export r1cs",
+        );
+        let r1cs_json_str = fs::read_to_string(&r1cs_json_path).unwrap();
+        let json: Value = serde_json::from_str(&r1cs_json_str).unwrap();
+        let public_inputs_amount = json["nPubInputs"].as_u64().unwrap();
+        assert_eq!(
+            public_input_identifiers.len(),
+            public_inputs_amount as usize,
+            "Amount of public inputs doesnt match"
+        );
     }
 
     fn apply_modifications_to_src_for_example_token(
