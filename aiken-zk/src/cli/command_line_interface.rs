@@ -34,9 +34,7 @@ impl CommandLineInterface {
             .subcommand_required(true)
             .subcommand(BuildCommand::create_subcommand())
             .subcommand(ProveCommand::create_subcommand());
-        Self {
-            main_command
-        }
+        Self { main_command }
     }
 
     pub fn parse_inputs_and_execute_command(&self) {

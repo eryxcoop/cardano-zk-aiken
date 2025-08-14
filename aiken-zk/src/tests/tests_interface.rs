@@ -1,4 +1,5 @@
 use crate::circom_circuit::CircomCircuit;
+use crate::tests::circom_component_factory::addition_custom_circom_template_and_component;
 use crate::tests::utils::{create_sandbox_and_set_as_current_directory, manifest_path};
 use serial_test::serial;
 use std::fs::File;
@@ -6,8 +7,6 @@ use std::io::{BufRead, BufReader, Read};
 use std::path::Path;
 use std::process::Command;
 use std::{fs, io};
-use crate::tests::circom_component_factory::addition_custom_circom_template_and_component;
-
 
 #[test]
 #[serial]
@@ -47,8 +46,16 @@ fn test_user_can_convert_aiken_with_custom_circom_offchain_to_valid_aiken() {
     let _temporal_directory = create_sandbox_and_set_as_current_directory();
     let aiken_zk_binary_path = manifest_path() + "/target/debug/aiken-zk";
     let output_path = "validators/output.ak";
-    fs::write("./addition.circom", addition_custom_circom_template_and_component()).unwrap();
-    fs::write(source_aiken_filename(), original_aiken_code_with_custom_token()).expect("output file write failed");
+    fs::write(
+        "./addition.circom",
+        addition_custom_circom_template_and_component(),
+    )
+    .unwrap();
+    fs::write(
+        source_aiken_filename(),
+        original_aiken_code_with_custom_token(),
+    )
+    .expect("output file write failed");
 
     Command::new(aiken_zk_binary_path)
         .arg("build")
@@ -140,7 +147,6 @@ fn test_user_can_generate_a_meshjs_proof() {
     assert_line_matches(&mut reader, "\t\t),\n");
 
     assert_text_matches(&mut reader, meshjs_file_suffix());
-
 }
 
 fn assert_line_matches(reader: &mut BufReader<File>, expected_line: &str) {
@@ -200,14 +206,14 @@ export function mZKRedeemer(redeemer: Data): ZKRedeemer {
 function proofs(): Proof[] {
     return [
 "#
-        .to_string()
+    .to_string()
 }
 
 fn meshjs_file_suffix() -> String {
     r#"    ];
 }
 "#
-        .to_string()
+    .to_string()
 }
 
 fn source_aiken_filename() -> &'static str {

@@ -205,11 +205,7 @@ impl CircomCircuit {
     // file system
 
     fn filename_from_path(path: &String) -> &str {
-        Path::new(path)
-            .file_stem()
-            .unwrap()
-            .to_str()
-            .unwrap()
+        Path::new(path).file_stem().unwrap().to_str().unwrap()
     }
 
     fn create_directory_if_not_exists(&self, build_path: &str) {

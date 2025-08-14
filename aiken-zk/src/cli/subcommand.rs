@@ -1,4 +1,4 @@
-use clap::{value_parser, Arg, ArgMatches, Command};
+use clap::{Arg, ArgMatches, Command, value_parser};
 use std::path::PathBuf;
 
 pub trait Subcommand {

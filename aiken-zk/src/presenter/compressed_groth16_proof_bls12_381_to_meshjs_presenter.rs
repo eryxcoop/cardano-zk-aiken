@@ -1,15 +1,12 @@
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 
 pub struct CompressedGroth16ProofBls12_381ToMeshJsPresenter {
-    proof: CompressedGroth16ProofBls12_381
+    proof: CompressedGroth16ProofBls12_381,
 }
 
 impl CompressedGroth16ProofBls12_381ToMeshJsPresenter {
-
     pub fn new_for(proof: CompressedGroth16ProofBls12_381) -> Self {
-        Self {
-            proof
-        }
+        Self { proof }
     }
 
     pub fn present(&self) -> String {

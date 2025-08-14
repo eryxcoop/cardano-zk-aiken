@@ -1,14 +1,14 @@
 use crate::circom_circuit::CircomCircuit;
-use crate::component_creator::ComponentCreator;
 use crate::compiler::lexer::{LexInfo, Lexer};
 use crate::compiler::token_zk::{TokenZK as Token, TokenZK};
+use crate::component_creator::ComponentCreator;
 use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
 use aiken_lang::ast::Span;
 use serde::Deserialize;
+use serde_json::Value;
 use std::fs;
 use std::io::Error;
 use std::process::Command;
-use serde_json::Value;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -30,12 +30,26 @@ impl AikenZkCompiler {
     ) -> String {
         let (offchain_token, offchain_token_span) = Self::detect_code_to_replace(&aiken_src);
         match &offchain_token {
-            TokenZK::Offchain { example:ZkExample::CustomCircom { path, public_inputs: public_input } } => {
-                Self::apply_modifications_to_src_for_custom_token(&aiken_src, random_seeds, offchain_token_span, path, public_input)
-            }
-            _ => {
-                Self::apply_modifications_to_src_for_example_token(&aiken_src, aiken_src_filename, random_seeds, &offchain_token, &offchain_token_span)
-            }
+            TokenZK::Offchain {
+                example:
+                    ZkExample::CustomCircom {
+                        path,
+                        public_inputs: public_input,
+                    },
+            } => Self::apply_modifications_to_src_for_custom_token(
+                &aiken_src,
+                random_seeds,
+                offchain_token_span,
+                path,
+                public_input,
+            ),
+            _ => Self::apply_modifications_to_src_for_example_token(
+                &aiken_src,
+                aiken_src_filename,
+                random_seeds,
+                &offchain_token,
+                &offchain_token_span,
+            ),
         }
     }
 
@@ -44,18 +58,19 @@ impl AikenZkCompiler {
         random_seeds: (&str, &str),
         offchain_token_span: Span,
         path: &str,
-        public_inputs: &Vec<Box<TokenZK>>) -> String
-    {
+        public_inputs: &Vec<Box<TokenZK>>,
+    ) -> String {
         let output_path = "build/";
-        let circuit_name = path.strip_suffix(".circom")
-        .unwrap();
+        let circuit_name = path.strip_suffix(".circom").unwrap();
         let circom_circuit = CircomCircuit::from(path.to_string());
 
         let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
         let r1cs_json_path = format!("{}.json", r1cs_path);
-        println!("{}",r1cs_json_path);
+        println!("{}", r1cs_json_path);
 
-        circom_circuit.generate_verification_key(random_seeds).unwrap();
+        circom_circuit
+            .generate_verification_key(random_seeds)
+            .unwrap();
         circom_circuit.run_command_or_fail(
             Command::new("snarkjs").args(["r1cs", "export", "json", &r1cs_path, &r1cs_json_path]),
             "export r1cs",
@@ -66,11 +81,16 @@ impl AikenZkCompiler {
         let public_inputs_amount = json["nPubInputs"].as_u64().unwrap();
 
         let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
-        let public_input_identifiers: Vec<String> = public_inputs.iter().map(|token| {
-            Self::extract_identifier_from_token(token)
-        }).collect();
+        let public_input_identifiers: Vec<String> = public_inputs
+            .iter()
+            .map(|token| Self::extract_identifier_from_token(token))
+            .collect();
 
-        assert_eq!(public_input_identifiers.len(), public_inputs_amount as usize, "Amount of public inputs doesnt match");
+        assert_eq!(
+            public_input_identifiers.len(),
+            public_inputs_amount as usize,
+            "Amount of public inputs doesnt match"
+        );
 
         let mut aiken_zk_src = aiken_src.to_string();
         let replacement = format!(
@@ -89,8 +109,18 @@ impl AikenZkCompiler {
         aiken_zk_src
     }
 
-    fn apply_modifications_to_src_for_example_token(aiken_src: &String, aiken_src_filename: String, random_seeds: (&str, &str), offchain_token: &TokenZK, offchain_token_span: &Span) -> String {
-        Self::output_offchain_circuit_and_reference(aiken_src_filename, random_seeds, &offchain_token);
+    fn apply_modifications_to_src_for_example_token(
+        aiken_src: &String,
+        aiken_src_filename: String,
+        random_seeds: (&str, &str),
+        offchain_token: &TokenZK,
+        offchain_token_span: &Span,
+    ) -> String {
+        Self::output_offchain_circuit_and_reference(
+            aiken_src_filename,
+            random_seeds,
+            &offchain_token,
+        );
         Self::output_aiken_code(&aiken_src, &offchain_token, &offchain_token_span)
     }
 

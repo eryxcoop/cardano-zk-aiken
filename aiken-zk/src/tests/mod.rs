@@ -14,7 +14,7 @@ mod tests_aiken_zk_compiler;
 mod tests_interface;
 
 mod aiken_program_factory;
+mod circom_component_factory;
+mod tests_presenters;
 mod token_factory;
 mod utils;
-mod tests_presenters;
-mod circom_component_factory;

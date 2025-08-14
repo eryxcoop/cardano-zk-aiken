@@ -87,23 +87,23 @@ pub enum ZkExample {
 }
 
 impl ZkExample {
-    fn name_parser() -> impl Parser<char, Token, Error=ParseError> {
+    fn name_parser() -> impl Parser<char, Token, Error = ParseError> {
         text::ident().map(|name| Token::Name { name }).padded()
     }
 
-    fn int_or_var() -> impl Parser<char, (Option<InputVisibility>, Token), Error=ParseError> {
+    fn int_or_var() -> impl Parser<char, (Option<InputVisibility>, Token), Error = ParseError> {
         Self::visibility_parser()
             .or_not()
             .then(choice((int_parser(), Self::name_parser())))
     }
 
-    pub fn visibility_parser() -> impl Parser<char, InputVisibility, Error=ParseError> {
+    pub fn visibility_parser() -> impl Parser<char, InputVisibility, Error = ParseError> {
         choice((just("pub").padded(), just("priv").padded())).map(InputVisibility::from)
     }
 
     fn parameters(
         ammount_of_parameters: usize,
-    ) -> impl Parser<char, Vec<(Option<InputVisibility>, Token)>, Error=ParseError> {
+    ) -> impl Parser<char, Vec<(Option<InputVisibility>, Token)>, Error = ParseError> {
         Self::int_or_var()
             .separated_by(just(',').padded())
             .exactly(ammount_of_parameters)
@@ -113,7 +113,7 @@ impl ZkExample {
             )
     }
 
-    fn addition_parser() -> impl Parser<char, Token, Error=ParseError> {
+    fn addition_parser() -> impl Parser<char, Token, Error = ParseError> {
         just("addition")
             .padded()
             .ignore_then(Self::parameters(3))
@@ -126,7 +126,7 @@ impl ZkExample {
             })
     }
 
-    fn subtraction_parser() -> impl Parser<char, Token, Error=ParseError> {
+    fn subtraction_parser() -> impl Parser<char, Token, Error = ParseError> {
         just("subtraction")
             .padded()
             .ignore_then(Self::parameters(3))
@@ -139,7 +139,7 @@ impl ZkExample {
             })
     }
 
-    fn multiplication_parser() -> impl Parser<char, Token, Error=ParseError> {
+    fn multiplication_parser() -> impl Parser<char, Token, Error = ParseError> {
         just("multiplication")
             .padded()
             .ignore_then(Self::parameters(3))
@@ -152,7 +152,7 @@ impl ZkExample {
             })
     }
 
-    fn fibonacci_parser() -> impl Parser<char, Token, Error=ParseError> {
+    fn fibonacci_parser() -> impl Parser<char, Token, Error = ParseError> {
         just("fibonacci")
             .padded()
             .ignore_then(Self::parameters(4))
@@ -166,7 +166,7 @@ impl ZkExample {
             })
     }
 
-    fn if_parser() -> impl Parser<char, Token, Error=ParseError> {
+    fn if_parser() -> impl Parser<char, Token, Error = ParseError> {
         just("if")
             .padded()
             .ignore_then(Self::parameters(4))
@@ -180,7 +180,7 @@ impl ZkExample {
             })
     }
 
-    fn assert_eq_parser() -> impl Parser<char, Token, Error=ParseError> {
+    fn assert_eq_parser() -> impl Parser<char, Token, Error = ParseError> {
         just("assert_eq")
             .padded()
             .ignore_then(Self::parameters(2))
@@ -192,38 +192,39 @@ impl ZkExample {
             })
     }
 
-    fn custom_circom_parser() -> impl Parser<char, Token, Error=ParseError> {
-        let string_literal_parser = just('"').
-            ignore_then(filter(|c| *c != '"').repeated().collect::<String>()).
-            then_ignore(just('"'));
+    fn custom_circom_parser() -> impl Parser<char, Token, Error = ParseError> {
+        let string_literal_parser = just('"')
+            .ignore_then(filter(|c| *c != '"').repeated().collect::<String>())
+            .then_ignore(just('"'));
         let identifiers_parser = choice((int_parser(), Self::name_parser()));
 
-        let public_input_identifiers_list_parser = identifiers_parser.separated_by(just(",").padded()).delimited_by(just("[").padded(), just("]").padded());
-        let custom_circom_argument_parser =
-            string_literal_parser.padded()
-                .then_ignore(just(",").padded())
-                .then(public_input_identifiers_list_parser)
-                .delimited_by(just("(").padded(), just(")").padded_by(just(" ").repeated()));
+        let public_input_identifiers_list_parser = identifiers_parser
+            .separated_by(just(",").padded())
+            .delimited_by(just("[").padded(), just("]").padded());
+        let custom_circom_argument_parser = string_literal_parser
+            .padded()
+            .then_ignore(just(",").padded())
+            .then(public_input_identifiers_list_parser)
+            .delimited_by(
+                just("(").padded(),
+                just(")").padded_by(just(" ").repeated()),
+            );
 
         just("custom")
             .padded()
             .ignore_then(custom_circom_argument_parser)
-            .map(|(path, public_input_identifiers)|{
-                Token::Offchain {
-                    example: ZkExample::CustomCircom {
-                        path,
-                        public_inputs: public_input_identifiers
-                            .iter()
-                            .map(|token| {
-                                Box::new(token.clone())
-                            })
-                            .collect(),
-                    },
-                }
+            .map(|(path, public_input_identifiers)| Token::Offchain {
+                example: ZkExample::CustomCircom {
+                    path,
+                    public_inputs: public_input_identifiers
+                        .iter()
+                        .map(|token| Box::new(token.clone()))
+                        .collect(),
+                },
             })
     }
 
-    pub fn parser() -> impl Parser<char, Token, Error=ParseError> {
+    pub fn parser() -> impl Parser<char, Token, Error = ParseError> {
         choice((
             Self::addition_parser(),
             Self::subtraction_parser(),

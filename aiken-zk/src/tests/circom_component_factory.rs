@@ -1,5 +1,4 @@
-pub fn addition_custom_circom_template_and_component(
-) -> String {
+pub fn addition_custom_circom_template_and_component() -> String {
     r#"
 pragma circom 2.1.9;
 
@@ -11,5 +10,6 @@ template Addition() {
 }
 
 component main {public [a, b]} = Addition();
-"#.to_string()
+"#
+    .to_string()
 }

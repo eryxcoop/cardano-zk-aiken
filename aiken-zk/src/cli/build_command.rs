@@ -1,5 +1,5 @@
-use crate::compiler::aiken_zk_compiler::AikenZkCompiler;
 use crate::cli::subcommand::Subcommand;
+use crate::compiler::aiken_zk_compiler::AikenZkCompiler;
 use clap::{ArgMatches, Command};
 use std::fs;
 use std::io::ErrorKind;
@@ -9,7 +9,7 @@ pub struct BuildCommand {}
 
 impl Subcommand for BuildCommand {
     const SUBCOMMAND_NAME: &'static str = "build";
-    
+
     fn create_subcommand() -> Command {
         let input = Self::create_required_argument_with_id(Self::BUILD_COMMAND_SOURCE_ARG_NAME);
         let output = Self::create_required_argument_with_id(Self::BUILD_COMMAND_OUTPUT_ARG_NAME);

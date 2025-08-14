@@ -1,11 +1,11 @@
-use std::fs;
 use crate::compiler::aiken_zk_compiler::{AikenZkCompiler, Groth16CompressedData};
 use crate::tests::aiken_program_factory::{
     aiken_template_with_body_and_verify_definition, verify_declaration,
 };
+use crate::tests::circom_component_factory::addition_custom_circom_template_and_component;
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
-use crate::tests::circom_component_factory::addition_custom_circom_template_and_component;
+use std::fs;
 
 #[test]
 #[serial]
@@ -20,8 +20,7 @@ fn test_replaces_addition_of_public_variables_by_the_corresponding_function_and_
 
 #[test]
 #[serial]
-fn test_replaces_addition_of_private_variables_by_the_corresponding_function_and_call()
-{
+fn test_replaces_addition_of_private_variables_by_the_corresponding_function_and_call() {
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv a, priv b, priv c)",
         "zk_verify_or_fail(redeemer, [])",
@@ -44,7 +43,7 @@ fn test_replaces_addition_of_mixed_variables_by_the_corresponding_function_and_c
 #[test]
 #[serial]
 fn test_replaces_addition_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
- {
+{
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv a, 4, pub b)",
         "zk_verify_or_fail(redeemer, [4, b])",
@@ -80,7 +79,7 @@ fn test_replaces_multiplication_of_mixed_variables_and_constants_by_the_correspo
 #[test]
 #[serial]
 fn test_replaces_fibonacci_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
- {
+{
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain fibonacci(priv a, b, 5, pub c)",
         "zk_verify_or_fail(redeemer, [b, c])",
@@ -91,8 +90,7 @@ fn test_replaces_fibonacci_of_mixed_variables_and_constants_by_the_corresponding
 
 #[test]
 #[serial]
-fn test_replaces_if_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
- {
+fn test_replaces_if_of_mixed_variables_and_constants_by_the_corresponding_function_and_call() {
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain if(a, b, priv c, priv d)",
         "zk_verify_or_fail(redeemer, [a, b])",
@@ -104,7 +102,7 @@ fn test_replaces_if_of_mixed_variables_and_constants_by_the_corresponding_functi
 #[test]
 #[serial]
 fn test_replaces_assert_eq_of_mixed_variables_and_constants_by_the_corresponding_function_and_call()
- {
+{
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain assert_eq(priv a, b)",
         "zk_verify_or_fail(redeemer, [b])",
@@ -117,9 +115,16 @@ fn test_replaces_assert_eq_of_mixed_variables_and_constants_by_the_corresponding
 #[serial]
 fn test_replaces_custom_circom_by_the_corresponding_function_and_call() {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
-    fs::write("./test.circom", addition_custom_circom_template_and_component()).unwrap();
+    fs::write(
+        "./test.circom",
+        addition_custom_circom_template_and_component(),
+    )
+    .unwrap();
     let aiken_src = aiken_template_with_body_and_verify_definition(
-        "", "offchain custom(\"test.circom\", [a, 5])", "");
+        "",
+        "offchain custom(\"test.circom\", [a, 5])",
+        "",
+    );
     let output_filename = "my_program".to_string();
     let random_seeds = ("asdasd", "dsadsa");
 
@@ -146,19 +151,21 @@ fn test_replaces_custom_circom_by_the_corresponding_function_and_call() {
 #[should_panic(expected = "Amount of public inputs doesnt match")]
 fn test_custom_circom_should_fail_if_amount_of_public_inputs_doesnt_match() {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
-    fs::write("./test.circom", addition_custom_circom_template_and_component()).unwrap();
+    fs::write(
+        "./test.circom",
+        addition_custom_circom_template_and_component(),
+    )
+    .unwrap();
     let aiken_src = aiken_template_with_body_and_verify_definition(
-        "", "offchain custom(\"test.circom\", [a, 5, b])", "");
+        "",
+        "offchain custom(\"test.circom\", [a, 5, b])",
+        "",
+    );
     let output_filename = "my_program".to_string();
     let random_seeds = ("asdasd", "dsadsa");
 
-    AikenZkCompiler::apply_modifications_to_src_for_token(
-        aiken_src,
-        output_filename,
-        random_seeds,
-    );
+    AikenZkCompiler::apply_modifications_to_src_for_token(aiken_src, output_filename, random_seeds);
 }
-
 
 fn assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
     original: &str,

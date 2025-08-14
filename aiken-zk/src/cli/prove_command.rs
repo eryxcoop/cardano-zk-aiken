@@ -1,7 +1,7 @@
 use crate::circom_circuit::CircomCircuit;
+use crate::cli::subcommand::Subcommand;
 use crate::presenter::compressed_groth16_proof_bls12_381_to_aiken_presenter::CompressedGroth16ProofBls12_381ToAikenPresenter;
 use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
-use crate::cli::subcommand::Subcommand;
 use clap::{Arg, ArgMatches, Command};
 use std::fs;
 use std::path::{Path, PathBuf};

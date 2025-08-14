@@ -2,14 +2,17 @@ use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 use crate::presenter::compressed_groth16_proof_bls12_381_to_meshjs_presenter::CompressedGroth16ProofBls12_381ToMeshJsPresenter;
 
 pub struct MeshJsZKRedeemerPresenter {
-    proof_presenter: CompressedGroth16ProofBls12_381ToMeshJsPresenter
+    proof_presenter: CompressedGroth16ProofBls12_381ToMeshJsPresenter,
 }
 
 impl MeshJsZKRedeemerPresenter {
-
-    pub fn new_for_proof(compressed_groth16_proof_bls12_381: CompressedGroth16ProofBls12_381) -> Self {
+    pub fn new_for_proof(
+        compressed_groth16_proof_bls12_381: CompressedGroth16ProofBls12_381,
+    ) -> Self {
         Self {
-            proof_presenter: CompressedGroth16ProofBls12_381ToMeshJsPresenter::new_for(compressed_groth16_proof_bls12_381)
+            proof_presenter: CompressedGroth16ProofBls12_381ToMeshJsPresenter::new_for(
+                compressed_groth16_proof_bls12_381,
+            ),
         }
     }
 
@@ -43,12 +46,13 @@ export function mZKRedeemer(redeemer: Data): ZKRedeemer {
 function proofs(): Proof[] {
     return [
 "#
-            .to_string()
+        .to_string()
     }
 
     fn file_suffix(&self) -> String {
         r#"    ];
 }
-"#.to_string()
+"#
+        .to_string()
     }
 }
