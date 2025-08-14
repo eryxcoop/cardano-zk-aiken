@@ -46,16 +46,20 @@ impl AikenZkCompiler {
         path: &str,
         public_inputs: &Vec<Box<TokenZK>>) -> String
     {
-        let output_path = "/build";
+        let output_path = "build/";
         let circuit_name = path.strip_suffix(".circom")
         .unwrap();
         let circom_circuit = CircomCircuit::from(path.to_string());
 
         let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
-        let r1cs_json_path = format!("{}{}.r1cs.json", output_path, circuit_name);
+        let r1cs_json_path = format!("{}.json", r1cs_path);
+        println!("{}",r1cs_json_path);
 
         circom_circuit.generate_verification_key(random_seeds).unwrap();
-        Command::new("snarkjs").args(["r1cs", "export", "json", &r1cs_path, &r1cs_json_path]);
+        circom_circuit.run_command_or_fail(
+            Command::new("snarkjs").args(["r1cs", "export", "json", &r1cs_path, &r1cs_json_path]),
+            "export r1cs",
+        );
 
         let r1cs_json_str = fs::read_to_string(&r1cs_json_path).unwrap();
         let json: Value = serde_json::from_str(&r1cs_json_str).unwrap();

@@ -224,7 +224,7 @@ impl CircomCircuit {
             .expect("Couldnt create directory");
     }
 
-    fn run_command_or_fail(&self, cmd: &mut Command, label: &str) {
+    pub fn run_command_or_fail(&self, cmd: &mut Command, label: &str) {
         let status = cmd
             .stdout(Stdio::null())
             .status()
