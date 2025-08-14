@@ -1,4 +1,5 @@
 use crate::circom_circuit::CircomCircuit;
+use crate::compiler::BUILD_DIR;
 use crate::compiler::lexer::{LexInfo, Lexer};
 use crate::compiler::token_zk::{TokenZK as Token, TokenZK};
 use crate::component_creator::ComponentCreator;
@@ -9,7 +10,6 @@ use serde_json::Value;
 use std::fs;
 use std::io::Error;
 use std::process::Command;
-use crate::compiler::BUILD_DIR;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -49,7 +49,7 @@ impl AikenZkCompiler {
                 aiken_src_filename,
                 random_seeds,
                 &offchain_token,
-                &offchain_token_span,
+                offchain_token_span,
             ),
         }
     }
@@ -82,6 +82,25 @@ impl AikenZkCompiler {
             &public_input_identifiers,
         );
 
+        let mut aiken_zk_src =
+            Self::replace_range_of_offchain_keyword_by_verification_function_call(
+                aiken_src,
+                offchain_token_span,
+                &public_input_identifiers,
+            );
+        aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
+        let public_input_count = public_input_identifiers.len();
+        let full_verify_function_declaration =
+            Self::create_verify_function_declaration_from(&vk_compressed_data, public_input_count);
+        aiken_zk_src = aiken_zk_src + &full_verify_function_declaration;
+        aiken_zk_src
+    }
+
+    fn replace_range_of_offchain_keyword_by_verification_function_call(
+        aiken_src: &str,
+        offchain_token_span: Span,
+        public_input_identifiers: &Vec<String>,
+    ) -> String {
         let mut aiken_zk_src = aiken_src.to_string();
         let replacement = format!(
             "zk_verify_or_fail(redeemer, [{}])",
@@ -91,11 +110,6 @@ impl AikenZkCompiler {
             offchain_token_span.start..offchain_token_span.end,
             &replacement,
         );
-        aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
-        let public_input_count = public_input_identifiers.len();
-        let full_verify_function_declaration =
-            Self::create_verify_function_declaration_from(&vk_compressed_data, public_input_count);
-        aiken_zk_src = aiken_zk_src + &full_verify_function_declaration;
         aiken_zk_src
     }
 
@@ -123,14 +137,14 @@ impl AikenZkCompiler {
         aiken_src_filename: String,
         random_seeds: (&str, &str),
         offchain_token: &TokenZK,
-        offchain_token_span: &Span,
+        offchain_token_span: Span,
     ) -> String {
         Self::output_offchain_circuit_and_reference(
             aiken_src_filename,
             random_seeds,
             &offchain_token,
         );
-        Self::output_aiken_code(&aiken_src, &offchain_token, &offchain_token_span)
+        Self::output_aiken_code(&aiken_src, &offchain_token, offchain_token_span)
     }
 
     fn detect_code_to_replace(aiken_src: &String) -> (TokenZK, Span) {
@@ -160,14 +174,14 @@ impl AikenZkCompiler {
     fn output_aiken_code(
         aiken_src: &String,
         offchain_token: &TokenZK,
-        offchain_token_span: &Span,
+        offchain_token_span: Span,
     ) -> String {
         // Replace offchain with groth16 verifier
         let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
         let mut aiken_zk_src = Self::replace_keyword_with_function_call(
             &aiken_src,
             &offchain_token,
-            &offchain_token_span,
+            offchain_token_span,
         );
         aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
         aiken_zk_src = Self::append_verify_function_declaration(
@@ -189,19 +203,14 @@ impl AikenZkCompiler {
     fn replace_keyword_with_function_call(
         aiken_src: &str,
         token: &Token,
-        offchain_token_span: &Span,
+        offchain_token_span: Span,
     ) -> String {
-        let mut aiken_zk_src = String::from(aiken_src);
-        let public_identifiers = Self::extract_public_identifiers_from_token(token);
-        let replacement = format!(
-            "zk_verify_or_fail(redeemer, [{}])",
-            public_identifiers.join(", ")
-        );
-        aiken_zk_src.replace_range(
-            offchain_token_span.start..offchain_token_span.end,
-            &replacement,
-        );
-        aiken_zk_src
+        let public_input_identifiers = Self::extract_public_identifiers_from_token(token);
+        Self::replace_range_of_offchain_keyword_by_verification_function_call(
+            aiken_src,
+            offchain_token_span,
+            &public_input_identifiers,
+        )
     }
 
     fn extract_identifier_from_token(token: &Token) -> String {

@@ -1,9 +1,9 @@
+use crate::compiler::BUILD_DIR;
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 use std::fs;
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::process::{Command, Stdio};
-use crate::compiler::BUILD_DIR;
 
 pub struct CircomCircuit {
     circom_source_code_path: String,
@@ -14,7 +14,10 @@ impl CircomCircuit {
     pub fn from(circom_source_code_path: String) -> Self {
         Self {
             circom_source_code_path: circom_source_code_path.clone(),
-            filename: circom_source_code_path.strip_suffix(".circom").unwrap().to_string(),
+            filename: circom_source_code_path
+                .strip_suffix(".circom")
+                .unwrap()
+                .to_string(),
         }
     }
 
@@ -161,7 +164,7 @@ impl CircomCircuit {
         );
     }
 
-    pub fn export_r1cs_to_json(&self, r1cs_path: &String, r1cs_json_path: &String){
+    pub fn export_r1cs_to_json(&self, r1cs_path: &String, r1cs_json_path: &String) {
         self.run_command_or_fail(
             Command::new("snarkjs").args(["r1cs", "export", "json", &r1cs_path, &r1cs_json_path]),
             "export r1cs",

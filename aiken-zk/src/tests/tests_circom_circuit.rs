@@ -1,9 +1,9 @@
 use crate::circom_circuit::CircomCircuit;
+use crate::compiler::BUILD_DIR;
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
 use std::fs;
-use crate::compiler::BUILD_DIR;
 
 #[test]
 #[serial]
@@ -16,8 +16,8 @@ fn test_circuit_can_generate_a_verification_key() {
 
     circuit.generate_verification_key(random_seeds).unwrap();
 
-    let stored_vk =
-        fs::read_to_string(BUILD_DIR.to_string() + "verification_key.json").expect("No se pudo leer el archivo");
+    let stored_vk = fs::read_to_string(BUILD_DIR.to_string() + "verification_key.json")
+        .expect("No se pudo leer el archivo");
     assert!(stored_vk.contains("protocol"));
 }
 
