@@ -106,10 +106,7 @@ impl AikenZkCompiler {
     ) {
         let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
         let r1cs_json_path = format!("{}.json", r1cs_path);
-        circom_circuit.run_command_or_fail(
-            Command::new("snarkjs").args(["r1cs", "export", "json", &r1cs_path, &r1cs_json_path]),
-            "export r1cs",
-        );
+        circom_circuit.export_r1cs_to_json(&r1cs_path, &r1cs_json_path);
         let r1cs_json_str = fs::read_to_string(&r1cs_json_path).unwrap();
         let json: Value = serde_json::from_str(&r1cs_json_str).unwrap();
         let public_inputs_amount = json["nPubInputs"].as_u64().unwrap();

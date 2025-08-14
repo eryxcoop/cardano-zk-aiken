@@ -159,6 +159,13 @@ impl CircomCircuit {
         );
     }
 
+    pub fn export_r1cs_to_json(&self, r1cs_path: &String, r1cs_json_path: &String){
+        self.run_command_or_fail(
+            Command::new("snarkjs").args(["r1cs", "export", "json", &r1cs_path, &r1cs_json_path]),
+            "export r1cs",
+        );
+    }
+
     // private - proof generation
 
     fn compile_witness_generator(&self, output_path: &str) {
