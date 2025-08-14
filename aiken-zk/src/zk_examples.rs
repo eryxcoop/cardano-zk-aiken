@@ -17,10 +17,11 @@ pub enum InputVisibility {
 }
 
 impl InputVisibility {
-    pub fn from(keyword: &str) -> Self {
+    pub fn from(keyword: Option<&str>) -> Option<Self> {
         match keyword {
-            "pub" => Self::Public,
-            "priv" => Self::Private,
+            Some("pub") => Some(Self::Public),
+            Some("priv") =>Some(Self::Private),
+            None => None,
             _ => panic!("Visibility not recognized"),
         }
     }
@@ -28,14 +29,17 @@ impl InputVisibility {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InputZK {
-    pub token: Box<Token>,
+    pub token: Option<Box<Token>>,
     pub visibility: Option<InputVisibility>,
 }
 
 impl InputZK {
-    pub fn from(visibility_token: (Option<InputVisibility>, Token)) -> Self {
+    pub fn from(visibility_token: (Option<InputVisibility>, Option<Token>)) -> Self {
         Self {
-            token: Box::new(visibility_token.1),
+            token: match visibility_token.1 {
+                None => None,
+                Some(token) => Some(Box::new(token))
+            },
             visibility: visibility_token.0,
         }
     }
@@ -43,7 +47,7 @@ impl InputZK {
 
 impl fmt::Display for InputZK {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.token)
+        write!(f, "{}", self.token.clone().unwrap())
     }
 }
 
@@ -91,19 +95,32 @@ impl ZkExample {
         text::ident().map(|name| Token::Name { name }).padded()
     }
 
-    fn int_or_var() -> impl Parser<char, (Option<InputVisibility>, Token), Error = ParseError> {
-        Self::visibility_parser()
-            .or_not()
-            .then(choice((int_parser(), Self::name_parser())))
-    }
+    fn int_or_var() -> impl Parser<char, (Option<InputVisibility>, Option<Token>), Error = ParseError> {
+        choice((
+            just("priv").padded()
+                .then(choice((int_parser(), Self::name_parser())).or_not())
+                .try_map(|(visibility, token), span| {
+                    if !token.is_none() {
+                        panic!("Private parameters cannot be followed by an identifier")
+                    }
+                    Ok((InputVisibility::from(Some(visibility)), None))
+                }),
+            just("pub").padded()
+                .or_not()
+                .then(choice(
+                    (int_parser(),
+                     Self::name_parser())))
+                .map(|(visibility, token)|{
+                    (InputVisibility::from(visibility), Some(token))
+                }),
+        ))
 
-    pub fn visibility_parser() -> impl Parser<char, InputVisibility, Error = ParseError> {
-        choice((just("pub").padded(), just("priv").padded())).map(InputVisibility::from)
+
     }
 
     fn parameters(
         ammount_of_parameters: usize,
-    ) -> impl Parser<char, Vec<(Option<InputVisibility>, Token)>, Error = ParseError> {
+    ) -> impl Parser<char, Vec<(Option<InputVisibility>, Option<Token>)>, Error = ParseError> {
         Self::int_or_var()
             .separated_by(just(',').padded())
             .exactly(ammount_of_parameters)

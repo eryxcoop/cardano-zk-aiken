@@ -2,19 +2,19 @@ use crate::compiler::token_zk;
 use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
 use aiken_lang::parser::token::Base;
 
-pub fn int_token(n: u32) -> Box<token_zk::TokenZK> {
-    Box::new(token_zk::TokenZK::Int {
+pub fn int_token(n: u32) -> Option<Box<token_zk::TokenZK>> {
+    Some(Box::new(token_zk::TokenZK::Int {
         value: n.to_string(),
         base: Base::Decimal {
             numeric_underscore: false,
         },
-    })
+    }))
 }
 
-pub fn variable_token(s: &str) -> Box<token_zk::TokenZK> {
-    Box::new(token_zk::TokenZK::Name {
+pub fn variable_token(s: &str) -> Option<Box<token_zk::TokenZK>> {
+    Some(Box::new(token_zk::TokenZK::Name {
         name: s.to_string(),
-    })
+    }))
 }
 
 pub fn addition_token_with_public_inputs() -> token_zk::TokenZK {
@@ -41,7 +41,7 @@ pub fn addition_token_with_mixed_visibility() -> token_zk::TokenZK {
         example: ZkExample::Addition {
             lhs: InputZK {
                 visibility: Some(InputVisibility::Private),
-                token: variable_token("c"),
+                token: None,
             },
             rhs: InputZK {
                 visibility: Some(InputVisibility::Public),
@@ -60,15 +60,15 @@ pub fn addition_token_with_all_private_inputs() -> token_zk::TokenZK {
         example: ZkExample::Addition {
             lhs: InputZK {
                 visibility: Some(InputVisibility::Private),
-                token: variable_token("c"),
+                token: None,
             },
             rhs: InputZK {
                 visibility: Some(InputVisibility::Private),
-                token: variable_token("b"),
+                token: None,
             },
             res: InputZK {
                 visibility: Some(InputVisibility::Private),
-                token: variable_token("n"),
+                token: None,
             },
         },
     }
@@ -85,7 +85,7 @@ pub fn subtraction_token_with_mixed_visibility() -> token_zk::TokenZK {
             },
             rhs: InputZK {
                 visibility: Some(InputVisibility::Private),
-                token: variable_token("b"),
+                token: None,
             },
             res: InputZK {
                 visibility: None,
@@ -106,7 +106,7 @@ pub fn multiplication_token_with_mixed_visibility() -> token_zk::TokenZK {
             },
             rhs: InputZK {
                 visibility: Some(InputVisibility::Private),
-                token: variable_token("b"),
+                token: None,
             },
             res: InputZK {
                 visibility: None,
@@ -127,7 +127,7 @@ pub fn fibonacci_token_with_mixed_visibility(n: usize) -> token_zk::TokenZK {
             },
             fib_1: InputZK {
                 visibility: Some(InputVisibility::Private),
-                token: variable_token("c"),
+                token: None,
             },
             n: InputZK {
                 visibility: Some(InputVisibility::Public),
@@ -152,7 +152,7 @@ pub fn if_token_with_mixed_visibility() -> token_zk::TokenZK {
             },
             assigned: InputZK {
                 visibility: Some(InputVisibility::Private),
-                token: variable_token("b"),
+                token: None,
             },
             true_branch: InputZK {
                 visibility: Some(InputVisibility::Public),
@@ -173,7 +173,7 @@ pub fn assert_eq_token_with_mixed_visibility() -> token_zk::TokenZK {
         example: ZkExample::AssertEq {
             lhs: InputZK {
                 visibility: Some(InputVisibility::Private),
-                token: variable_token("a"),
+                token: None,
             },
             rhs: InputZK {
                 visibility: Some(InputVisibility::Public),

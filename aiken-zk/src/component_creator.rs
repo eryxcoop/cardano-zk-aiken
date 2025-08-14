@@ -103,7 +103,7 @@ impl ComponentCreator {
                 n,
                 res,
             } => {
-                let Token::Int { value, base: _ } = &*n.token else {
+                let Token::Int { value, base: _ } = &*n.token.clone().unwrap() else {
                     panic!("Not expected kind of token")
                 };
                 let inputs_to_identifiers = [(fib_0, "a"), (fib_1, "b"), (res, "c")];

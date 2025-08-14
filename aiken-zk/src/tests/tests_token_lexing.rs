@@ -32,7 +32,7 @@ fn test_lexer_translates_public_addition_parameters_numeric() {
 
 #[test]
 fn test_lexer_translates_private_addition_parameters_numeric() {
-    let program = "offchain addition(priv 4, priv 5, priv 9)";
+    let program = "offchain addition(priv, priv, priv)";
     let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
     let offchain_token = &tokens[0].0;
     assert_eq!(
@@ -40,15 +40,15 @@ fn test_lexer_translates_private_addition_parameters_numeric() {
             example: ZkExample::Addition {
                 lhs: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: int_token(4)
+                    token: None
                 },
                 rhs: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: int_token(5)
+                    token: None
                 },
                 res: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: int_token(9)
+                    token: None
                 },
             }
         },
@@ -84,7 +84,7 @@ fn test_lexer_translates_addition_parameters_without_visibility_numeric() {
 
 #[test]
 fn test_lexer_translates_addition_parameters_with_mixed_visibility_and_input_types() {
-    let program = "offchain addition(priv a, pub 5, olga)";
+    let program = "offchain addition(priv, pub 5, olga)";
     let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
     let offchain_token = &tokens[0].0;
     assert_eq!(
@@ -92,7 +92,7 @@ fn test_lexer_translates_addition_parameters_with_mixed_visibility_and_input_typ
             example: ZkExample::Addition {
                 lhs: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: variable_token("a")
+                    token: None
                 },
                 rhs: InputZK {
                     visibility: Some(InputVisibility::Public),
@@ -138,7 +138,7 @@ fn test_lexer_translates_public_subtraction_parameters_numeric() {
 
 #[test]
 fn test_lexer_translates_private_subtraction_parameters_numeric() {
-    let program = "offchain subtraction(priv 4, priv 5, priv 9)";
+    let program = "offchain subtraction(priv, priv, priv)";
     let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
     let offchain_token = &tokens[0].0;
     assert_eq!(
@@ -146,15 +146,15 @@ fn test_lexer_translates_private_subtraction_parameters_numeric() {
             example: ZkExample::Subtraction {
                 lhs: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: int_token(4)
+                    token: None
                 },
                 rhs: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: int_token(5)
+                    token: None
                 },
                 res: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: int_token(9)
+                    token: None
                 },
             }
         },
@@ -190,7 +190,7 @@ fn test_lexer_translates_subtraction_parameters_without_visibility_numeric() {
 
 #[test]
 fn test_lexer_translates_subtraction_parameters_with_mixed_visibility_and_input_types() {
-    let program = "offchain subtraction(priv a, pub 5, olga)";
+    let program = "offchain subtraction(priv, pub 5, olga)";
     let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
     let offchain_token = &tokens[0].0;
     assert_eq!(
@@ -198,7 +198,7 @@ fn test_lexer_translates_subtraction_parameters_with_mixed_visibility_and_input_
             example: ZkExample::Subtraction {
                 lhs: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: variable_token("a")
+                    token: None
                 },
                 rhs: InputZK {
                     visibility: Some(InputVisibility::Public),
@@ -218,7 +218,7 @@ fn test_lexer_translates_subtraction_parameters_with_mixed_visibility_and_input_
 
 #[test]
 fn test_lexer_translates_multiplication_parameters_with_mixed_visibility_and_input_types() {
-    let program = "offchain multiplication(priv a, pub 5, olga)";
+    let program = "offchain multiplication(priv, pub 5, olga)";
     let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
     let offchain_token = &tokens[0].0;
     assert_eq!(
@@ -226,7 +226,7 @@ fn test_lexer_translates_multiplication_parameters_with_mixed_visibility_and_inp
             example: ZkExample::Multiplication {
                 lhs: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: variable_token("a")
+                    token: None
                 },
                 rhs: InputZK {
                     visibility: Some(InputVisibility::Public),
@@ -246,7 +246,7 @@ fn test_lexer_translates_multiplication_parameters_with_mixed_visibility_and_inp
 
 #[test]
 fn test_lexer_translates_fibonacci_parameters_with_mixed_visibility_and_input_types() {
-    let program = "offchain fibonacci(priv a, pub 5, olga, pub 1)";
+    let program = "offchain fibonacci(priv, pub 5, olga, pub 1)";
     let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
     let offchain_token = &tokens[0].0;
     assert_eq!(
@@ -254,7 +254,7 @@ fn test_lexer_translates_fibonacci_parameters_with_mixed_visibility_and_input_ty
             example: ZkExample::Fibonacci {
                 fib_0: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: variable_token("a")
+                    token: None
                 },
                 fib_1: InputZK {
                     visibility: Some(InputVisibility::Public),
@@ -278,7 +278,7 @@ fn test_lexer_translates_fibonacci_parameters_with_mixed_visibility_and_input_ty
 
 #[test]
 fn test_lexer_translates_if_parameters_with_mixed_visibility_and_input_types() {
-    let program = "offchain if(priv a, pub 5, olga, pub 1)";
+    let program = "offchain if(priv, pub 5, olga, pub 1)";
     let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
     let offchain_token = &tokens[0].0;
     assert_eq!(
@@ -286,7 +286,7 @@ fn test_lexer_translates_if_parameters_with_mixed_visibility_and_input_types() {
             example: ZkExample::If {
                 condition: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: variable_token("a")
+                    token: None
                 },
                 assigned: InputZK {
                     visibility: Some(InputVisibility::Public),
@@ -309,7 +309,7 @@ fn test_lexer_translates_if_parameters_with_mixed_visibility_and_input_types() {
 
 #[test]
 fn test_lexer_translates_assert_eq_parameters_with_mixed_visibility_and_input_types() {
-    let program = "offchain assert_eq(priv a, pub 5)";
+    let program = "offchain assert_eq(priv, pub 5)";
     let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
     let offchain_token = &tokens[0].0;
     assert_eq!(
@@ -317,7 +317,7 @@ fn test_lexer_translates_assert_eq_parameters_with_mixed_visibility_and_input_ty
             example: ZkExample::AssertEq {
                 lhs: InputZK {
                     visibility: Some(InputVisibility::Private),
-                    token: variable_token("a")
+                    token: None
                 },
                 rhs: InputZK {
                     visibility: Some(InputVisibility::Public),
@@ -338,9 +338,16 @@ fn test_lexer_translates_custom_circom() {
         Token::Offchain {
             example: ZkExample::CustomCircom {
                 path: String::from("path/to/circom/with/main.circom"),
-                public_inputs: vec![variable_token("a"), int_token(5)]
+                public_inputs: vec![variable_token("a").unwrap(), int_token(5).unwrap()]
             },
         },
         *offchain_token
     );
+}
+
+#[test]
+#[should_panic(expected = "Private parameters cannot be followed by an identifier")]
+fn test_lexer_does_not_allow_identifiers_for_private_parameters() {
+    let program = "offchain assert_eq(priv a, pub 5)";
+    let lexer::LexInfo { .. } = lexer::Lexer::new().run(program).unwrap();
 }

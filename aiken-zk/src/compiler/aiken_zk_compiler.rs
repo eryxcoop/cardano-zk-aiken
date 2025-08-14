@@ -281,7 +281,7 @@ impl AikenZkCompiler {
         match input.visibility.clone() {
             Some(InputVisibility::Private) => acc,
             _ => {
-                acc.push(Self::extract_identifier_from_token(&input.token));
+                acc.push(Self::extract_identifier_from_token(&input.token.clone().unwrap()));
                 acc
             }
         }
