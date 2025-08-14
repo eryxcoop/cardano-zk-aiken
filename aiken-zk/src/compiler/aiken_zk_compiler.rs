@@ -8,6 +8,7 @@ use serde::Deserialize;
 use std::fs;
 use std::io::Error;
 use std::process::Command;
+use serde_json::Value;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -45,12 +46,27 @@ impl AikenZkCompiler {
         path: &str,
         public_inputs: &Vec<Box<TokenZK>>) -> String
     {
+        let output_path = "/build";
+        let circuit_name = path.strip_suffix(".circom")
+        .unwrap();
         let circom_circuit = CircomCircuit::from(path.to_string());
+
+        let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
+        let r1cs_json_path = format!("{}{}.r1cs.json", output_path, circuit_name);
+
         circom_circuit.generate_verification_key(random_seeds).unwrap();
+        Command::new("snarkjs").args(["r1cs", "export", "json", &r1cs_path, &r1cs_json_path]);
+
+        let r1cs_json_str = fs::read_to_string(&r1cs_json_path).unwrap();
+        let json: Value = serde_json::from_str(&r1cs_json_str).unwrap();
+        let public_inputs_amount = json["nPubInputs"].as_u64().unwrap();
+
         let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
         let public_input_identifiers: Vec<String> = public_inputs.iter().map(|token| {
             Self::extract_identifier_from_token(token)
         }).collect();
+
+        assert_eq!(public_input_identifiers.len(), public_inputs_amount as usize, "Amount of public inputs doesnt match");
 
         let mut aiken_zk_src = aiken_src.to_string();
         let replacement = format!(

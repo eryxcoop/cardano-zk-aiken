@@ -141,6 +141,24 @@ fn test_replaces_custom_circom_by_the_corresponding_function_and_call() {
     );
 }
 
+#[test]
+#[serial]
+#[should_panic(expected = "Amount of public inputs doesnt match")]
+fn test_custom_circom_should_fail_if_amount_of_public_inputs_doesnt_match() {
+    let _temp_dir = create_sandbox_and_set_as_current_directory();
+    fs::write("./test.circom", addition_custom_circom_template_and_component()).unwrap();
+    let aiken_src = aiken_template_with_body_and_verify_definition(
+        "", "offchain custom(\"test.circom\", [a, 5, b])", "");
+    let output_filename = "my_program".to_string();
+    let random_seeds = ("asdasd", "dsadsa");
+
+    AikenZkCompiler::apply_modifications_to_src_for_token(
+        aiken_src,
+        output_filename,
+        random_seeds,
+    );
+}
+
 
 fn assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
     original: &str,
