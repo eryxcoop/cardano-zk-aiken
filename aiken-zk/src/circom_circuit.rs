@@ -3,6 +3,7 @@ use std::fs;
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::process::{Command, Stdio};
+use crate::compiler::BUILD_DIR;
 
 pub struct CircomCircuit {
     circom_source_code_path: String,
@@ -24,7 +25,7 @@ impl CircomCircuit {
             .circom_source_code_path
             .strip_suffix(".circom")
             .unwrap();
-        let output_path = "build/";
+        let output_path = BUILD_DIR;
 
         fs::create_dir_all(output_path).expect("Failed to create output directory");
 
@@ -60,7 +61,7 @@ impl CircomCircuit {
         verification_key_path: &str,
         inputs_path: &str,
     ) -> CompressedGroth16ProofBls12_381 {
-        let build_path = "build/".to_string();
+        let build_path = BUILD_DIR.to_string();
         self.create_directory_if_not_exists(&build_path);
 
         self.compile_witness_generator(&build_path);

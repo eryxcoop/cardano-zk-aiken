@@ -9,6 +9,7 @@ use serde_json::Value;
 use std::fs;
 use std::io::Error;
 use std::process::Command;
+use crate::compiler::BUILD_DIR;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -60,7 +61,7 @@ impl AikenZkCompiler {
         path: &str,
         public_inputs: &Vec<Box<TokenZK>>,
     ) -> String {
-        let output_path = "build/";
+        let output_path = BUILD_DIR;
         let circuit_name = path.strip_suffix(".circom").unwrap();
         let circom_circuit = CircomCircuit::from(path.to_string());
 
@@ -288,7 +289,7 @@ impl AikenZkCompiler {
     fn extract_vk_compressed_data() -> Result<Groth16CompressedData, Error> {
         let output = Command::new("node")
             .arg("curve_compress/compressedVerificationKey.js")
-            .arg("build/verification_key.json")
+            .arg(BUILD_DIR.to_string() + "verification_key.json")
             .output()?;
 
         let stdout = String::from_utf8(output.stdout).unwrap();
