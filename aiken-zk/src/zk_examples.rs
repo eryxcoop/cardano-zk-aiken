@@ -203,7 +203,7 @@ impl ZkExample {
             string_literal_parser.padded()
                 .then_ignore(just(",").padded())
                 .then(public_input_identifiers_list_parser)
-                .delimited_by(just("(").padded(), just(")").padded());
+                .delimited_by(just("(").padded(), just(")").padded_by(just(" ").repeated()));
 
         just("custom")
             .padded()
