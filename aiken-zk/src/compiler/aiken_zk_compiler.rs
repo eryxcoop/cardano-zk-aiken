@@ -88,12 +88,14 @@ impl AikenZkCompiler {
                 offchain_token_span,
                 &public_input_identifiers,
             );
-        aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
         let public_input_count = public_input_identifiers.len();
-        let full_verify_function_declaration =
-            Self::create_verify_function_declaration_from(&vk_compressed_data, public_input_count);
-        aiken_zk_src = aiken_zk_src + &full_verify_function_declaration;
-        aiken_zk_src
+        aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
+
+        Self::append_verify_function_declaration(
+            aiken_zk_src,
+            &vk_compressed_data,
+            public_input_count,
+        )
     }
 
     fn replace_range_of_offchain_keyword_by_verification_function_call(
@@ -183,11 +185,12 @@ impl AikenZkCompiler {
             &offchain_token,
             offchain_token_span,
         );
+        let public_input_count = Self::extract_public_identifiers_from_token(offchain_token).len();
         aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
         aiken_zk_src = Self::append_verify_function_declaration(
             aiken_zk_src,
-            &offchain_token,
             &vk_compressed_data,
+            public_input_count,
         );
         aiken_zk_src
     }
@@ -286,10 +289,9 @@ impl AikenZkCompiler {
 
     fn append_verify_function_declaration(
         aiken_zk_src: String,
-        token: &Token,
         vk_compressed_data: &Groth16CompressedData,
+        public_input_count: usize,
     ) -> String {
-        let public_input_count = Self::extract_public_identifiers_from_token(token).len();
         let full_verify_function_declaration =
             Self::create_verify_function_declaration_from(vk_compressed_data, public_input_count);
         aiken_zk_src + &full_verify_function_declaration
