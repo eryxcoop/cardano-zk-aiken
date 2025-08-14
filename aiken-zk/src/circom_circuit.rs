@@ -7,24 +7,25 @@ use crate::compiler::BUILD_DIR;
 
 pub struct CircomCircuit {
     circom_source_code_path: String,
+    filename: String,
 }
 
 impl CircomCircuit {
-    // constructor
-
     pub fn from(circom_source_code_path: String) -> Self {
         Self {
-            circom_source_code_path,
+            circom_source_code_path: circom_source_code_path.clone(),
+            filename: circom_source_code_path.strip_suffix(".circom").unwrap().to_string(),
         }
+    }
+
+    pub fn filename(&self) -> String {
+        self.filename.clone()
     }
 
     // verification key generation
 
     pub fn generate_verification_key(&self, rand: (&str, &str)) -> Result<(), Error> {
-        let circuit_name = self
-            .circom_source_code_path
-            .strip_suffix(".circom")
-            .unwrap();
+        let circuit_name = self.filename();
         let output_path = BUILD_DIR;
 
         fs::create_dir_all(output_path).expect("Failed to create output directory");

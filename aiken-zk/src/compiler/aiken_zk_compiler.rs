@@ -62,8 +62,8 @@ impl AikenZkCompiler {
         public_inputs: &Vec<Box<TokenZK>>,
     ) -> String {
         let output_path = BUILD_DIR;
-        let circuit_name = path.strip_suffix(".circom").unwrap();
         let circom_circuit = CircomCircuit::from(path.to_string());
+        let circuit_name = circom_circuit.filename();
 
         circom_circuit
             .generate_verification_key(random_seeds)
