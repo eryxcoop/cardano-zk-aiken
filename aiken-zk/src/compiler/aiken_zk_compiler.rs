@@ -66,7 +66,6 @@ impl AikenZkCompiler {
 
         let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
         let r1cs_json_path = format!("{}.json", r1cs_path);
-        println!("{}", r1cs_json_path);
 
         circom_circuit
             .generate_verification_key(random_seeds)
