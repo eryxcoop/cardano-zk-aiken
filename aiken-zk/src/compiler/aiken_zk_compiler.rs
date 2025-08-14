@@ -77,7 +77,7 @@ impl AikenZkCompiler {
 
         Self::assert_equal_number_of_public_inputs(
             output_path,
-            circuit_name,
+            &circuit_name,
             circom_circuit,
             &public_input_identifiers,
         );
