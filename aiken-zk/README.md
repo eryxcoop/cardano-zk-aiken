@@ -91,9 +91,9 @@ source code with **one** of the following new language tokens in the validator b
 
 This new addition to the language allows you to declare some of the arguments as private. Some examples are:
 
-* offchain addition(priv x, pub y, z)
-* offchain addition(priv x, priv y, priv z)
-* offchain assert_eq(priv x, y)
+* offchain addition(priv, pub y, z)
+* offchain addition(priv, priv, priv)
+* offchain assert_eq(priv, y)
 
 Any visibility combination is possible. If the visibility modifier is not present, the argument is assumed to be
 **public**.

@@ -264,7 +264,7 @@ validator example {
     _self: Transaction,
   ) {
     expect Some(b) = datum
-    expect _zk_redeemer = offchain addition(priv a, b, 10)
+    expect _zk_redeemer = offchain addition(priv, b, 10)
     True
   }
 

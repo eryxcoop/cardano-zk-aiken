@@ -16,7 +16,7 @@ validator example {
   ) {
     let second_fibonacci = redeemer.redeemer
     expect Some(nth_fibonacci) = datum
-    expect _redeemer = offchain fibonacci(priv _, second_fibonacci, 5, pub nth_fibonacci)
+    expect _redeemer = offchain fibonacci(priv, second_fibonacci, 5, pub nth_fibonacci)
     True
   }
 
