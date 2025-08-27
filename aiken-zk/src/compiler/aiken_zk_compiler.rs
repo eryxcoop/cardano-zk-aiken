@@ -3,13 +3,14 @@ use crate::compiler::BUILD_DIR;
 use crate::compiler::lexer::{LexInfo, Lexer};
 use crate::compiler::token_zk::{TokenZK as Token, TokenZK};
 use crate::component_creator::ComponentCreator;
-use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
+use crate::zk_examples::{InputVisibility, InputZK, TokenWithCardinality, ZkExample};
 use aiken_lang::ast::Span;
 use serde::Deserialize;
 use serde_json::Value;
 use std::fs;
 use std::io::Error;
 use std::process::Command;
+use chumsky::Parser;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -59,7 +60,7 @@ impl AikenZkCompiler {
         random_seeds: (&str, &str),
         offchain_token_span: Span,
         path: &str,
-        public_inputs: &Vec<Box<TokenZK>>,
+        public_inputs: &Vec<Box<TokenWithCardinality>>,
     ) -> String {
         let output_path = BUILD_DIR;
         let circom_circuit = CircomCircuit::from(path.to_string());
@@ -72,7 +73,10 @@ impl AikenZkCompiler {
         let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
         let public_input_identifiers: Vec<String> = public_inputs
             .iter()
-            .map(|token| Self::extract_identifier_from_token(token))
+            .map(|token| {
+                let token = TokenWithCardinality::extract_single(token);
+                Self::extract_identifier_from_token(&token.unwrap())
+            })
             .collect();
 
         Self::assert_equal_number_of_public_inputs(
@@ -216,7 +220,7 @@ impl AikenZkCompiler {
         )
     }
 
-    fn extract_identifier_from_token(token: &Token) -> String {
+    fn extract_identifier_from_token(token: &TokenZK) -> String {
         match token {
             Token::Name { name } => name.clone(),
             Token::Int { value, .. } => value.clone(),
@@ -228,30 +232,30 @@ impl AikenZkCompiler {
         match token {
             Token::Offchain {
                 example: ZkExample::Addition { lhs, rhs, res },
-            } => [lhs, rhs, res].iter().fold(vec![], |acc, &input| {
-                Self::extract_visibility_from_input(acc, &input)
-            }),
+            } => [lhs, rhs, res].into_iter().filter_map(| input| {
+                Self::extract_visibility_from_input(&input)
+            }).collect(),
 
             Token::Offchain {
                 example: ZkExample::Subtraction { lhs, rhs, res },
-            } => [lhs, rhs, res].iter().fold(vec![], |acc, &input| {
-                Self::extract_visibility_from_input(acc, &input)
-            }),
+            } => [lhs, rhs, res].into_iter().filter_map(| input| {
+                Self::extract_visibility_from_input(&input)
+            }).collect(),
 
             Token::Offchain {
                 example: ZkExample::Multiplication { lhs, rhs, res },
-            } => [lhs, rhs, res].iter().fold(vec![], |acc, &input| {
-                Self::extract_visibility_from_input(acc, &input)
-            }),
+            } => [lhs, rhs, res].into_iter().filter_map(| input| {
+                Self::extract_visibility_from_input(&input)
+            }).collect(),
 
             Token::Offchain {
                 example:
                     ZkExample::Fibonacci {
                         fib_0, fib_1, res, ..
                     },
-            } => [fib_0, fib_1, res].iter().fold(vec![], |acc, &input| {
-                Self::extract_visibility_from_input(acc, &input)
-            }),
+            } => [fib_0, fib_1, res].into_iter().filter_map(|input| {
+                Self::extract_visibility_from_input(&input)
+            }).collect(),
 
             Token::Offchain {
                 example:
@@ -262,27 +266,27 @@ impl AikenZkCompiler {
                         false_branch,
                     },
             } => [condition, assigned, true_branch, false_branch]
-                .iter()
-                .fold(vec![], |acc, &input| {
-                    Self::extract_visibility_from_input(acc, &input)
-                }),
+                .into_iter()
+                .filter_map(|input| {
+                    Self::extract_visibility_from_input(&input)
+                }).collect(),
 
             Token::Offchain {
                 example: ZkExample::AssertEq { lhs, rhs },
-            } => [lhs, rhs].iter().fold(vec![], |acc, &input| {
-                Self::extract_visibility_from_input(acc, &input)
-            }),
+            } => [lhs, rhs].into_iter().filter_map(|input| {
+                Self::extract_visibility_from_input(&input)
+            }).collect(),
 
             _ => panic!("Not implemented"),
         }
     }
 
-    fn extract_visibility_from_input(mut acc: Vec<String>, input: &&InputZK) -> Vec<String> {
+    fn extract_visibility_from_input(input: &InputZK) -> Option<String> {
         match input.visibility.clone() {
-            InputVisibility::Private => acc,
+            InputVisibility::Private => None,
             _ => {
-                acc.push(Self::extract_identifier_from_token(&input.token.clone().unwrap()));
-                acc
+                let token = TokenWithCardinality::extract_single(&input.token.clone().unwrap());
+                Some(Self::extract_identifier_from_token(&token.unwrap()))
             }
         }
     }

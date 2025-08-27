@@ -3,12 +3,13 @@ use std::fmt;
 use std::fmt::Formatter;
 
 use crate::compiler::parsers::int_parser;
-use crate::compiler::token_zk::TokenZK as Token;
+use crate::compiler::token_zk::{TokenZK as Token, TokenZK};
 use aiken_lang::parser::error::ParseError;
 use chumsky::{
     Parser,
     prelude::{choice, just},
 };
+use crate::zk_examples::TokenWithCardinality::{Multiple, Single};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum InputVisibility {
@@ -26,6 +27,47 @@ impl InputVisibility {
         }
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum TokenWithCardinality {
+    Single(Token),
+    Multiple(Vec<Token>)
+}
+
+impl fmt::Display for TokenWithCardinality {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Single(token) => write!(f, "{}", token),
+            Multiple(token_vector) => {
+                write!(f, "[")?;
+                for token in token_vector {
+                    write!(f, "{}", token)?;
+                }
+                write!(f, "]")?;
+                Ok(())
+            }
+        }
+    }
+}
+
+impl TokenWithCardinality {
+    pub fn new_single(token: Token) -> Self {
+        Single(token)
+    }
+
+    fn _new_multiple(token_vector: Vec<Token>) -> Self {
+        Multiple(token_vector)
+    }
+
+    pub fn extract_single(&self) -> Option<TokenZK> {
+        match self {
+            Single(token) => Some(token.clone()),
+            Multiple(_) => None
+        }
+    }
+}
+
+
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CircuitTemplateParameter {
@@ -52,26 +94,26 @@ impl CircuitTemplateParameter {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InputZK {
     pub visibility: InputVisibility,
-    pub token: Option<Box<Token>>,
+    pub token: Option<Box<TokenWithCardinality>>,
 }
 
 impl InputZK {
-    pub fn from(visibility_token: (Option<InputVisibility>, Option<Token>)) -> Self {
-        let (maybe_input_visibility, maybe_token) = visibility_token;
+    pub fn from(visibility_token: (Option<InputVisibility>, Option<TokenZK>)) -> Self {
+        let (maybe_input_visibility, maybe_cardinality_token) = visibility_token;
 
         match maybe_input_visibility {
             None | Some(InputVisibility::Public) => {
-                if maybe_token.is_none() {
+                if maybe_cardinality_token.is_none() {
                     panic!("Public parameters must be followed by an identifier");
                 }
 
                 Self {
                     visibility: InputVisibility::Public,
-                    token: Some(Box::new(maybe_token.unwrap())),
+                    token: Some(Box::new(TokenWithCardinality::new_single(maybe_cardinality_token.unwrap()))),
                 }
             }
             Some(InputVisibility::Private) => {
-                if maybe_token.is_some() {
+                if maybe_cardinality_token.is_some() {
                     panic!("Private parameters cannot be followed by an identifier");
                 }
 
@@ -130,7 +172,7 @@ pub enum ZkExample {
     },
     CustomCircom {
         path: String,
-        public_inputs: Vec<Box<Token>>,
+        public_inputs: Vec<Box<TokenWithCardinality>>,
     },
 }
 
@@ -280,7 +322,7 @@ impl ZkExample {
                     path,
                     public_inputs: public_input_identifiers
                         .iter()
-                        .map(|token| Box::new(token.clone()))
+                        .map(|token| Box::new(TokenWithCardinality::new_single(token.clone())))
                         .collect(),
                 },
             })

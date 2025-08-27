@@ -261,7 +261,7 @@ fn test_lexer_translates_fibonacci_parameters_with_mixed_visibility_and_input_ty
                     token: variable_token("olga")
                 },
                 n: CircuitTemplateParameter {
-                    token: int_token(5).unwrap()
+                    token: Box::new(int_token(5).unwrap().extract_single().unwrap())
                 },
                 res: InputZK {
                     visibility: InputVisibility::Public,
@@ -337,7 +337,7 @@ fn test_lexer_translates_sha256_parameters() {
         Token::Offchain {
             example: ZkExample::Sha256 {
                 n_bits: CircuitTemplateParameter {
-                    token: int_token(5).unwrap()
+                    token: Box::new(int_token(5).unwrap().extract_single().unwrap())
                 },
                 r#in: InputZK {
                     visibility: InputVisibility::Public,

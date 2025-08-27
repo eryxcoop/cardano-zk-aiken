@@ -1,20 +1,24 @@
 use crate::compiler::token_zk;
-use crate::zk_examples::{CircuitTemplateParameter, InputVisibility, InputZK, ZkExample};
+use crate::zk_examples::{CircuitTemplateParameter, InputVisibility, InputZK, TokenWithCardinality, ZkExample};
 use aiken_lang::parser::token::Base;
 
-pub fn int_token(n: u32) -> Option<Box<token_zk::TokenZK>> {
-    Some(Box::new(token_zk::TokenZK::Int {
-        value: n.to_string(),
-        base: Base::Decimal {
-            numeric_underscore: false,
-        },
-    }))
+pub fn int_token(n: u32) -> Option<Box<TokenWithCardinality>> {
+    Some(Box::new(TokenWithCardinality::Single(
+                  token_zk::TokenZK::Int {
+                    value: n.to_string(),
+                    base: Base::Decimal {
+                        numeric_underscore: false,
+                    },
+                  }
+    )))
 }
 
-pub fn variable_token(s: &str) -> Option<Box<token_zk::TokenZK>> {
-    Some(Box::new(token_zk::TokenZK::Name {
-        name: s.to_string(),
-    }))
+pub fn variable_token(s: &str) -> Option<Box<TokenWithCardinality>> {
+    Some(Box::new(TokenWithCardinality::Single(
+        token_zk::TokenZK::Name {
+            name: s.to_string(),
+        }
+    )))
 }
 
 pub fn addition_token_with_public_inputs() -> token_zk::TokenZK {
@@ -130,7 +134,7 @@ pub fn fibonacci_token_with_mixed_visibility(n: usize) -> token_zk::TokenZK {
                 token: None,
             },
             n: CircuitTemplateParameter {
-                token: int_token(n as u32).unwrap(),
+                token: Box::new(int_token(n as u32).unwrap().extract_single().unwrap())
             },
             res: InputZK {
                 visibility: InputVisibility::Public,
