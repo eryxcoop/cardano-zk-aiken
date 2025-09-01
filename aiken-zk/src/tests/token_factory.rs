@@ -21,15 +21,15 @@ pub fn addition_token_with_public_inputs() -> token_zk::TokenZK {
     token_zk::TokenZK::Offchain {
         example: ZkExample::Addition {
             lhs: InputZK {
-                visibility: Some(InputVisibility::Public),
+                visibility: InputVisibility::Public,
                 token: variable_token("c"),
             },
             rhs: InputZK {
-                visibility: Some(InputVisibility::Public),
+                visibility: InputVisibility::Public,
                 token: int_token(5),
             },
             res: InputZK {
-                visibility: None,
+                visibility: InputVisibility::Public,
                 token: int_token(9),
             },
         },
@@ -40,15 +40,15 @@ pub fn addition_token_with_mixed_visibility() -> token_zk::TokenZK {
     token_zk::TokenZK::Offchain {
         example: ZkExample::Addition {
             lhs: InputZK {
-                visibility: Some(InputVisibility::Private),
+                visibility: InputVisibility::Private,
                 token: None,
             },
             rhs: InputZK {
-                visibility: Some(InputVisibility::Public),
+                visibility: InputVisibility::Public,
                 token: variable_token("b"),
             },
             res: InputZK {
-                visibility: None,
+                visibility: InputVisibility::Public,
                 token: variable_token("n"),
             },
         },
@@ -59,15 +59,15 @@ pub fn addition_token_with_all_private_inputs() -> token_zk::TokenZK {
     token_zk::TokenZK::Offchain {
         example: ZkExample::Addition {
             lhs: InputZK {
-                visibility: Some(InputVisibility::Private),
+                visibility: InputVisibility::Private,
                 token: None,
             },
             rhs: InputZK {
-                visibility: Some(InputVisibility::Private),
+                visibility: InputVisibility::Private,
                 token: None,
             },
             res: InputZK {
-                visibility: Some(InputVisibility::Private),
+                visibility: InputVisibility::Private,
                 token: None,
             },
         },
@@ -80,15 +80,15 @@ pub fn subtraction_token_with_mixed_visibility() -> token_zk::TokenZK {
     token_zk::TokenZK::Offchain {
         example: ZkExample::Subtraction {
             lhs: InputZK {
-                visibility: Some(InputVisibility::Public),
+                visibility: InputVisibility::Public,
                 token: variable_token("c"),
             },
             rhs: InputZK {
-                visibility: Some(InputVisibility::Private),
+                visibility: InputVisibility::Private,
                 token: None,
             },
             res: InputZK {
-                visibility: None,
+                visibility: InputVisibility::Public,
                 token: variable_token("n"),
             },
         },
@@ -101,15 +101,15 @@ pub fn multiplication_token_with_mixed_visibility() -> token_zk::TokenZK {
     token_zk::TokenZK::Offchain {
         example: ZkExample::Multiplication {
             lhs: InputZK {
-                visibility: Some(InputVisibility::Public),
+                visibility: InputVisibility::Public,
                 token: variable_token("c"),
             },
             rhs: InputZK {
-                visibility: Some(InputVisibility::Private),
+                visibility: InputVisibility::Private,
                 token: None,
             },
             res: InputZK {
-                visibility: None,
+                visibility: InputVisibility::Public,
                 token: variable_token("n"),
             },
         },
@@ -122,18 +122,18 @@ pub fn fibonacci_token_with_mixed_visibility(n: usize) -> token_zk::TokenZK {
     token_zk::TokenZK::Offchain {
         example: ZkExample::Fibonacci {
             fib_0: InputZK {
-                visibility: Some(InputVisibility::Public),
+                visibility: InputVisibility::Public,
                 token: variable_token("c"),
             },
             fib_1: InputZK {
-                visibility: Some(InputVisibility::Private),
+                visibility: InputVisibility::Private,
                 token: None,
             },
             n: CircuitTemplateParameter {
                 token: int_token(n as u32).unwrap(),
             },
             res: InputZK {
-                visibility: None,
+                visibility: InputVisibility::Public,
                 token: variable_token("n"),
             },
         },
@@ -146,19 +146,19 @@ pub fn if_token_with_mixed_visibility() -> token_zk::TokenZK {
     token_zk::TokenZK::Offchain {
         example: ZkExample::If {
             condition: InputZK {
-                visibility: Some(InputVisibility::Public),
+                visibility: InputVisibility::Public,
                 token: variable_token("a"),
             },
             assigned: InputZK {
-                visibility: Some(InputVisibility::Private),
+                visibility: InputVisibility::Private,
                 token: None,
             },
             true_branch: InputZK {
-                visibility: Some(InputVisibility::Public),
+                visibility: InputVisibility::Public,
                 token: variable_token("c"),
             },
             false_branch: InputZK {
-                visibility: None,
+                visibility: InputVisibility::Public,
                 token: variable_token("d"),
             },
         },
@@ -171,11 +171,11 @@ pub fn assert_eq_token_with_mixed_visibility() -> token_zk::TokenZK {
     token_zk::TokenZK::Offchain {
         example: ZkExample::AssertEq {
             lhs: InputZK {
-                visibility: Some(InputVisibility::Private),
+                visibility: InputVisibility::Private,
                 token: None,
             },
             rhs: InputZK {
-                visibility: Some(InputVisibility::Public),
+                visibility: InputVisibility::Public,
                 token: int_token(5),
             },
         },

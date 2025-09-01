@@ -165,7 +165,7 @@ impl ComponentCreator {
             .iter()
             .fold(vec![], |mut acc, (input, var_name)| {
                 match input.visibility.clone() {
-                    Some(InputVisibility::Private) => acc,
+                    InputVisibility::Private => acc,
                     _ => {
                         acc.push(var_name.to_string());
                         acc

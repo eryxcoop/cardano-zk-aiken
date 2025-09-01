@@ -20,7 +20,7 @@ impl InputVisibility {
     pub fn from(keyword: Option<&str>) -> Option<Self> {
         match keyword {
             Some("pub") => Some(Self::Public),
-            Some("priv") =>Some(Self::Private),
+            Some("priv") => Some(Self::Private),
             None => None,
             _ => panic!("Visibility not recognized"),
         }
@@ -34,32 +34,37 @@ pub struct CircuitTemplateParameter {
 
 impl CircuitTemplateParameter {
     pub fn from(visibility_token: (Option<InputVisibility>, Option<Token>)) -> Self {
-        if visibility_token.0.is_some() {
+        let (maybe_input_visibility, maybe_token) = visibility_token;
+
+        if maybe_input_visibility.is_some() {
             panic!("");
         }
+
         Self {
-            token: match visibility_token.1 {
+            token: match maybe_token {
                 None => panic!(""),
-                Some(token) => Box::new(token)
-            }
+                Some(token) => Box::new(token),
+            },
         }
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InputZK {
+    pub visibility: InputVisibility,
     pub token: Option<Box<Token>>,
-    pub visibility: Option<InputVisibility>,
 }
 
 impl InputZK {
     pub fn from(visibility_token: (Option<InputVisibility>, Option<Token>)) -> Self {
+        let (maybe_input_visibility, maybe_token) = visibility_token;
+
         Self {
-            token: match visibility_token.1 {
+            token: match maybe_token {
                 None => None,
-                Some(token) => Some(Box::new(token))
+                Some(token) => Some(Box::new(token)),
             },
-            visibility: visibility_token.0,
+            visibility: maybe_input_visibility.unwrap_or_else(|| InputVisibility::Public),
         }
     }
 }
@@ -114,9 +119,11 @@ impl ZkExample {
         text::ident().map(|name| Token::Name { name }).padded()
     }
 
-    fn int_or_var() -> impl Parser<char, (Option<InputVisibility>, Option<Token>), Error = ParseError> {
+    fn int_or_var()
+    -> impl Parser<char, (Option<InputVisibility>, Option<Token>), Error = ParseError> {
         choice((
-            just("priv").padded()
+            just("priv")
+                .padded()
                 .then(choice((int_parser(), Self::name_parser())).or_not())
                 .try_map(|(visibility, token), _| {
                     if !token.is_none() {
@@ -124,17 +131,12 @@ impl ZkExample {
                     }
                     Ok((InputVisibility::from(Some(visibility)), None))
                 }),
-            just("pub").padded()
+            just("pub")
+                .padded()
                 .or_not()
-                .then(choice(
-                    (int_parser(),
-                     Self::name_parser())))
-                .map(|(visibility, token)|{
-                    (InputVisibility::from(visibility), Some(token))
-                }),
+                .then(choice((int_parser(), Self::name_parser())))
+                .map(|(visibility, token)| (InputVisibility::from(visibility), Some(token))),
         ))
-
-
     }
 
     fn parameters(

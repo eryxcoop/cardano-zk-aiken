@@ -279,7 +279,7 @@ impl AikenZkCompiler {
 
     fn extract_visibility_from_input(mut acc: Vec<String>, input: &&InputZK) -> Vec<String> {
         match input.visibility.clone() {
-            Some(InputVisibility::Private) => acc,
+            InputVisibility::Private => acc,
             _ => {
                 acc.push(Self::extract_identifier_from_token(&input.token.clone().unwrap()));
                 acc

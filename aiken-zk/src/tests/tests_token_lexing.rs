@@ -13,15 +13,15 @@ fn test_lexer_translates_public_addition_parameters_numeric() {
         Token::Offchain {
             example: ZkExample::Addition {
                 lhs: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(4)
                 },
                 rhs: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(5)
                 },
                 res: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(9)
                 },
             }
@@ -39,15 +39,15 @@ fn test_lexer_translates_private_addition_parameters_numeric() {
         Token::Offchain {
             example: ZkExample::Addition {
                 lhs: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
                 rhs: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
                 res: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
             }
@@ -65,15 +65,15 @@ fn test_lexer_translates_addition_parameters_without_visibility_numeric() {
         Token::Offchain {
             example: ZkExample::Addition {
                 lhs: InputZK {
-                    visibility: None,
+                    visibility: InputVisibility::Public,
                     token: int_token(4)
                 },
                 rhs: InputZK {
-                    visibility: None,
+                    visibility: InputVisibility::Public,
                     token: int_token(5)
                 },
                 res: InputZK {
-                    visibility: None,
+                    visibility: InputVisibility::Public,
                     token: int_token(9)
                 },
             }
@@ -91,15 +91,15 @@ fn test_lexer_translates_addition_parameters_with_mixed_visibility_and_input_typ
         Token::Offchain {
             example: ZkExample::Addition {
                 lhs: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
                 rhs: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(5)
                 },
                 res: InputZK {
-                    visibility: None,
+                    visibility: InputVisibility::Public,
                     token: variable_token("olga")
                 },
             }
@@ -119,15 +119,15 @@ fn test_lexer_translates_public_subtraction_parameters_numeric() {
         Token::Offchain {
             example: ZkExample::Subtraction {
                 lhs: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(4)
                 },
                 rhs: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(5)
                 },
                 res: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(9)
                 },
             }
@@ -145,15 +145,15 @@ fn test_lexer_translates_private_subtraction_parameters_numeric() {
         Token::Offchain {
             example: ZkExample::Subtraction {
                 lhs: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
                 rhs: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
                 res: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
             }
@@ -171,15 +171,15 @@ fn test_lexer_translates_subtraction_parameters_without_visibility_numeric() {
         Token::Offchain {
             example: ZkExample::Subtraction {
                 lhs: InputZK {
-                    visibility: None,
+                    visibility: InputVisibility::Public,
                     token: int_token(4)
                 },
                 rhs: InputZK {
-                    visibility: None,
+                    visibility: InputVisibility::Public,
                     token: int_token(5)
                 },
                 res: InputZK {
-                    visibility: None,
+                    visibility: InputVisibility::Public,
                     token: int_token(9)
                 },
             }
@@ -197,15 +197,15 @@ fn test_lexer_translates_subtraction_parameters_with_mixed_visibility_and_input_
         Token::Offchain {
             example: ZkExample::Subtraction {
                 lhs: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
                 rhs: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(5)
                 },
                 res: InputZK {
-                    visibility: None,
+                    visibility: InputVisibility::Public,
                     token: variable_token("olga")
                 },
             }
@@ -225,15 +225,15 @@ fn test_lexer_translates_multiplication_parameters_with_mixed_visibility_and_inp
         Token::Offchain {
             example: ZkExample::Multiplication {
                 lhs: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
                 rhs: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(5)
                 },
                 res: InputZK {
-                    visibility: None,
+                    visibility: InputVisibility::Public,
                     token: variable_token("olga")
                 },
             }
@@ -253,18 +253,18 @@ fn test_lexer_translates_fibonacci_parameters_with_mixed_visibility_and_input_ty
         Token::Offchain {
             example: ZkExample::Fibonacci {
                 fib_0: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
                 fib_1: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: variable_token("olga")
                 },
                 n: CircuitTemplateParameter {
                     token: int_token(5).unwrap()
                 },
                 res: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(1)
                 },
             }
@@ -284,19 +284,19 @@ fn test_lexer_translates_if_parameters_with_mixed_visibility_and_input_types() {
         Token::Offchain {
             example: ZkExample::If {
                 condition: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
                 assigned: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(5)
                 },
                 true_branch: InputZK {
-                    visibility: None,
+                    visibility: InputVisibility::Public,
                     token: variable_token("olga")
                 },
                 false_branch: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(1)
                 },
             }
@@ -315,11 +315,11 @@ fn test_lexer_translates_assert_eq_parameters_with_mixed_visibility_and_input_ty
         Token::Offchain {
             example: ZkExample::AssertEq {
                 lhs: InputZK {
-                    visibility: Some(InputVisibility::Private),
+                    visibility: InputVisibility::Private,
                     token: None
                 },
                 rhs: InputZK {
-                    visibility: Some(InputVisibility::Public),
+                    visibility: InputVisibility::Public,
                     token: int_token(5)
                 },
             }
