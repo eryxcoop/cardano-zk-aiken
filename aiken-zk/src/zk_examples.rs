@@ -59,12 +59,27 @@ impl InputZK {
     pub fn from(visibility_token: (Option<InputVisibility>, Option<Token>)) -> Self {
         let (maybe_input_visibility, maybe_token) = visibility_token;
 
-        Self {
-            token: match maybe_token {
-                None => None,
-                Some(token) => Some(Box::new(token)),
-            },
-            visibility: maybe_input_visibility.unwrap_or_else(|| InputVisibility::Public),
+        match maybe_input_visibility {
+            None | Some(InputVisibility::Public) => {
+                if maybe_token.is_none() {
+                    panic!("Public parameters must be followed by an identifier");
+                }
+
+                Self {
+                    visibility: InputVisibility::Public,
+                    token: Some(Box::new(maybe_token.unwrap())),
+                }
+            }
+            Some(InputVisibility::Private) => {
+                if maybe_token.is_some() {
+                    panic!("Private parameters cannot be followed by an identifier");
+                }
+
+                Self {
+                    visibility: InputVisibility::Private,
+                    token: None,
+                }
+            }
         }
     }
 }
@@ -121,22 +136,13 @@ impl ZkExample {
 
     fn int_or_var()
     -> impl Parser<char, (Option<InputVisibility>, Option<Token>), Error = ParseError> {
-        choice((
-            just("priv")
-                .padded()
-                .then(choice((int_parser(), Self::name_parser())).or_not())
-                .try_map(|(visibility, token), _| {
-                    if !token.is_none() {
-                        panic!("Private parameters cannot be followed by an identifier")
-                    }
-                    Ok((InputVisibility::from(Some(visibility)), None))
-                }),
-            just("pub")
-                .padded()
-                .or_not()
-                .then(choice((int_parser(), Self::name_parser())))
-                .map(|(visibility, token)| (InputVisibility::from(visibility), Some(token))),
-        ))
+        choice((just("priv"), just("pub")))
+            .padded()
+            .or_not()
+            .then(choice((int_parser(), Self::name_parser())).or_not())
+            .map(|(maybe_visibility, maybe_token)| {
+                (InputVisibility::from(maybe_visibility), maybe_token)
+            })
     }
 
     fn parameters(

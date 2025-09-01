@@ -106,7 +106,7 @@ fn test_replaces_assert_eq_of_mixed_variables_and_constants_by_the_corresponding
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain assert_eq(priv, b)",
         "zk_verify_or_fail(redeemer, [b])",
-        assert_eq_mixed_visibility_vk_compressed(),
+        get_compressed_verification_key_from__assert_eq__circuit_with_mixed_visibility(),
         1,
     );
 }
@@ -284,7 +284,8 @@ fn if_mixed_visibility_vk_compressed() -> Groth16CompressedData {
     }
 }
 
-fn assert_eq_mixed_visibility_vk_compressed() -> Groth16CompressedData {
+fn get_compressed_verification_key_from__assert_eq__circuit_with_mixed_visibility()
+-> Groth16CompressedData {
     Groth16CompressedData {
         vk_alpha_1: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
         vk_beta_2: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),
