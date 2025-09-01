@@ -246,7 +246,7 @@ fn test_lexer_translates_multiplication_parameters_with_mixed_visibility_and_inp
 
 #[test]
 fn test_lexer_translates_fibonacci_parameters_with_mixed_visibility_and_input_types() {
-    let program = "offchain fibonacci(priv, pub 5, olga, pub 1)";
+    let program = "offchain fibonacci(priv, pub olga, 5, pub 1)";
     let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
     let offchain_token = &tokens[0].0;
     assert_eq!(
@@ -258,11 +258,10 @@ fn test_lexer_translates_fibonacci_parameters_with_mixed_visibility_and_input_ty
                 },
                 fib_1: InputZK {
                     visibility: Some(InputVisibility::Public),
-                    token: int_token(5)
-                },
-                n: InputZK {
-                    visibility: None,
                     token: variable_token("olga")
+                },
+                n: CircuitTemplateParameter {
+                    token: int_token(5).unwrap()
                 },
                 res: InputZK {
                     visibility: Some(InputVisibility::Public),

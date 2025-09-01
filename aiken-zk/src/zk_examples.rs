@@ -28,6 +28,25 @@ impl InputVisibility {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CircuitTemplateParameter {
+    pub token: Box<Token>,
+}
+
+impl CircuitTemplateParameter {
+    pub fn from(visibility_token: (Option<InputVisibility>, Option<Token>)) -> Self {
+        if visibility_token.0.is_some() {
+            panic!("");
+        }
+        Self {
+            token: match visibility_token.1 {
+                None => panic!(""),
+                Some(token) => Box::new(token)
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InputZK {
     pub token: Option<Box<Token>>,
     pub visibility: Option<InputVisibility>,
@@ -71,7 +90,7 @@ pub enum ZkExample {
     Fibonacci {
         fib_0: InputZK,
         fib_1: InputZK,
-        n: InputZK,
+        n: CircuitTemplateParameter,
         res: InputZK,
     },
     If {
@@ -99,7 +118,7 @@ impl ZkExample {
         choice((
             just("priv").padded()
                 .then(choice((int_parser(), Self::name_parser())).or_not())
-                .try_map(|(visibility, token), span| {
+                .try_map(|(visibility, token), _| {
                     if !token.is_none() {
                         panic!("Private parameters cannot be followed by an identifier")
                     }
@@ -177,7 +196,7 @@ impl ZkExample {
                 example: ZkExample::Fibonacci {
                     fib_0: InputZK::from(args[0].clone()),
                     fib_1: InputZK::from(args[1].clone()),
-                    n: InputZK::from(args[2].clone()),
+                    n: CircuitTemplateParameter::from(args[2].clone()),
                     res: InputZK::from(args[3].clone()),
                 },
             })

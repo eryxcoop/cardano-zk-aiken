@@ -1,5 +1,5 @@
 use crate::compiler::token_zk;
-use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
+use crate::zk_examples::{CircuitTemplateParameter, InputVisibility, InputZK, ZkExample};
 use aiken_lang::parser::token::Base;
 
 pub fn int_token(n: u32) -> Option<Box<token_zk::TokenZK>> {
@@ -129,9 +129,8 @@ pub fn fibonacci_token_with_mixed_visibility(n: usize) -> token_zk::TokenZK {
                 visibility: Some(InputVisibility::Private),
                 token: None,
             },
-            n: InputZK {
-                visibility: Some(InputVisibility::Public),
-                token: int_token(n as u32),
+            n: CircuitTemplateParameter {
+                token: int_token(n as u32).unwrap(),
             },
             res: InputZK {
                 visibility: None,
