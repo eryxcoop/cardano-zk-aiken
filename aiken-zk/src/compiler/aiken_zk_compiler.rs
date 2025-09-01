@@ -332,9 +332,14 @@ impl AikenZkCompiler {
 
         format!(
             r#"
+    type ZKInputType {{
+        Single(Int)
+        Many(List<Int>)
+    }}
+
     fn zk_verify_or_fail(
         zk_redeemer: ZK<Redeemer>,
-        public_inputs: List<Int>
+        public_inputs: List<ZKInputType>
     ) -> ZK<Redeemer> {{
 
         let vk: SnarkVerificationKey =
@@ -352,7 +357,14 @@ impl AikenZkCompiler {
 
         expect Some(proof) = list.head(zk_redeemer.proofs)
 
-        if !groth_verify(vk, proof, public_inputs) {{
+        let flattened_public_inputs: List<Int> = list.flat_map(public_inputs, fn(item) {{
+            when item is {{
+              Single(x) -> [x]
+              Many(xs) -> xs
+            }}
+        }})
+
+        if !groth_verify(vk, proof, flattened_public_inputs) {{
           fail
           Void
         }} else {{

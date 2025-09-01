@@ -29,10 +29,10 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
         .lines()
         .collect::<Result<_, _>>()
         .unwrap();
-    let expected_line_replacement = "zk_verify_or_fail(redeemer, [b, 10])";
+    let expected_line_replacement = "zk_verify_or_fail(redeemer, [Single(b), Single(10)])";
     let expected_line_declaration = "fn zk_verify_or_fail(";
     assert!(lines[19].contains(expected_line_replacement));
-    assert!(lines[28].contains(expected_line_declaration));
+    assert!(lines[33].contains(expected_line_declaration));
     assert!(Path::new("verification_key.zkey").exists());
     assert!(Path::new("output.circom").exists());
 
@@ -66,7 +66,7 @@ fn test_user_can_convert_aiken_with_custom_circom_offchain_to_valid_aiken() {
 
     let compilation_result = Command::new("aiken").arg("build").output().unwrap();
     let file = fs::read_to_string(output_path).unwrap();
-    let expected_line_replacement = "zk_verify_or_fail(redeemer, [b, 5])";
+    let expected_line_replacement = "zk_verify_or_fail(redeemer, [Single(b), Single(5)])";
     let expected_line_declaration = "fn zk_verify_or_fail(";
     assert!(file.contains(expected_line_replacement));
     assert!(file.contains(expected_line_declaration));
