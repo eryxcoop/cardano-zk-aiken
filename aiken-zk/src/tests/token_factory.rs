@@ -185,3 +185,23 @@ pub fn assert_eq_token_with_mixed_visibility() -> token_zk::TokenZK {
         },
     }
 }
+
+// ----- SHA256 ----- //
+
+pub fn sha256_token_with_mixed_visibility(n: u32) -> token_zk::TokenZK {
+    token_zk::TokenZK::Offchain {
+        example: ZkExample::Sha256 {
+            n_bits: CircuitTemplateParameter {
+                token: Box::new(int_token(n).unwrap().extract_single().unwrap()),
+            },
+            r#in: InputZK {
+                visibility: InputVisibility::Private,
+                token: None,
+            },
+            out: InputZK {
+                visibility: InputVisibility::Public,
+                token: int_token(n as u32),
+            },
+        },
+    }
+}
