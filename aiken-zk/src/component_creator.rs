@@ -155,6 +155,7 @@ impl ComponentCreator {
             ZkExample::CustomCircom { .. } => {
                 panic!("You shouldn't be here")
             }
+            ZkExample::Sha256 { n_bits, .. } => {"".to_string()}
         }
     }
 

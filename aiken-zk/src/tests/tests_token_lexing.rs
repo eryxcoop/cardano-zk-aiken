@@ -329,6 +329,31 @@ fn test_lexer_translates_assert_eq_parameters_with_mixed_visibility_and_input_ty
 }
 
 #[test]
+fn test_lexer_translates_sha256_parameters() {
+    let program = "offchain sha256(5, pub number_to_hash, pub hashed_number)";
+    let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
+    let offchain_token = &tokens[0].0;
+    assert_eq!(
+        Token::Offchain {
+            example: ZkExample::Sha256 {
+                n_bits: CircuitTemplateParameter {
+                    token: int_token(5).unwrap()
+                },
+                r#in: InputZK {
+                    visibility: InputVisibility::Public,
+                    token: variable_token("number_to_hash")
+                },
+                out: InputZK {
+                    visibility: InputVisibility::Public,
+                    token: variable_token("hashed_number")
+                },
+            }
+        },
+        *offchain_token
+    );
+}
+
+#[test]
 fn test_lexer_translates_custom_circom() {
     let program = r#"offchain custom("path/to/circom/with/main.circom", [a, 5])"#;
     let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();

@@ -123,6 +123,11 @@ pub enum ZkExample {
         lhs: InputZK,
         rhs: InputZK,
     },
+    Sha256 {
+        n_bits: CircuitTemplateParameter,
+        r#in: InputZK,
+        out: InputZK,
+    },
     CustomCircom {
         path: String,
         public_inputs: Vec<Box<Token>>,
@@ -236,6 +241,19 @@ impl ZkExample {
             })
     }
 
+    fn sha256_parser() -> impl Parser<char, Token, Error = ParseError> {
+        just("sha256")
+            .padded()
+            .ignore_then(Self::parameters(3))
+            .map(|args| Token::Offchain {
+                example: ZkExample::Sha256 {
+                    n_bits: CircuitTemplateParameter::from(args[0].clone()),
+                    r#in: InputZK::from(args[1].clone()),
+                    out: InputZK::from(args[2].clone()),
+                },
+            })
+    }
+
     fn custom_circom_parser() -> impl Parser<char, Token, Error = ParseError> {
         let string_literal_parser = just('"')
             .ignore_then(filter(|c| *c != '"').repeated().collect::<String>())
@@ -276,6 +294,7 @@ impl ZkExample {
             Self::fibonacci_parser(),
             Self::if_parser(),
             Self::assert_eq_parser(),
+            Self::sha256_parser(),
             Self::custom_circom_parser(),
         ))
     }
