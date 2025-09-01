@@ -11,6 +11,7 @@ use std::fs;
 use std::io::Error;
 use std::process::Command;
 use chumsky::Parser;
+use clap::builder::Str;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -34,10 +35,10 @@ impl AikenZkCompiler {
         match &offchain_token {
             TokenZK::Offchain {
                 example:
-                    ZkExample::CustomCircom {
-                        path,
-                        public_inputs: public_input,
-                    },
+                ZkExample::CustomCircom {
+                    path,
+                    public_inputs: public_input,
+                },
             } => Self::apply_modifications_to_src_for_custom_token(
                 &aiken_src,
                 random_seeds,
@@ -108,9 +109,14 @@ impl AikenZkCompiler {
         public_input_identifiers: &Vec<String>,
     ) -> String {
         let mut aiken_zk_src = aiken_src.to_string();
+        let public_input_identifiers_wrapped_with_list_characteristics: Vec<String> = public_input_identifiers
+            .iter().map(|identifier| {
+            "Single(".to_string() + identifier + ")"
+        }).collect();
+
         let replacement = format!(
             "zk_verify_or_fail(redeemer, [{}])",
-            public_input_identifiers.join(", ")
+            public_input_identifiers_wrapped_with_list_characteristics.join(", ")
         );
         aiken_zk_src.replace_range(
             offchain_token_span.start..offchain_token_span.end,
@@ -232,39 +238,39 @@ impl AikenZkCompiler {
         match token {
             Token::Offchain {
                 example: ZkExample::Addition { lhs, rhs, res },
-            } => [lhs, rhs, res].into_iter().filter_map(| input| {
+            } => [lhs, rhs, res].into_iter().filter_map(|input| {
                 Self::extract_visibility_from_input(&input)
             }).collect(),
 
             Token::Offchain {
                 example: ZkExample::Subtraction { lhs, rhs, res },
-            } => [lhs, rhs, res].into_iter().filter_map(| input| {
+            } => [lhs, rhs, res].into_iter().filter_map(|input| {
                 Self::extract_visibility_from_input(&input)
             }).collect(),
 
             Token::Offchain {
                 example: ZkExample::Multiplication { lhs, rhs, res },
-            } => [lhs, rhs, res].into_iter().filter_map(| input| {
+            } => [lhs, rhs, res].into_iter().filter_map(|input| {
                 Self::extract_visibility_from_input(&input)
             }).collect(),
 
             Token::Offchain {
                 example:
-                    ZkExample::Fibonacci {
-                        fib_0, fib_1, res, ..
-                    },
+                ZkExample::Fibonacci {
+                    fib_0, fib_1, res, ..
+                },
             } => [fib_0, fib_1, res].into_iter().filter_map(|input| {
                 Self::extract_visibility_from_input(&input)
             }).collect(),
 
             Token::Offchain {
                 example:
-                    ZkExample::If {
-                        condition,
-                        assigned,
-                        true_branch,
-                        false_branch,
-                    },
+                ZkExample::If {
+                    condition,
+                    assigned,
+                    true_branch,
+                    false_branch,
+                },
             } => [condition, assigned, true_branch, false_branch]
                 .into_iter()
                 .filter_map(|input| {

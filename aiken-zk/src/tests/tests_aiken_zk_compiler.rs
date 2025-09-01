@@ -12,7 +12,7 @@ use std::fs;
 fn test_replaces_addition_of_public_variables_by_the_corresponding_function_and_call() {
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(pub a, pub b, pub c)",
-        "zk_verify_or_fail(redeemer, [a, b, c])",
+        "zk_verify_or_fail(redeemer, [Single(a), Single(b), Single(c)])",
         addition_all_public_vk_compressed(),
         3,
     );
@@ -34,7 +34,7 @@ fn test_replaces_addition_of_private_variables_by_the_corresponding_function_and
 fn test_replaces_addition_of_mixed_variables_by_the_corresponding_function_and_call() {
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv, b, pub c)",
-        "zk_verify_or_fail(redeemer, [b, c])",
+        "zk_verify_or_fail(redeemer, [Single(b), Single(c)])",
         addition_mixed_visibility_vk_compressed(),
         2,
     );
@@ -46,7 +46,7 @@ fn test_replaces_addition_of_mixed_variables_and_constants_by_the_corresponding_
 {
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain addition(priv, 4, pub b)",
-        "zk_verify_or_fail(redeemer, [4, b])",
+        "zk_verify_or_fail(redeemer, [Single(4), Single(b)])",
         addition_mixed_visibility_vk_compressed(),
         2,
     );
@@ -58,7 +58,7 @@ fn test_replaces_subtraction_of_mixed_variables_and_constants_by_the_correspondi
  {
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain subtraction(priv, 4, pub b)",
-        "zk_verify_or_fail(redeemer, [4, b])",
+        "zk_verify_or_fail(redeemer, [Single(4), Single(b)])",
         addition_mixed_visibility_vk_compressed(),
         2,
     );
@@ -70,7 +70,7 @@ fn test_replaces_multiplication_of_mixed_variables_and_constants_by_the_correspo
  {
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain multiplication(priv, 4, pub b)",
-        "zk_verify_or_fail(redeemer, [4, b])",
+        "zk_verify_or_fail(redeemer, [Single(4), Single(b)])",
         multiplication_mixed_visibility_vk_compressed(),
         2,
     );
@@ -82,7 +82,7 @@ fn test_replaces_fibonacci_of_mixed_variables_and_constants_by_the_corresponding
 {
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain fibonacci(priv, b, 5, pub c)",
-        "zk_verify_or_fail(redeemer, [b, c])",
+        "zk_verify_or_fail(redeemer, [Single(b), Single(c)])",
         fibonacci_mixed_visibility_vk_compressed(),
         2,
     );
@@ -93,7 +93,7 @@ fn test_replaces_fibonacci_of_mixed_variables_and_constants_by_the_corresponding
 fn test_replaces_if_of_mixed_variables_and_constants_by_the_corresponding_function_and_call() {
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain if(a, b, priv, priv)",
-        "zk_verify_or_fail(redeemer, [a, b])",
+        "zk_verify_or_fail(redeemer, [Single(a), Single(b)])",
         if_mixed_visibility_vk_compressed(),
         2,
     );
@@ -105,7 +105,7 @@ fn test_replaces_assert_eq_of_mixed_variables_and_constants_by_the_corresponding
 {
     assert_compiler_can_replace_keyword_by_the_corresponding_function_and_call(
         "offchain assert_eq(priv, b)",
-        "zk_verify_or_fail(redeemer, [b])",
+        "zk_verify_or_fail(redeemer, [Single(b)])",
         get_compressed_verification_key_from__assert_eq__circuit_with_mixed_visibility(),
         1,
     );
@@ -136,7 +136,7 @@ fn test_replaces_custom_circom_by_the_corresponding_function_and_call() {
 
     let expected_aiken_src = aiken_template_with_body_and_verify_definition(
         import_header(),
-        "zk_verify_or_fail(redeemer, [a, 5])",
+        "zk_verify_or_fail(redeemer, [Single(a), Single(5)])",
         &verify_declaration(2, addition_custom_circom_vk_compressed()),
     );
 
