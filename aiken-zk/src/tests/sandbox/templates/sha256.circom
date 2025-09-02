@@ -305,7 +305,7 @@ template Sha256_2() {
 
 template Sha256(nBits) {
     signal input in[nBits];
-    signal output out[256];
+    signal input out[256];
 
     var i;
     var k;
@@ -375,7 +375,7 @@ template Sha256(nBits) {
     }
 
     for (k=0; k<256; k++) {
-        out[k] <== sha256compression[nBlocks-1].out[k];
+        out[k] === sha256compression[nBlocks-1].out[k];
     }
 
 }

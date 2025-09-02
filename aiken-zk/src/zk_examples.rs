@@ -79,7 +79,7 @@ impl CircuitTemplateParameter {
         let (maybe_input_visibility, maybe_token) = visibility_token;
 
         if maybe_input_visibility.is_some() {
-            panic!("");
+            panic!("A circuit template parameter cannot have visibility");
         }
 
         Self {

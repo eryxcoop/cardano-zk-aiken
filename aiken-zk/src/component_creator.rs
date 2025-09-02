@@ -1,5 +1,5 @@
 use crate::compiler::token_zk::TokenZK as Token;
-use crate::zk_examples::{InputVisibility, InputZK, TokenWithCardinality, ZkExample};
+use crate::zk_examples::{InputVisibility, InputZK, ZkExample};
 
 pub struct ComponentCreator {
     pub token: Token,
