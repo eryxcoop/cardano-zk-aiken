@@ -164,13 +164,27 @@ impl ComponentCreator {
                     Self::process_inputs_visibility(inputs_to_identifiers);
                 Self::generate_circom_component(
                     Self::USED_CIRCOM_VERSION,
-                    "sha256",
+                    "hash",
                     "Sha256",
                     public_inputs_identifiers,
                     &[&value],
                 )
             },
-            &ZkExample::Poseidon { .. } => todo!()
+            ZkExample::Poseidon { n_inputs, r#in, out } => {
+                let Token::Int { value, base: _ } = *n_inputs.token.clone() else {
+                    panic!("Not expected kind of token")
+                };
+                let inputs_to_identifiers = [(r#in, "in"), (out, "out")];
+                let public_inputs_identifiers =
+                    Self::process_inputs_visibility(inputs_to_identifiers);
+                Self::generate_circom_component(
+                    Self::USED_CIRCOM_VERSION,
+                    "hash",
+                    "Poseidon",
+                    public_inputs_identifiers,
+                    &[&value],
+                )
+            }
         }
     }
 

@@ -205,3 +205,23 @@ pub fn sha256_token_with_mixed_visibility(n: u32) -> token_zk::TokenZK {
         },
     }
 }
+
+// ----- POSEIDON ----- //
+
+pub fn poseidon_token_with_mixed_visibility(n: u32) -> token_zk::TokenZK {
+    token_zk::TokenZK::Offchain {
+        example: ZkExample::Poseidon {
+            n_inputs: CircuitTemplateParameter {
+                token: Box::new(int_token(n).unwrap().extract_single().unwrap()),
+            },
+            r#in: InputZK {
+                visibility: InputVisibility::Private,
+                token: None,
+            },
+            out: InputZK {
+                visibility: InputVisibility::Public,
+                token: int_token(n as u32),
+            },
+        },
+    }
+}

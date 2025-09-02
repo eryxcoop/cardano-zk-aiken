@@ -1,5 +1,5 @@
 use crate::component_creator::ComponentCreator;
-use crate::tests::token_factory::{addition_token_with_all_private_inputs, addition_token_with_mixed_visibility, addition_token_with_public_inputs, assert_eq_token_with_mixed_visibility, fibonacci_token_with_mixed_visibility, if_token_with_mixed_visibility, multiplication_token_with_mixed_visibility, sha256_token_with_mixed_visibility, subtraction_token_with_mixed_visibility};
+use crate::tests::token_factory::{addition_token_with_all_private_inputs, addition_token_with_mixed_visibility, addition_token_with_public_inputs, assert_eq_token_with_mixed_visibility, fibonacci_token_with_mixed_visibility, if_token_with_mixed_visibility, multiplication_token_with_mixed_visibility, poseidon_token_with_mixed_visibility, sha256_token_with_mixed_visibility, subtraction_token_with_mixed_visibility};
 
 #[test]
 fn test_circom_version_should_be_2_1_9() {
@@ -109,7 +109,19 @@ fn test_component_creator_can_create_sha256_component_with_mixed_visibilities() 
     let token = sha256_token_with_mixed_visibility(5);
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"pragma circom 2.1.9;
-include "templates/sha256.circom";
+include "templates/hash.circom";
 component main { public [out] } = Sha256(5);"#;
+    assert_eq!(expected_program, component_creator.create())
+}
+
+// ----------- POSEIDON ----------- //
+
+#[test]
+fn test_component_creator_can_create_poseidon_component() {
+    let token = poseidon_token_with_mixed_visibility(5);
+    let component_creator = ComponentCreator::from_token(token);
+    let expected_program = r#"pragma circom 2.1.9;
+include "templates/hash.circom";
+component main { public [out] } = Poseidon(5);"#;
     assert_eq!(expected_program, component_creator.create())
 }
