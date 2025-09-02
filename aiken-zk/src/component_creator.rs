@@ -169,7 +169,8 @@ impl ComponentCreator {
                     public_inputs_identifiers,
                     &[&value],
                 )
-            }
+            },
+            &ZkExample::Poseidon { .. } => todo!()
         }
     }
 

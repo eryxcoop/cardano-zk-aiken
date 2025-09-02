@@ -4,12 +4,12 @@ use std::fmt::Formatter;
 
 use crate::compiler::parsers::int_parser;
 use crate::compiler::token_zk::{TokenZK as Token, TokenZK};
+use crate::zk_examples::TokenWithCardinality::{Multiple, Single};
 use aiken_lang::parser::error::ParseError;
 use chumsky::{
     Parser,
     prelude::{choice, just},
 };
-use crate::zk_examples::TokenWithCardinality::{Multiple, Single};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum InputVisibility {
@@ -31,7 +31,7 @@ impl InputVisibility {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum TokenWithCardinality {
     Single(Token),
-    Multiple(Vec<Token>)
+    Multiple(Vec<Token>),
 }
 
 impl fmt::Display for TokenWithCardinality {
@@ -62,12 +62,10 @@ impl TokenWithCardinality {
     pub fn extract_single(&self) -> Option<TokenZK> {
         match self {
             Single(token) => Some(token.clone()),
-            Multiple(_) => None
+            Multiple(_) => None,
         }
     }
 }
-
-
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CircuitTemplateParameter {
@@ -109,7 +107,9 @@ impl InputZK {
 
                 Self {
                     visibility: InputVisibility::Public,
-                    token: Some(Box::new(TokenWithCardinality::new_single(maybe_cardinality_token.unwrap()))),
+                    token: Some(Box::new(TokenWithCardinality::new_single(
+                        maybe_cardinality_token.unwrap(),
+                    ))),
                 }
             }
             Some(InputVisibility::Private) => {
@@ -173,6 +173,11 @@ pub enum ZkExample {
     CustomCircom {
         path: String,
         public_inputs: Vec<Box<TokenWithCardinality>>,
+    },
+    Poseidon {
+        n_inputs: CircuitTemplateParameter,
+        r#in: InputZK,
+        out: InputZK,
     },
 }
 
@@ -296,6 +301,19 @@ impl ZkExample {
             })
     }
 
+    fn poseidon_parser() -> impl Parser<char, Token, Error = ParseError> {
+        just("poseidon")
+            .padded()
+            .ignore_then(Self::parameters(3))
+            .map(|args| Token::Offchain {
+                example: ZkExample::Poseidon {
+                    n_inputs: CircuitTemplateParameter::from(args[0].clone()),
+                    r#in: InputZK::from(args[1].clone()),
+                    out: InputZK::from(args[2].clone()),
+                },
+            })
+    }
+
     fn custom_circom_parser() -> impl Parser<char, Token, Error = ParseError> {
         let string_literal_parser = just('"')
             .ignore_then(filter(|c| *c != '"').repeated().collect::<String>())
@@ -337,6 +355,7 @@ impl ZkExample {
             Self::if_parser(),
             Self::assert_eq_parser(),
             Self::sha256_parser(),
+            Self::poseidon_parser(),
             Self::custom_circom_parser(),
         ))
     }
