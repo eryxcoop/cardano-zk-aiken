@@ -1,7 +1,7 @@
 use crate::circom_circuit::CircomCircuit;
+use crate::compiler::BUILD_DIR;
 use crate::compiler::lexer::{LexInfo, Lexer};
 use crate::compiler::token_zk::{TokenZK as Token, TokenZK};
-use crate::compiler::BUILD_DIR;
 use crate::component_creator::ComponentCreator;
 use crate::zk_examples::{InputVisibility, InputZK, TokenWithCardinality, ZkExample};
 use aiken_lang::ast::Span;
@@ -119,6 +119,20 @@ impl AikenZkCompiler {
             } => public_input_identifiers
                 .iter()
                 .map(|identifier| "Many(".to_string() + identifier + ")")
+                .collect(),
+            ZkExample::Poseidon {
+                n_inputs: _,
+                r#in: _,
+                out: _,
+            } => public_input_identifiers
+                .iter()
+                .map(|identifier| {
+                    match identifier.as_str() {
+                        "in" => "Many(".to_string() + identifier + ")",
+                        "out" => "Single(".to_string() + identifier + ")",
+                        _ => panic!("Invalid Poseidon identifier")
+                    }
+                })
                 .collect(),
             _ => public_input_identifiers
                 .iter()
@@ -329,6 +343,13 @@ impl AikenZkCompiler {
 
             Token::Offchain {
                 example: ZkExample::Sha256 { r#in, out, .. },
+            } => [r#in, out]
+                .iter()
+                .filter_map(|input| Self::extract_visibility_from_input(&input))
+                .collect(),
+
+            Token::Offchain {
+                example: ZkExample::Poseidon { r#in, out, .. },
             } => [r#in, out]
                 .iter()
                 .filter_map(|input| Self::extract_visibility_from_input(&input))
