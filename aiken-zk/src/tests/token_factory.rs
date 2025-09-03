@@ -225,3 +225,32 @@ pub fn poseidon_token_with_mixed_visibility(n: u32) -> token_zk::TokenZK {
         },
     }
 }
+
+// ----- MERKLE_TREE_CHECKER ----- //
+
+pub fn merkle_tree_checker_token_with_mixed_visibility(n: u32) -> token_zk::TokenZK {
+    token_zk::TokenZK::Offchain {
+        example: ZkExample::MerkleTreeChecker {
+
+            levels: CircuitTemplateParameter {
+                token: Box::new(int_token(n).unwrap().extract_single().unwrap())
+            },
+            leaf: InputZK {
+                visibility: InputVisibility::Private,
+                token: None
+            },
+            root: InputZK {
+                visibility: InputVisibility::Public,
+                token: variable_token("root")
+            },
+            path_elements: InputZK {
+                visibility: InputVisibility::Private,
+                token: None
+            },
+            path_indices: InputZK {
+                visibility: InputVisibility::Private,
+                token: None
+            }
+        }
+    }
+}

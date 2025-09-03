@@ -185,7 +185,27 @@ impl ComponentCreator {
                     &[&value],
                 )
             }
-            ZkExample::MerkleTreeChecker { levels ,.. } => {"".to_string()}
+            ZkExample::MerkleTreeChecker {
+                levels,
+                leaf,
+                root,
+                path_elements,
+                path_indices,
+            } => {
+                let Token::Int { value, base: _ } = *levels.token.clone() else {
+                    panic!("Not expected kind of token")
+                };
+                let inputs_to_identifiers = [(leaf, "leaf"), (root, "root"), (path_elements, "path_elements"), (path_indices, "path_indices")];
+                let public_inputs_identifiers =
+                    Self::process_inputs_visibility(inputs_to_identifiers);
+                Self::generate_circom_component(
+                    Self::USED_CIRCOM_VERSION,
+                    "merkle_tree_checker",
+                    "MerkleTreeChecker",
+                    public_inputs_identifiers,
+                    &[&value],
+                )
+            }
         }
     }
 
