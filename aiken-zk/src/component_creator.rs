@@ -185,6 +185,7 @@ impl ComponentCreator {
                     &[&value],
                 )
             }
+            ZkExample::MerkleTreeChecker { levels ,.. } => {"".to_string()}
         }
     }
 

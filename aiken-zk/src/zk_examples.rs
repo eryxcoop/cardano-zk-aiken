@@ -179,6 +179,13 @@ pub enum ZkExample {
         r#in: InputZK,
         out: InputZK,
     },
+    MerkleTreeChecker {
+        levels: CircuitTemplateParameter,
+        leaf: InputZK,
+        root: InputZK,
+        path_elements: InputZK,
+        path_indices: InputZK,
+    },
 }
 
 impl ZkExample {
@@ -314,6 +321,21 @@ impl ZkExample {
             })
     }
 
+    fn merkle_tree_checker_parser() -> impl Parser<char, Token, Error = ParseError> {
+        just("merkle_tree_checker")
+            .padded()
+            .ignore_then(Self::parameters(5))
+            .map(|args| Token::Offchain {
+                example: ZkExample::MerkleTreeChecker {
+                    levels: CircuitTemplateParameter::from(args[0].clone()),
+                    leaf: InputZK::from(args[1].clone()),
+                    root: InputZK::from(args[2].clone()),
+                    path_elements: InputZK::from(args[3].clone()),
+                    path_indices: InputZK::from(args[4].clone()),
+                },
+            })
+    }
+
     fn custom_circom_parser() -> impl Parser<char, Token, Error = ParseError> {
         let string_literal_parser = just('"')
             .ignore_then(filter(|c| *c != '"').repeated().collect::<String>())
@@ -356,6 +378,7 @@ impl ZkExample {
             Self::assert_eq_parser(),
             Self::sha256_parser(),
             Self::poseidon_parser(),
+            Self::merkle_tree_checker_parser(),
             Self::custom_circom_parser(),
         ))
     }

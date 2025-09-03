@@ -328,6 +328,8 @@ fn test_lexer_translates_assert_eq_parameters_with_mixed_visibility_and_input_ty
     );
 }
 
+// --------- Poseidon --------- //
+
 #[test]
 fn test_lexer_translates_poseidon_parameters() {
     let program = "offchain poseidon(5, pub number_to_hash, pub hashed_number)";
@@ -353,6 +355,8 @@ fn test_lexer_translates_poseidon_parameters() {
     );
 }
 
+// --------- Sha256 --------- //
+
 #[test]
 fn test_lexer_translates_sha256_parameters() {
     let program = "offchain sha256(5, pub number_to_hash, pub hashed_number)";
@@ -377,6 +381,44 @@ fn test_lexer_translates_sha256_parameters() {
         *offchain_token
     );
 }
+
+// --------- MerkleTreeChecker --------- //
+
+#[test]
+fn test_lexer_translates_merkle_tree_checker_parameters() {
+    let program = "offchain merkle_tree_checker(3, priv, pub root, priv, priv)";
+    let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
+    let offchain_token = &tokens[0].0;
+    assert_eq!(
+        Token::Offchain {
+            example: ZkExample::MerkleTreeChecker {
+
+                levels: CircuitTemplateParameter {
+                    token: Box::new(int_token(3).unwrap().extract_single().unwrap())
+                },
+                leaf: InputZK {
+                    visibility: InputVisibility::Private,
+                    token: None
+                },
+                root: InputZK {
+                    visibility: InputVisibility::Public,
+                    token: variable_token("root")
+                },
+                path_elements: InputZK {
+                    visibility: InputVisibility::Private,
+                    token: None
+                },
+                path_indices: InputZK {
+                    visibility: InputVisibility::Private,
+                    token: None
+                }
+            }
+        },
+        *offchain_token
+    );
+}
+
+// --------- Custom --------- //
 
 #[test]
 fn test_lexer_translates_custom_circom() {
