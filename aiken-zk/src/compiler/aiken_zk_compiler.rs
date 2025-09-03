@@ -134,6 +134,24 @@ impl AikenZkCompiler {
                     }
                 })
                 .collect(),
+            ZkExample::MerkleTreeChecker {
+                levels: _,
+                leaf: _,
+                root: _,
+                path_elements: _,
+                path_indices: _,
+            } => public_input_identifiers
+                .iter()
+                .map(|identifier| {
+                    match identifier.as_str() {
+                        "leaf" => "Single(".to_string() + identifier + ")",
+                        "root" => "Single(".to_string() + identifier + ")",
+                        "path_elements" => "Many(".to_string() + identifier + ")",
+                        "path_indices" => "Many(".to_string() + identifier + ")",
+                        _ => panic!("Invalid Poseidon identifier")
+                    }
+                })
+                .collect(),
             _ => public_input_identifiers
                 .iter()
                 .map(|identifier| "Single(".to_string() + identifier + ")")
@@ -351,6 +369,13 @@ impl AikenZkCompiler {
             Token::Offchain {
                 example: ZkExample::Poseidon { r#in, out, .. },
             } => [r#in, out]
+                .iter()
+                .filter_map(|input| Self::extract_visibility_from_input(&input))
+                .collect(),
+
+            Token::Offchain {
+                example: ZkExample::MerkleTreeChecker { leaf, root, path_elements, path_indices, .. },
+            } => [leaf, root, path_elements, path_indices]
                 .iter()
                 .filter_map(|input| Self::extract_visibility_from_input(&input))
                 .collect(),
