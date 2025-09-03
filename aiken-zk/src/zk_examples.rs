@@ -82,7 +82,7 @@ impl CircuitTemplateParameter {
 
         Self {
             token: match maybe_token {
-                None => panic!(""),
+                None => panic!("Expected circuit template parameter but the parameter provided is empty"),
                 Some(token) => Box::new(token),
             },
         }
