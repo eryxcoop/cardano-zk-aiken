@@ -25,7 +25,7 @@ dependencies needed for meshJS deployment.
 First, run the following command:
 
 ```shell
-cargo run -- build validators_with_offchain/example.ak validators/output.ak
+cargo run -- build validators_with_offchain/example_fibonacci.ak validators/output.ak
 ```
 
 The command will generate a modified aiken file in ```validators/output.ak```. This is the final source code, over which
