@@ -18,9 +18,9 @@ First, enter the subdirectory ```curve_compress``` and run ```npm install```. Th
 Then go back and enter the subdirectory ```deployment``` and run another ```npm install```. This installs the
 dependencies needed for meshJS deployment.
 
-## Steps
+## Running the fibonacci example (simple token)
 
-### Conversion to Aiken
+### Conversion to compilable Aiken
 
 First, run the following command:
 
@@ -35,13 +35,14 @@ The generated source code includes a test that missing a valid proof to success.
 trying an ```aiken check``` at this point will fail.
 
 ### Generate proof
-The fibonacci parameters used to generate the proof are in the input.json file:
+
+The fibonacci parameters used to generate the proof are in the input_fibonacci.json file:
 
 ```json
 {
-  "a": 2,
-  "b": 3,
-  "c": 13
+  "a": "2",
+  "b": "3",
+  "c": "13"
 }
 ```
 
@@ -52,7 +53,7 @@ This means `a = fibonacci(1) = 2`, `b = fibonacci(2) = 3`, then `c = fibonacci(5
 Execute the following command to generate a proof ready to use in the mentioned Aiken test:
 
 ```shell
-cargo run -- prove aiken output.circom verification_key.zkey inputs.json proof.ak
+cargo run -- prove aiken output.circom verification_key.zkey inputs_fibonacci.json proof.ak
 ```
 
 The ```proof.ak``` file will look like:
@@ -118,22 +119,22 @@ aiken build
 Then, enter the subdirectory ```deployment``` and run:
 
 ```shell
-npx tsx lock.ts
+npx tsx lock_fibonacci.ts
 ```
 
 This will output the transaction hash, save it for the next step.
 
-Now, it's time to unlock. For this task we provide the ```unlock.ts``` file, but it lacks the proof on the redeemer yet.
+Now, it's time to unlock. For this task we provide the ```unlock_fibonacci.ts``` file, but it lacks the proof on the redeemer yet.
 
 To generate this proof, you can use the aiken-zk tool.
 
 To accomplish this task, go back and run:
 
 ```shell
-cargo run -- prove meshjs output.circom verification_key.zkey inputs.json deployment/zk_redeemer.ts
+cargo run -- prove meshjs output.circom verification_key.zkey inputs_fibonacci.json deployment/zk_redeemer.ts
 ```
 
-Go to ```deployment/unlock.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
+Go to ```deployment/unlock_fibonacci.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
 
 ```javascript
  import {mZKRedeemer} from "./zk_redeemer";
@@ -150,14 +151,92 @@ This function will wrap your redeemer with additional information about the proo
 
 Now you have all you need to deploy the script into the blockchain.
 
-Finally, to unlock the contract run the following command. Replace `lockTxHash` with the hash that you copied in the lock step:
+Finally, to unlock the contract run the following command. Replace `lockTxHash` with the hash that you copied in the
+lock step:
 
 ```shell
-npx tsx unlock.ts lockTxHash
+npx tsx unlock_fibonacci.ts lockTxHash
 ```
 
 Now you can program, deploy and spend a validator with offchain capabilities!
 
 For more information, read the README.
 
+## Running the sha256 example (complex token)
 
+For this tutorial we assume you have run the fibonacci example.
+
+### Conversion to compilable Aiken
+
+Run the following command:
+
+```shell
+cargo run -- build validators_with_offchain/example_sha256.ak validators/output.ak
+```
+
+The compilable aiken file is in ```validators/output.ak```.
+
+### Generate proof
+
+The sha256 parameters used to generate the proof are in the input_sha256.json file:
+
+```json
+{
+  "in": ["0","0", ... ,"1"],
+  "out": ["1","0", ... , "0","1"]
+}
+```
+
+This means `sha256("Coffe") = "0xBFB424E48235A63C27A22610243DC4E0B217B0B604358A93072E1FBA35637435"`.
+
+#### Aiken testing
+
+Execute the following command to generate the proof to use in the Aiken test:
+
+```shell
+cargo run -- prove aiken output.circom verification_key.zkey inputs_sha256.json proof.ak
+```
+
+You could use the generated proof ```proof.ak``` on the Aiken test. Then, running an ```aiken check``` should execute
+successfully.
+
+#### MeshJS unlocking
+
+Compile the Aiken code with:
+
+```shell
+aiken build
+```
+
+Then, enter the subdirectory ```deployment``` and run:
+
+```shell
+npx tsx lock_sha256.ts
+```
+
+Save the output transaction hash for the next step.
+
+Time to unlock. Run the following command to generate the typescript library that contains the proof:
+
+```shell
+cargo run -- prove meshjs output.circom verification_key.zkey inputs_sha256.json deployment/zk_redeemer.ts
+```
+
+Go to ```deployment/unlock_sha256.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
+
+```javascript
+ import {mZKRedeemer} from "./zk_redeemer";
+```
+
+Use the exported function to wrap the redeemer. The spend should look like:
+
+```javascript
+await contract.spend(validatorScriptIndex, txHashFromDeposit, mZKRedeemer(mVoid()))
+```
+
+Finally, unlock the contract running the following command. Replace `lockTxHash` with the hash that you copied in the
+lock step:
+
+```shell
+npx tsx unlock_sha256.ts lockTxHash
+```
