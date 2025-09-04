@@ -72,28 +72,37 @@ the ```./start.sh``` command. To run the tests:
 ## Offchain statement
 
 It extends the Aiken language with a new ```offchain``` keyword. This means that a programmer can write an Aiken
-source code with **one** of the following new language tokens in the validator body:
+source code with **one** of the tokens presented below.
 
+### Parameters convention
+* ```x```, ```y```, ```z```, ```w```: integer literal, integer variable name 
+* ```t```: integer literal
+* ```A```, ```B```: list variable name
+
+#### Types description
+* **integer literal** such as ```4``` or ```0xa3```.
+* **integer variable name** such as ```my_number```.
+* **list variable name** such as ```my_list```. It cannot be a list literal as ```[1,2]```. 
+
+
+### Supported tokens
 * ```offchain addition(x, y, z)```: verifies that ```x + y == z```.
 * ```offchain subtraction(x, y, z)```: verifies that ```x - y == z```.
 * ```offchain multiplication(x, y, z)```: verifies that ```x * y == z```.
-* ```offchain fibonacci(x, y, z, w)```: verifies that the fibonacci sequence with initial values ```[x,y]``` and ```z```
-  elements ends with ```w```. In this case, ```z``` **must** be a literal number.
+* ```offchain fibonacci(x, y, t, z)```: verifies that the fibonacci sequence with initial values ```[x,y]``` and ```t```
+  elements ends with ```z```. In this case, ```t``` **must** be a literal number.
 * ```offchain if(x, y, z, w)```: verifies that ```y == z if (x == 1) | y == w if (x == 0)```. ```x``` must be 1 or 0.
 * ```offchain assert_eq(x, y)```: verifies that ```x == y```
-
-```x```,```y```,```z``` and ```w``` must be
-
-* **numeric literals** such as ```4``` or ```0xa3```.
-* **single variable names** such as ```my_number```.
+* ```offchain sha256(t, A, B)```: verifies that $sha256(A) = B$ with $size(A) = t$ and $size(B) = 256$. A and B being lists of **bits**.
+* ```offchain poseidon(t, A, x)```: verifies that $poseidon(A) = x$ with $size(A) = t$ and A being a list of integers and x being an integer. 
 
 ### Public and private parameters
 
 This new addition to the language allows you to declare some of the arguments as private. Some examples are:
 
-* offchain addition(priv, pub y, z)
-* offchain addition(priv, priv, priv)
-* offchain assert_eq(priv, y)
+* ```offchain addition(priv, pub y, z)```
+* ```offchain addition(priv, priv, priv)```
+* ```offchain assert_eq(priv, y)```
 
 Any visibility combination is possible. If the visibility modifier is not present, the argument is assumed to be
 **public**.
