@@ -143,12 +143,13 @@ impl AikenZkCompiler {
             } => public_input_identifiers
                 .iter()
                 .map(|identifier| {
-                    match identifier.as_str() {
+                    let str_identifier = identifier.as_str();
+                    match  str_identifier {
                         "leaf" => "Single(".to_string() + identifier + ")",
                         "root" => "Single(".to_string() + identifier + ")",
-                        "path_elements" => "Many(".to_string() + identifier + ")",
-                        "path_indices" => "Many(".to_string() + identifier + ")",
-                        _ => panic!("Invalid Poseidon identifier")
+                        "pathElements" => "Many(".to_string() + identifier + ")",
+                        "pathIndices" => "Many(".to_string() + identifier + ")",
+                        _ => panic!("Invalid MerkleTreeChecker identifier")
                     }
                 })
                 .collect(),
