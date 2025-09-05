@@ -169,8 +169,12 @@ impl ComponentCreator {
                     public_inputs_identifiers,
                     &[&value],
                 )
-            },
-            ZkExample::Poseidon { n_inputs, r#in, out } => {
+            }
+            ZkExample::Poseidon {
+                n_inputs,
+                r#in,
+                out,
+            } => {
                 let Token::Int { value, base: _ } = *n_inputs.token.clone() else {
                     panic!("Not expected kind of token")
                 };
@@ -195,7 +199,12 @@ impl ComponentCreator {
                 let Token::Int { value, base: _ } = *levels.token.clone() else {
                     panic!("Not expected kind of token")
                 };
-                let inputs_to_identifiers = [(leaf, "leaf"), (root, "root"), (path_elements, "pathElements"), (path_indices, "pathIndices")];
+                let inputs_to_identifiers = [
+                    (leaf, "leaf"),
+                    (root, "root"),
+                    (path_elements, "pathElements"),
+                    (path_indices, "pathIndices"),
+                ];
                 let public_inputs_identifiers =
                     Self::process_inputs_visibility(inputs_to_identifiers);
                 Self::generate_circom_component(

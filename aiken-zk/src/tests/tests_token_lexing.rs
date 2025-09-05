@@ -392,7 +392,6 @@ fn test_lexer_translates_merkle_tree_checker_parameters() {
     assert_eq!(
         Token::Offchain {
             example: ZkExample::MerkleTreeChecker {
-
                 levels: CircuitTemplateParameter {
                     token: Box::new(int_token(3).unwrap().extract_single().unwrap())
                 },

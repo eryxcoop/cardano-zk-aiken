@@ -127,12 +127,10 @@ impl AikenZkCompiler {
             } => public_input_identifiers
                 .iter()
                 .enumerate()
-                .map(|(i,identifier)| {
-                    match i {
-                        0 => "Many(".to_string() + identifier + ")",
-                        1 => "Single(".to_string() + identifier + ")",
-                        _ => panic!("Invalid MerkleTreeChecker identifier")
-                    }
+                .map(|(i, identifier)| match i {
+                    0 => "Many(".to_string() + identifier + ")",
+                    1 => "Single(".to_string() + identifier + ")",
+                    _ => panic!("Invalid MerkleTreeChecker identifier"),
                 })
                 .collect(),
             ZkExample::MerkleTreeChecker {
@@ -144,12 +142,10 @@ impl AikenZkCompiler {
             } => public_input_identifiers
                 .iter()
                 .enumerate()
-                .map(|(i,identifier)| {
-                    match i {
-                        0..=1 => "Single(".to_string() + identifier + ")",
-                        2..=3 => "Many(".to_string() + identifier + ")",
-                        _ => panic!("Invalid MerkleTreeChecker identifier")
-                    }
+                .map(|(i, identifier)| match i {
+                    0..=1 => "Single(".to_string() + identifier + ")",
+                    2..=3 => "Many(".to_string() + identifier + ")",
+                    _ => panic!("Invalid MerkleTreeChecker identifier"),
                 })
                 .collect(),
             _ => public_input_identifiers
@@ -374,7 +370,14 @@ impl AikenZkCompiler {
                 .collect(),
 
             Token::Offchain {
-                example: ZkExample::MerkleTreeChecker { leaf, root, path_elements, path_indices, .. },
+                example:
+                    ZkExample::MerkleTreeChecker {
+                        leaf,
+                        root,
+                        path_elements,
+                        path_indices,
+                        ..
+                    },
             } => [leaf, root, path_elements, path_indices]
                 .iter()
                 .filter_map(|input| Self::extract_visibility_from_input(&input))

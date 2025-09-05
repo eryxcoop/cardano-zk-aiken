@@ -1,15 +1,17 @@
 use crate::compiler::token_zk;
-use crate::zk_examples::{CircuitTemplateParameter, InputVisibility, InputZK, TokenWithCardinality, ZkExample};
+use crate::zk_examples::{
+    CircuitTemplateParameter, InputVisibility, InputZK, TokenWithCardinality, ZkExample,
+};
 use aiken_lang::parser::token::Base;
 
 pub fn int_token(n: u32) -> Option<Box<TokenWithCardinality>> {
     Some(Box::new(TokenWithCardinality::Single(
-                  token_zk::TokenZK::Int {
-                    value: n.to_string(),
-                    base: Base::Decimal {
-                        numeric_underscore: false,
-                    },
-                  }
+        token_zk::TokenZK::Int {
+            value: n.to_string(),
+            base: Base::Decimal {
+                numeric_underscore: false,
+            },
+        },
     )))
 }
 
@@ -17,7 +19,7 @@ pub fn variable_token(s: &str) -> Option<Box<TokenWithCardinality>> {
     Some(Box::new(TokenWithCardinality::Single(
         token_zk::TokenZK::Name {
             name: s.to_string(),
-        }
+        },
     )))
 }
 
@@ -134,7 +136,7 @@ pub fn fibonacci_token_with_mixed_visibility(n: usize) -> token_zk::TokenZK {
                 token: None,
             },
             n: CircuitTemplateParameter {
-                token: Box::new(int_token(n as u32).unwrap().extract_single().unwrap())
+                token: Box::new(int_token(n as u32).unwrap().extract_single().unwrap()),
             },
             res: InputZK {
                 visibility: InputVisibility::Public,
@@ -231,26 +233,25 @@ pub fn poseidon_token_with_mixed_visibility(n: u32) -> token_zk::TokenZK {
 pub fn merkle_tree_checker_token_with_mixed_visibility(n: u32) -> token_zk::TokenZK {
     token_zk::TokenZK::Offchain {
         example: ZkExample::MerkleTreeChecker {
-
             levels: CircuitTemplateParameter {
-                token: Box::new(int_token(n).unwrap().extract_single().unwrap())
+                token: Box::new(int_token(n).unwrap().extract_single().unwrap()),
             },
             leaf: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("leaf")
+                token: variable_token("leaf"),
             },
             root: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("root")
+                token: variable_token("root"),
             },
             path_elements: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("pathElements")
+                token: variable_token("pathElements"),
             },
             path_indices: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("pathIndices")
-            }
-        }
+                token: variable_token("pathIndices"),
+            },
+        },
     }
 }
