@@ -126,11 +126,12 @@ impl AikenZkCompiler {
                 out: _,
             } => public_input_identifiers
                 .iter()
-                .map(|identifier| {
-                    match identifier.as_str() {
-                        "in" => "Many(".to_string() + identifier + ")",
-                        "out" => "Single(".to_string() + identifier + ")",
-                        _ => panic!("Invalid Poseidon identifier")
+                .enumerate()
+                .map(|(i,identifier)| {
+                    match i {
+                        0 => "Many(".to_string() + identifier + ")",
+                        1 => "Single(".to_string() + identifier + ")",
+                        _ => panic!("Invalid MerkleTreeChecker identifier")
                     }
                 })
                 .collect(),
@@ -142,13 +143,11 @@ impl AikenZkCompiler {
                 path_indices: _,
             } => public_input_identifiers
                 .iter()
-                .map(|identifier| {
-                    let str_identifier = identifier.as_str();
-                    match  str_identifier {
-                        "leaf" => "Single(".to_string() + identifier + ")",
-                        "root" => "Single(".to_string() + identifier + ")",
-                        "pathElements" => "Many(".to_string() + identifier + ")",
-                        "pathIndices" => "Many(".to_string() + identifier + ")",
+                .enumerate()
+                .map(|(i,identifier)| {
+                    match i {
+                        0..=1 => "Single(".to_string() + identifier + ")",
+                        2..=3 => "Many(".to_string() + identifier + ")",
                         _ => panic!("Invalid MerkleTreeChecker identifier")
                     }
                 })
