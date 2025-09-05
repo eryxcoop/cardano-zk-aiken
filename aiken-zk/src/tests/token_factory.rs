@@ -236,20 +236,20 @@ pub fn merkle_tree_checker_token_with_mixed_visibility(n: u32) -> token_zk::Toke
                 token: Box::new(int_token(n).unwrap().extract_single().unwrap())
             },
             leaf: InputZK {
-                visibility: InputVisibility::Private,
-                token: None
+                visibility: InputVisibility::Public,
+                token: variable_token("leaf")
             },
             root: InputZK {
                 visibility: InputVisibility::Public,
                 token: variable_token("root")
             },
             path_elements: InputZK {
-                visibility: InputVisibility::Private,
-                token: None
+                visibility: InputVisibility::Public,
+                token: variable_token("pathElements")
             },
             path_indices: InputZK {
-                visibility: InputVisibility::Private,
-                token: None
+                visibility: InputVisibility::Public,
+                token: variable_token("pathIndices")
             }
         }
     }

@@ -146,6 +146,6 @@ fn test_component_creator_can_create_merkle_tree_checker_component() {
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"pragma circom 2.1.9;
 include "templates/merkle_tree_checker.circom";
-component main { public [root] } = MerkleTreeChecker(3);"#;
+component main { public [leaf,root,pathElements,pathIndices] } = MerkleTreeChecker(3);"#;
     assert_eq!(expected_program, component_creator.create())
 }
