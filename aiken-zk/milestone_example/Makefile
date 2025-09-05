@@ -1,3 +1,3 @@
 clean:
 	rm -r build/
-	rm output.circom verification_key.zkey validators/output*.ak proof*.ak aiken.lock
+	rm output.circom verification_key.zkey validators/output*.ak proof*.ak aiken.lock plutus.json

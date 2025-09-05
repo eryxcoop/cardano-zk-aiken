@@ -183,7 +183,7 @@ The sha256 parameters used to generate the proof are in the input_sha256.json fi
 ```json
 {
   "in": ["0","0", ... ,"1"],
-  "out": ["1","0", ... , "0","1"]
+  "out": ["0xBFB424E48235A63C27A22610243DC4E0", "0xB217B0B604358A93072E1FBA35637435"]
 }
 ```
 

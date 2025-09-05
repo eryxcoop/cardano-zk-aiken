@@ -300,12 +300,33 @@ template Sha256_2() {
 }
 
 
+template Converter256BitsTo2FieldElements() {
+    signal input in[256];
+    signal output mostSignificant;
+    signal output leastSignificant;
 
+    signal mostSignificantAccumulator[128];
+    mostSignificantAccumulator[0] <== in[0];
+
+    var k;
+    for (k=1; k < 128; k++) {
+        mostSignificantAccumulator[k] <== (2 * mostSignificantAccumulator[k-1]) + in[k];
+    }
+
+    signal leastSignificantAccumulator[128];
+    leastSignificantAccumulator[0] <== in[128];
+    for (k=1; k < 128; k++) {
+        leastSignificantAccumulator[k] <== (2 * leastSignificantAccumulator[k-1]) + in[k+128];
+    }
+
+    mostSignificant <== mostSignificantAccumulator[127];
+    leastSignificant <== leastSignificantAccumulator[127];
+}
 
 
 template Sha256(nBits) {
     signal input in[nBits];
-    signal input out[256];
+    signal input out[2];
 
     var i;
     var k;
@@ -374,10 +395,10 @@ template Sha256(nBits) {
         }
     }
 
-    for (k=0; k<256; k++) {
-        out[k] === sha256compression[nBlocks-1].out[k];
-    }
-
+    component converter = Converter256BitsTo2FieldElements();
+    converter.in <== sha256compression[nBlocks-1].out;
+    out[0] === converter.mostSignificant;
+    out[1] === converter.leastSignificant;
 }
 /*
     Copyright 2018 0KIMS association.
