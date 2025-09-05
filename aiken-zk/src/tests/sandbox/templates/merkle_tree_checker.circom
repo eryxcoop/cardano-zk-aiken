@@ -318,12 +318,12 @@ template DualMux() {
 }
 
 // Verifies that merkle proof is correct for given merkle root and a leaf
-// path_indices input is an array of 0/1 selectors telling whether given pathElement is on the left or right side of merkle path
+// pathIndices input is an array of 0/1 selectors telling whether given pathElement is on the left or right side of merkle path
 template MerkleTreeChecker(levels) {
     signal input leaf;
     signal input root;
-    signal input path_elements[levels];
-    signal input path_indices[levels];
+    signal input pathElements[levels];
+    signal input pathIndices[levels];
 
     component selectors[levels];
     component hashers[levels];
@@ -331,8 +331,8 @@ template MerkleTreeChecker(levels) {
     for (var i = 0; i < levels; i++) {
         selectors[i] = DualMux();
         selectors[i].in[0] <== i == 0 ? leaf : hashers[i - 1].hash;
-        selectors[i].in[1] <== path_elements[i];
-        selectors[i].s <== path_indices[i];
+        selectors[i].in[1] <== pathElements[i];
+        selectors[i].s <== pathIndices[i];
 
         hashers[i] = HashLeftRight();
         hashers[i].left <== selectors[i].out[0];
