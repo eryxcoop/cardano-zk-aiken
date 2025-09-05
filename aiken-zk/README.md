@@ -1,6 +1,6 @@
 # Explanation (so far)
 
-This repo contains a tool that facilitates the integration of Aiken validators with Zero Knowledge proofs. It allows the
+This repository contains a tool that facilitates the integration of Aiken validators with Zero Knowledge proofs. It allows the
 user to write Aiken programs that contain some offchain block. This creates a new source code so that instead of being
 executed on-chain, the program will receive a proof of that execution and validate it. This is useful to move
 computation out of the chain and/or to hide information.
