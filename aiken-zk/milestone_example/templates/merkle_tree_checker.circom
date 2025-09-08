@@ -305,6 +305,15 @@ template HashLeftRight() {
     hash <== hasher.outs[0];
 }
 
+// Computes DummyHash([left, right]) which is an arbitrary hash function for testing purposes
+template DummyHashLeftRight() {
+    signal input left;
+    signal input right;
+    signal output hash;
+
+    hash <== 3 * left + 7 * right;
+}
+
 // if s == 0 returns [in[0], in[1]]
 // if s == 1 returns [in[1], in[0]]
 template DualMux() {
@@ -334,7 +343,8 @@ template MerkleTreeChecker(levels) {
         selectors[i].in[1] <== pathElements[i];
         selectors[i].s <== pathIndices[i];
 
-        hashers[i] = HashLeftRight();
+        //hashers[i] = HashLeftRight();
+        hashers[i] = DummyHashLeftRight();
         hashers[i].left <== selectors[i].out[0];
         hashers[i].right <== selectors[i].out[1];
     }
