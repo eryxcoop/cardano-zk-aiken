@@ -418,17 +418,37 @@ fn test_lexer_translates_merkle_tree_checker_parameters() {
 }
 
 #[test]
-#[should_panic(expected = "A circuit template parameter cannot have visibility")]
-fn test_lexer_doesnt_allow_visibility_in_as_template_parameters() {
-    let program = "offchain merkle_tree_checker(pub 4, priv, pub root, priv, priv)";
-    let lexer::LexInfo { .. } = lexer::Lexer::new().run(program).unwrap();
-}
-
-#[test]
-#[should_panic(expected = "A circuit template parameter must be constant")]
-fn test_lexer_only_allows_constants_as_template_parameters() {
-    let program = "offchain merkle_tree_checker(a, priv, pub root, priv, priv)";
-    let lexer::LexInfo { .. } = lexer::Lexer::new().run(program).unwrap();
+fn test_lexer_translates_polynomial_evaluations_parameters() {
+    // First 2: grade of polynomial
+    // Second 2: amount of evaluations
+    let program = "offchain polynomial_evaluations(2, coefficients, 2, pub domain, pub evaluations)";
+    let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
+    let offchain_token = &tokens[0].0;
+    assert_eq!(
+        Token::Offchain {
+            example: ZkExample::PolynomialEvaluations {
+                grade: CircuitTemplateParameter {
+                    token: Box::new(int_token(2).unwrap().extract_single().unwrap())
+                },
+                coefficients: InputZK {
+                    visibility: InputVisibility::Public,
+                    token: variable_token("coefficients")
+                },
+                amount_of_evaluations: CircuitTemplateParameter {
+                    token: Box::new(int_token(2).unwrap().extract_single().unwrap())
+                },
+                domain: InputZK {
+                    visibility: InputVisibility::Public,
+                    token: variable_token("domain")
+                },
+                evaluations: InputZK {
+                    visibility: InputVisibility::Public,
+                    token: variable_token("evaluations")
+                }
+            }
+        },
+        *offchain_token
+    );
 }
 
 // --------- Custom --------- //
@@ -453,5 +473,19 @@ fn test_lexer_translates_custom_circom() {
 #[should_panic(expected = "Private parameters cannot be followed by an identifier")]
 fn test_lexer_does_not_allow_identifiers_for_private_parameters() {
     let program = "offchain assert_eq(priv a, pub 5)";
+    let lexer::LexInfo { .. } = lexer::Lexer::new().run(program).unwrap();
+}
+
+#[test]
+#[should_panic(expected = "A circuit template parameter cannot have visibility")]
+fn test_lexer_doesnt_allow_visibility_in_as_template_parameters() {
+    let program = "offchain merkle_tree_checker(pub 4, priv, pub root, priv, priv)";
+    let lexer::LexInfo { .. } = lexer::Lexer::new().run(program).unwrap();
+}
+
+#[test]
+#[should_panic(expected = "A circuit template parameter must be constant")]
+fn test_lexer_only_allows_constants_as_template_parameters() {
+    let program = "offchain merkle_tree_checker(a, priv, pub root, priv, priv)";
     let lexer::LexInfo { .. } = lexer::Lexer::new().run(program).unwrap();
 }

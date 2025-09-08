@@ -215,6 +215,8 @@ impl ComponentCreator {
                     &[&value],
                 )
             }
+            ZkExample::PolynomialEvaluations { .. } => {panic!("Polynomial evaluations no supported yet")}
+
         }
     }
 
