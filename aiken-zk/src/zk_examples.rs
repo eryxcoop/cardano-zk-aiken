@@ -80,13 +80,14 @@ impl CircuitTemplateParameter {
             panic!("A circuit template parameter cannot have visibility");
         }
 
+        let identifier_token = if let Some(Token::Int{ value, base}) = maybe_token {
+            Box::new(TokenZK::Int {value, base})
+        } else {
+            panic!("A circuit template parameter must be constant");
+        };
+
         Self {
-            token: match maybe_token {
-                None => panic!(
-                    "Expected circuit template parameter but the parameter provided is empty"
-                ),
-                Some(token) => Box::new(token),
-            },
+            token: identifier_token,
         }
     }
 }
