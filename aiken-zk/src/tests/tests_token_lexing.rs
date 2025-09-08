@@ -421,14 +421,14 @@ fn test_lexer_translates_merkle_tree_checker_parameters() {
 #[should_panic(expected = "A circuit template parameter cannot have visibility")]
 fn test_lexer_doesnt_allow_visibility_in_as_template_parameters() {
     let program = "offchain merkle_tree_checker(pub 4, priv, pub root, priv, priv)";
-    let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
+    let lexer::LexInfo { .. } = lexer::Lexer::new().run(program).unwrap();
 }
 
 #[test]
 #[should_panic(expected = "A circuit template parameter must be constant")]
 fn test_lexer_only_allows_constants_as_template_parameters() {
     let program = "offchain merkle_tree_checker(a, priv, pub root, priv, priv)";
-    let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
+    let lexer::LexInfo { .. } = lexer::Lexer::new().run(program).unwrap();
 }
 
 // --------- Custom --------- //
