@@ -18,20 +18,20 @@ template Evaluations(grade, amountOfEvaluations) {
     signal input domain[amountOfEvaluations];
     signal input evaluations[amountOfEvaluations];
 
-    component evaluations[amountOfEvaluations];
+    component evaluationCheckers[amountOfEvaluations];
     var i;
-    for (i=0; i <= amountOfEvaluations; i++) {
-        evaluations[i] = Evaluation(grade);
-        evaluations[i].coefficients = coefficients;
-        evaluations[i].x = domain[i];
-        evaluations[i].y = evaluations[i];
+    for (i=0; i < amountOfEvaluations; i++) {
+        evaluationCheckers[i] = Evaluation(grade);
+        evaluationCheckers[i].coefficients <== coefficients;
+        evaluationCheckers[i].x <== domain[i];
+        evaluationCheckers[i].y === evaluations[i];
     }
 }
 
 template Evaluation(grade) {
     signal input coefficients[grade+1];
     signal input x;
-    signal input y;
+    signal output y;
 
     signal partials[grade+1];
     var i;
@@ -39,7 +39,5 @@ template Evaluation(grade) {
     for (i=grade-1; i >= 0; i--) {
         partials[i] <== partials[i+1] * x + coefficients[i];
     }
-    y === partials[0];
+    y <== partials[0];
 }
-
-component main { public [coefficients, x, y] } = Evaluate(1);
