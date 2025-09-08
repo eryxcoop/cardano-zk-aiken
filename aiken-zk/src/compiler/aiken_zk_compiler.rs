@@ -148,6 +148,12 @@ impl AikenZkCompiler {
                     _ => panic!("Invalid MerkleTreeChecker identifier"),
                 })
                 .collect(),
+            ZkExample::PolynomialEvaluations {
+                ..
+            } => public_input_identifiers
+                .iter()
+                .map(|identifier| "Many(".to_string() + identifier + ")")
+                .collect(),
             _ => public_input_identifiers
                 .iter()
                 .map(|identifier| "Single(".to_string() + identifier + ")")
@@ -379,6 +385,20 @@ impl AikenZkCompiler {
                         ..
                     },
             } => [leaf, root, path_elements, path_indices]
+                .iter()
+                .filter_map(|input| Self::extract_visibility_from_input(&input))
+                .collect(),
+
+            Token::Offchain {
+                example:
+                    ZkExample::PolynomialEvaluations {
+                        grade: _,
+                        coefficients,
+                        amount_of_evaluations: _,
+                        domain,
+                        evaluations,
+                    },
+            } => [coefficients, domain, evaluations]
                 .iter()
                 .filter_map(|input| Self::extract_visibility_from_input(&input))
                 .collect(),
