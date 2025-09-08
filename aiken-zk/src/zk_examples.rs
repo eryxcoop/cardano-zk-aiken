@@ -80,8 +80,8 @@ impl CircuitTemplateParameter {
             panic!("A circuit template parameter cannot have visibility");
         }
 
-        let identifier_token = if let Some(Token::Int{ value, base}) = maybe_token {
-            Box::new(TokenZK::Int {value, base})
+        let identifier_token = if let Some(Token::Int { value, base }) = maybe_token {
+            Box::new(TokenZK::Int { value, base })
         } else {
             panic!("A circuit template parameter must be constant");
         };
@@ -188,6 +188,13 @@ pub enum ZkExample {
         root: InputZK,
         path_elements: InputZK,
         path_indices: InputZK,
+    },
+    PolynomialEvaluations {
+        grade: CircuitTemplateParameter,
+        coefficients: InputZK,
+        amount_of_evaluations: CircuitTemplateParameter,
+        domain: InputZK,
+        evaluations: InputZK,
     },
 }
 
@@ -382,7 +389,23 @@ impl ZkExample {
             Self::sha256_parser(),
             Self::poseidon_parser(),
             Self::merkle_tree_checker_parser(),
+            Self::polynomial_evaluations(),
             Self::custom_circom_parser(),
         ))
+    }
+
+    fn polynomial_evaluations() -> impl Parser<char, Token, Error = ParseError> {
+        just("polynomial_evaluations")
+            .padded()
+            .ignore_then(Self::parameters(5))
+            .map(|args| Token::Offchain {
+                example: ZkExample::PolynomialEvaluations {
+                    grade: CircuitTemplateParameter::from(args[0].clone()),
+                    coefficients: InputZK::from(args[1].clone()),
+                    amount_of_evaluations: CircuitTemplateParameter::from(args[2].clone()),
+                    domain: InputZK::from(args[3].clone()),
+                    evaluations: InputZK::from(args[4].clone()),
+                },
+            })
     }
 }

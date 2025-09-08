@@ -255,3 +255,30 @@ pub fn merkle_tree_checker_token_with_mixed_visibility(n: u32) -> token_zk::Toke
         },
     }
 }
+
+// ----- POLYNOMIAL_EVALUATIONS ----- //
+
+pub fn polynomial_evaluations_token(grade: u32, amount_of_evaluations: u32) -> token_zk::TokenZK {
+    token_zk::TokenZK::Offchain {
+        example: ZkExample::PolynomialEvaluations {
+            grade: CircuitTemplateParameter {
+                token: Box::new(int_token(grade).unwrap().extract_single().unwrap())
+            },
+            coefficients: InputZK {
+                visibility: InputVisibility::Public,
+                token: variable_token("coefficients")
+            },
+            amount_of_evaluations: CircuitTemplateParameter {
+                token: Box::new(int_token(amount_of_evaluations).unwrap().extract_single().unwrap())
+            },
+            domain: InputZK {
+                visibility: InputVisibility::Public,
+                token: variable_token("domain")
+            },
+            evaluations: InputZK {
+                visibility: InputVisibility::Public,
+                token: variable_token("evaluations")
+            }
+        }
+    }
+}

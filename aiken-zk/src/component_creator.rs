@@ -36,14 +36,14 @@ impl ComponentCreator {
         template_file_name: &str,
         template_name: &str,
         public_inputs_identifiers: Vec<String>,
-        parameters: &[&str],
+        circuit_template_parameters: &[&str],
     ) -> String {
         let circom_version_line = format!("pragma circom {};", circom_version);
         let import_line = format!("include \"templates/{}.circom\";", template_file_name);
 
         let visibility_line = Self::generate_inputs_visibility(public_inputs_identifiers);
 
-        let component_parameters = Self::process_and_generate_template_arguments(parameters);
+        let component_parameters = Self::process_and_generate_template_arguments(circuit_template_parameters);
 
         let instantiation = format!(
             "component main {}= {}{};",
@@ -213,6 +213,34 @@ impl ComponentCreator {
                     "MerkleTreeChecker",
                     public_inputs_identifiers,
                     &[&value],
+                )
+            }
+            ZkExample::PolynomialEvaluations {
+                grade,
+                coefficients,
+                amount_of_evaluations,
+                domain,
+                evaluations,
+            } => {
+                let Token::Int { value: polynomial_grade, base: _ } = *grade.token.clone() else {
+                    panic!("Not expected kind of token")
+                };
+                let Token::Int { value: amount_of_evaluations, base: _ } = *amount_of_evaluations.token.clone() else {
+                    panic!("Not expected kind of token")
+                };
+                let inputs_to_identifiers = [
+                    (coefficients, "coefficients"),
+                    (domain, "domain"),
+                    (evaluations, "evaluations"),
+                ];
+                let public_inputs_identifiers =
+                    Self::process_inputs_visibility(inputs_to_identifiers);
+                Self::generate_circom_component(
+                    Self::USED_CIRCOM_VERSION,
+                    "polynomials",
+                    "PolynomialEvaluations",
+                    public_inputs_identifiers,
+                    &[&polynomial_grade, &amount_of_evaluations],
                 )
             }
         }
