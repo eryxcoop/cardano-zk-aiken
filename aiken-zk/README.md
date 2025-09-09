@@ -76,7 +76,7 @@ source code with **one** of the tokens presented below.
 
 ### Parameters convention
 * ```x```, ```y```, ```z```, ```w```: integer literal, integer variable name 
-* ```t```: integer literal
+* ```t```, ```r```: integer literal
 * ```A```, ```B```: list variable name
 
 #### Types description
@@ -86,15 +86,16 @@ source code with **one** of the tokens presented below.
 
 
 ### Supported tokens
-* ```offchain addition(x, y, z)```: verifies that ```x + y == z```.
-* ```offchain subtraction(x, y, z)```: verifies that ```x - y == z```.
-* ```offchain multiplication(x, y, z)```: verifies that ```x * y == z```.
-* ```offchain fibonacci(x, y, t, z)```: verifies that the fibonacci sequence with initial values ```[x,y]``` and ```t```
-  elements ends with ```z```. In this case, ```t``` **must** be a literal number.
-* ```offchain if(x, y, z, w)```: verifies that ```y == z if (x == 1) | y == w if (x == 0)```. ```x``` must be 1 or 0.
-* ```offchain assert_eq(x, y)```: verifies that ```x == y```
+* ```offchain addition(x, y, z)```: verifies that $x + y = z$.
+* ```offchain subtraction(x, y, z)```: verifies that $x - y = z$.
+* ```offchain multiplication(x, y, z)```: verifies that $x * y = z$.
+* ```offchain fibonacci(x, y, t, z)```: verifies that the fibonacci sequence with initial values $[x,y]$ and $t$
+  elements ends with $z$. In this case, $t$ **must** be a literal number.
+* ```offchain if(x, y, z, w)```: verifies that $y = z \,\,\,\rm{if} (x = 1)\, |\, y = w \,\,\,\rm{if} (x = 0)$. $x$ must be 1 or 0.
+* ```offchain assert_eq(x, y)```: verifies that $x = y$
 * ```offchain sha256(t, A, B)```: verifies that $sha256(A) = B$ with $size(A) = t$ and $size(B) = 256$. A and B being lists of **bits**.
-* ```offchain poseidon(t, A, x)```: verifies that $poseidon(A) = x$ with $size(A) = t$ and A being a list of integers and x being an integer. 
+* ```offchain poseidon(t, A, x)```: verifies that $poseidon(A) = x$ with $size(A) = t$ and A being a list of integers and x being an integer.
+* ```offchain polynomial_evaluations(t, A, r, B, C)```: verifies that the polynomial $P$ represented by the coefficients $A$ match $\forall i \in [1\ldots r]$ $P(B[i]) = C[i]$.
 
 ### Public and private parameters
 
