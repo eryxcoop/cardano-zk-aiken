@@ -396,7 +396,7 @@ Save the output transaction hash for the next step.
 Time to unlock. Run the following command to generate the typescript library that contains the proof:
 
 ```shell
-cargo run -- prove meshjs output.circom verification_key.zkey inputs_custom_circuit.json deployment/zk_redeemer.ts
+cargo run -- prove meshjs my_custom_circuit.circom verification_key.zkey inputs_custom_circuit.json deployment/zk_redeemer.ts
 ```
 
 Go to ```deployment/unlock_complex_token.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
