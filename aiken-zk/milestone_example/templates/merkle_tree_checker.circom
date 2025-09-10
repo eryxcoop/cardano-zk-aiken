@@ -1,19 +1,5 @@
 pragma circom 2.0.0;
 
-include "hash.circom";
-
-// Computes MiMC([left, right])
-template HashLeftRight() {
-    signal input left;
-    signal input right;
-    signal output hash;
-
-    component hasher = MiMCSponge(2, 220, 1);
-    hasher.ins[0] <== left;
-    hasher.ins[1] <== right;
-    hasher.k <== 0;
-    hash <== hasher.outs[0];
-}
 
 // Computes DummyHash([left, right]) which is an arbitrary hash function for testing purposes
 template DummyHashLeftRight() {
@@ -53,34 +39,10 @@ template MerkleTreeChecker(levels) {
         selectors[i].in[1] <== pathElements[i];
         selectors[i].s <== pathIndices[i];
 
-        // hashers[i] = HashLeftRight();
-        // hashers[i] = DummyHashLeftRight();
-        hashers[i] = PoseidonMergeHash();
+        hashers[i] = DummyHashLeftRight();
         hashers[i].left <== selectors[i].out[0];
         hashers[i].right <== selectors[i].out[1];
     }
 
     root === hashers[levels - 1].hash;
-}
-
-template PoseidonMergeHash() {
-    signal input left;
-    signal input right;
-    signal output hash;
-    component hasher = Poseidon_(2);
-    hasher.in[0] <== left;
-    hasher.in[1] <== right;
-    hash <== hasher.out;
-}
-
-template Poseidon_(nInputs) {
-    signal input in[nInputs];
-    signal output out;
-
-    component pEx = PoseidonEx(nInputs, 1);
-    pEx.initialState <== 0;
-    for (var i=0; i<nInputs; i++) {
-        pEx.inputs[i] <== in[i];
-    }
-    out <== pEx.out[0];
 }
