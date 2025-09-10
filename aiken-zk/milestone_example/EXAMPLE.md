@@ -318,4 +318,4 @@ lock step:
 
 ```shell
 npx tsx unlock_merkle_tree_checker.ts lockTxHash
-    ```
+```
