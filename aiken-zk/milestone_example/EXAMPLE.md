@@ -240,3 +240,82 @@ lock step:
 ```shell
 npx tsx unlock_sha256.ts lockTxHash
 ```
+
+## Running the MerkleTreeChecker example (complex token)
+
+For this tutorial we assume you have run the fibonacci example.
+
+### Conversion to compilable Aiken
+
+Run the following command:
+
+```shell
+cargo run -- build validators_with_offchain/example_merkle_tree_checker.ak validators/output.ak
+```
+
+The compilable aiken file is in ```validators/output.ak```.
+
+### Generate proof
+
+The MerkleTreeChecker parameters used to generate the proof are in the input_merkle_tree_checker.json file:
+
+```json
+{
+  "leaf": 0,
+  "root": 79,
+  "pathElements": [1, 10],
+  "pathIndices": [0, 1]
+}
+```
+
+#### Aiken testing
+
+Execute the following command to generate the proof to use in the Aiken test:
+
+```shell
+cargo run -- prove aiken output.circom verification_key.zkey inputs_merkle_tree_checker.json proof.ak
+```
+
+You could use the generated proof ```proof.ak``` on the Aiken test. Then, running an ```aiken check``` should execute
+successfully.
+
+#### MeshJS unlocking
+
+Compile the Aiken code with:
+
+```shell
+aiken build
+```
+
+Then, enter the subdirectory ```deployment``` and run:
+
+```shell
+npx tsx lock_merkle_tree_checker.ts
+```
+
+Save the output transaction hash for the next step.
+
+Time to unlock. Run the following command to generate the typescript library that contains the proof:
+
+```shell
+cargo run -- prove meshjs output.circom verification_key.zkey inputs_merkle_tree_checker.json deployment/zk_redeemer.ts
+```
+
+Go to ```deployment/unlock_merkle_tree_checker.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
+
+```javascript
+ import {mZKRedeemer} from "./zk_redeemer";
+```
+
+Use the exported function to wrap the redeemer. The spend should look like:
+
+```javascript
+await contract.spend(validatorScriptIndex, txHashFromDeposit, mZKRedeemer(mVoid()))
+```
+
+Finally, unlock the contract running the following command. Replace `lockTxHash` with the hash that you copied in the
+lock step:
+
+```shell
+npx tsx unlock_merkle_tree_checker.ts lockTxHash
+    ```
