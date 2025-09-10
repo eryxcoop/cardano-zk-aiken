@@ -1,19 +1,5 @@
 pragma circom 2.0.0;
 
-include "hash.circom";
-
-// Computes MiMC([left, right])
-template HashLeftRight() {
-    signal input left;
-    signal input right;
-    signal output hash;
-
-    component hasher = MiMCSponge(2, 220, 1);
-    hasher.ins[0] <== left;
-    hasher.ins[1] <== right;
-    hasher.k <== 0;
-    hash <== hasher.outs[0];
-}
 
 // Computes DummyHash([left, right]) which is an arbitrary hash function for testing purposes
 template DummyHashLeftRight() {
