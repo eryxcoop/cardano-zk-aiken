@@ -95,7 +95,7 @@ source code with **one** of the tokens presented below.
 * ```offchain assert_eq(x, y)```: verifies that $x = y$
 * ```offchain sha256(t, A, B)```: verifies that $sha256(A) = B$ with $size(A) = t$ and $size(B) = 256$. A and B being lists of **bits**.
 * ```offchain poseidon(t, A, x)```: verifies that $poseidon(A) = x$ with $size(A) = t$ and A being a list of integers and x being an integer.
-* ```offchain polynomial_evaluations(t, A, r, B, C)```: verifies that the polynomial $P$ represented by the coefficients $A$ match $\forall i \in [1\ldots r]$ $P(B[i]) = C[i]$.
+* ```offchain polynomial_evaluations(t, A, r, B, C)```: verifies that the polynomial $P$ with grade $t$ represented by the coefficients $A$ matches $\forall i \in [1\ldots r]$ $P(B[i]) = C[i]$.
 * ```offchain merkle_tree_checker(merklePathLength, leaf, merkleRoot , pathElements, pathIndices)```: verifies that the merkle path formed by $pathElements$, in which each element is on the left or the right (indicated by $0$s and $1$s respectively in $pathIndices$), where $leaf$ is the value of the leaf and $merkleRoot$ is the root of the tree, is correct. $merklePathLength$ is the length of the merkle path without the root and **must** be a constant in compilation time. **Warning: do not use in production since the hash function is being mocked for now.**
 
 
