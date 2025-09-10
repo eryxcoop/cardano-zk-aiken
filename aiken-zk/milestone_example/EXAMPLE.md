@@ -211,7 +211,7 @@ aiken build
 Then, enter the subdirectory ```deployment``` and run:
 
 ```shell
-npx tsx lock_sha256.ts
+npx tsx lock_complex_token.ts
 ```
 
 Save the output transaction hash for the next step.
@@ -222,7 +222,7 @@ Time to unlock. Run the following command to generate the typescript library tha
 cargo run -- prove meshjs output.circom verification_key.zkey inputs_sha256.json deployment/zk_redeemer.ts
 ```
 
-Go to ```deployment/unlock_sha256.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
+Go to ```deployment/unlock_complex_token.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
 
 ```javascript
  import {mZKRedeemer} from "./zk_redeemer";
@@ -238,7 +238,7 @@ Finally, unlock the contract running the following command. Replace `lockTxHash`
 lock step:
 
 ```shell
-npx tsx unlock_sha256.ts lockTxHash
+npx tsx unlock_complex_token.ts lockTxHash
 ```
 
 ## Running the MerkleTreeChecker example (complex token)
@@ -290,7 +290,7 @@ aiken build
 Then, enter the subdirectory ```deployment``` and run:
 
 ```shell
-npx tsx lock_merkle_tree_checker.ts
+npx tsx lock_complex_token.ts
 ```
 
 Save the output transaction hash for the next step.
@@ -301,7 +301,7 @@ Time to unlock. Run the following command to generate the typescript library tha
 cargo run -- prove meshjs output.circom verification_key.zkey inputs_merkle_tree_checker.json deployment/zk_redeemer.ts
 ```
 
-Go to ```deployment/unlock_merkle_tree_checker.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
+Go to ```deployment/unlock_complex_token.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
 
 ```javascript
  import {mZKRedeemer} from "./zk_redeemer";
@@ -317,5 +317,104 @@ Finally, unlock the contract running the following command. Replace `lockTxHash`
 lock step:
 
 ```shell
-npx tsx unlock_merkle_tree_checker.ts lockTxHash
+npx tsx unlock_complex_token.ts lockTxHash
 ```
+
+## Running the CustomCircuit example (complex token)
+
+We assume you have run the fibonacci example.
+
+In order to show how a custom circuit works, a my_custom_circuit.circom is provided. Note that it is a circom component (not a
+circom template), this means it includes a line ```component main {public [f2, hashedFn]} = MyCustomCircuit(5);```
+declaring the main component with their public inputs.
+
+### What this custom circuit does?
+
+Given a generalization of fibonacci sequence being the elements fibonacci_1 and fibonacci_2 arbitrary integers instead of
+0 and 1 like the original fibonacci sequence. Then the fibonacci_n is the nth element being n the sequence length.
+This example uses an $n = 5$.
+
+For example a fibonacci like sequence with fibonacci_1 = 10 and fibonacci_2 = 11 and a length of 5, has this look: 
+[10,11,21,32,53]
+
+Then, the circuit checks that a user knows a fibonacci sequence. It has 4 inputs: fibonacci_1, fibonacci_2, fibonacci_n
+and a hash of fibonacci_n. The circuit checks that the hash matches with fibonacci_n.
+
+As fibonacci_2 and the hashed element are private, the idea is that the locker published the fibonacci_2 and the hashed 
+element. So the unlocker has to provide fibonacci_1 and fibonacci_n that are private in order to unlock the validator.
+
+### Conversion to compilable Aiken
+
+Run the following command:
+
+```shell
+cargo run -- build validators_with_offchain/example_custom_circuit.ak validators/output.ak
+```
+
+The compilable aiken file is in ```validators/output.ak```.
+
+### Generate proof
+
+The CustomCircuit parameters used to generate the proof are in the input_custom_circuit.json file:
+
+```json
+{
+  "f1": "10",
+  "f2": "11",
+  "fn": "53",
+  "hashedFn": "12890501568230843208428202504271607409819721466300370964598773433007502645712"
+}
+```
+
+#### Aiken testing
+
+Execute the following command to generate the proof to use in the Aiken test:
+
+```shell
+cargo run -- prove aiken output.circom verification_key.zkey inputs_custom_circuit.json proof.ak
+```
+
+You could use the generated proof ```proof.ak``` on the Aiken test. Then, running an ```aiken check``` should execute
+successfully.
+
+#### MeshJS unlocking
+
+Compile the Aiken code with:
+
+```shell
+aiken build
+```
+
+Then, enter the subdirectory ```deployment``` and run:
+
+```shell
+npx tsx lock_complex_token.ts
+```
+
+Save the output transaction hash for the next step.
+
+Time to unlock. Run the following command to generate the typescript library that contains the proof:
+
+```shell
+cargo run -- prove meshjs output.circom verification_key.zkey inputs_custom_circuit.json deployment/zk_redeemer.ts
+```
+
+Go to ```deployment/unlock_complex_token.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
+
+```javascript
+ import {mZKRedeemer} from "./zk_redeemer";
+```
+
+Use the exported function to wrap the redeemer. The spend should look like:
+
+```javascript
+await contract.spend(validatorScriptIndex, txHashFromDeposit, mZKRedeemer(mVoid()))
+```
+
+Finally, unlock the contract running the following command. Replace `lockTxHash` with the hash that you copied in the
+lock step:
+
+```shell
+npx tsx unlock_complex_token.ts lockTxHash
+```
+

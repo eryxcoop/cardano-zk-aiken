@@ -3,7 +3,7 @@ pragma circom 2.1.9;
 include "templates/hash.circom";
 include "templates/fibonacci.circom";
 
-template MyCustomCircuit() {
+template MyCustomCircuit(n) {
     signal input f1;
     signal input f2;
     signal input fn;
@@ -13,10 +13,10 @@ template MyCustomCircuit() {
     hasher.in[0] <== fn;
     hasher.out <== hashedFn;
 
-    component fibonacci = Fibonacci(5);
+    component fibonacci = Fibonacci(n);
     fibonacci.a <== f1;
     fibonacci.b <== f2;
     fibonacci.c <== fn;
 }
 
-component main {public [f2, hashedFn]} = MyCustomCircuit();
+component main {public [f2, hashedFn]} = MyCustomCircuit(5);
