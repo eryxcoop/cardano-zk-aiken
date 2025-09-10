@@ -371,7 +371,7 @@ The CustomCircuit parameters used to generate the proof are in the input_custom_
 Execute the following command to generate the proof to use in the Aiken test:
 
 ```shell
-cargo run -- prove aiken output.circom verification_key.zkey inputs_custom_circuit.json proof.ak
+cargo run -- prove aiken my_custom_circuit.circom verification_key.zkey inputs_custom_circuit.json proof.ak
 ```
 
 You could use the generated proof ```proof.ak``` on the Aiken test. Then, running an ```aiken check``` should execute
