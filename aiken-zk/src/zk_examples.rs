@@ -196,13 +196,6 @@ impl ZkExample {
         text::ident().map(|name| Token::Name { name }).padded()
     }
 
-    fn name_parser_cardinality() -> impl Parser<char, TokenWithCardinality, Error = ParseError> {
-        choice((
-            Self::name_parser().map(|id| { TokenWithCardinality::new_single(id)}),
-            just("@").then(Self::name_parser()).map(|(_, id)|{TokenWithCardinality::new_multiple(id)})
-        ))
-    }
-
     fn int_or_var()
     -> impl Parser<char, (Option<InputVisibility>, Option<Token>), Error = ParseError> {
         choice((just("priv"), just("pub")))
@@ -346,13 +339,26 @@ impl ZkExample {
             })
     }
 
+    fn int_parser_single() -> impl Parser<char, TokenWithCardinality, Error = ParseError> {
+        int_parser().map(|literal_token| TokenWithCardinality::new_single(literal_token))
+    }
+
+    fn name_parser_single() -> impl Parser<char, TokenWithCardinality, Error = ParseError> {
+        Self::name_parser().map(|id| TokenWithCardinality::new_single(id))
+    }
+
+    fn name_parser_multiple() -> impl Parser<char, TokenWithCardinality, Error = ParseError> {
+        just("@").then(Self::name_parser()).map(|(_, id)| TokenWithCardinality::new_multiple(id) )
+    }
+
     fn custom_circom_parser() -> impl Parser<char, Token, Error = ParseError> {
         let string_literal_parser = just('"')
             .ignore_then(filter(|c| *c != '"').repeated().collect::<String>())
             .then_ignore(just('"'));
         let identifiers_parser = choice((
-            int_parser().map(|literal_token| TokenWithCardinality::new_single(literal_token)),
-            Self::name_parser_cardinality(),
+            Self::int_parser_single(),
+            Self::name_parser_single(),
+            Self::name_parser_multiple(),
         ));
 
         let public_input_identifiers_list_parser = identifiers_parser
