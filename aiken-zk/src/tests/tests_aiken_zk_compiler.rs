@@ -201,7 +201,7 @@ fn test_replaces_custom_circom_with_list_variable_by_the_corresponding_function_
     .unwrap();
     let aiken_src = aiken_template_with_body_and_verify_definition(
         "",
-        "offchain custom(\"test.circom\", [l, idx, val])",
+        "offchain custom(\"test.circom\", [l, val])",
         "",
     );
     let output_filename = "my_program".to_string();
@@ -215,8 +215,8 @@ fn test_replaces_custom_circom_with_list_variable_by_the_corresponding_function_
 
     let expected_aiken_src = aiken_template_with_body_and_verify_definition(
         import_header(),
-        "zk_verify_or_fail(redeemer, [Many(l), Single(idx), Single(val)])",
-        &verify_declaration(3, addition_custom_circom_vk_compressed()),
+        "zk_verify_or_fail(redeemer, [Many(l), Single(val)])",
+        &verify_declaration(2, addition_custom_circom_vk_compressed()),
     );
 
     assert_eq!(
