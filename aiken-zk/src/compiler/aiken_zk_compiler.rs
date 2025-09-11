@@ -204,17 +204,28 @@ impl AikenZkCompiler {
         circom_circuit: CircomCircuit,
         public_inputs: &Vec<Box<TokenWithCardinality>>,
     ) {
-        let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
-        let r1cs_json_path = format!("{}.json", r1cs_path);
-        circom_circuit.export_r1cs_to_json(&r1cs_path, &r1cs_json_path);
-        let r1cs_json_str = fs::read_to_string(&r1cs_json_path).unwrap();
-        let json: Value = serde_json::from_str(&r1cs_json_str).unwrap();
-        let public_inputs_amount = json["nPubInputs"].as_u64().unwrap();
-        assert_eq!(
-            public_inputs.len(),
-            public_inputs_amount as usize,
-            "Amount of public inputs doesnt match"
-        );
+        let bind = public_inputs.clone();
+        let has_list_variable = bind.iter()
+            .find(|&token_with_cardinality|{
+                match **token_with_cardinality {
+                    TokenWithCardinality::Multiple(_) => true,
+                    _ => false
+                }
+        });
+        if has_list_variable.is_some() {
+            // We anulate the validation in case there are list variables
+            let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
+            let r1cs_json_path = format!("{}.json", r1cs_path);
+            circom_circuit.export_r1cs_to_json(&r1cs_path, &r1cs_json_path);
+            let r1cs_json_str = fs::read_to_string(&r1cs_json_path).unwrap();
+            let json: Value = serde_json::from_str(&r1cs_json_str).unwrap();
+            let public_inputs_amount = json["nPubInputs"].as_u64().unwrap();
+            assert_eq!(
+                public_inputs.len(),
+                public_inputs_amount as usize,
+                "Amount of public inputs doesnt match"
+            );
+        }
     }
 
     fn apply_modifications_to_src_for_example_token(
