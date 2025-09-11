@@ -201,7 +201,7 @@ fn test_replaces_custom_circom_with_list_variable_by_the_corresponding_function_
     .unwrap();
     let aiken_src = aiken_template_with_body_and_verify_definition(
         "",
-        "offchain custom(\"test.circom\", [l, val])",
+        "offchain custom(\"test.circom\", [@l, val])",
         "",
     );
     let output_filename = "my_program".to_string();
@@ -216,13 +216,28 @@ fn test_replaces_custom_circom_with_list_variable_by_the_corresponding_function_
     let expected_aiken_src = aiken_template_with_body_and_verify_definition(
         import_header(),
         "zk_verify_or_fail(redeemer, [Many(l), Single(val)])",
-        &verify_declaration(2, addition_custom_circom_vk_compressed()),
+        &verify_declaration(2, indexing_custom_circom_vk_compressed()),
     );
 
     assert_eq!(
         without_delta(expected_aiken_src),
         without_delta(aiken_zk_src)
     );
+}
+
+fn indexing_custom_circom_vk_compressed() -> Groth16CompressedData {
+    Groth16CompressedData {
+        vk_alpha_1: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
+        vk_beta_2: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),
+        vk_gamma_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
+        vk_delta_2: "93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8".to_string(),
+        IC: vec![
+            "b42a4610c5c2722df0cae5b696d0e212dd41e471a5246217751ae313dceba2b4d25c1be296ee8e00454027b7c4a45208".to_string(),
+            "8027291e03baad211b040544b6f4b1dc08b0bcb3228f2454df242b16bd485f49ac7d2a7775e19984bb063c5659b6fd87".to_string(),
+            "8cd46f20c5538bb855c3747d45239aea4f5c7d8cf296e72ff926aa63532cd21e616d7e71b3e11712abdb0adc588fc369".to_string(),
+            "92860410fedf7cd20ac120951b318150bf82a8b4802a03120cd0ce2bd61c849d86ddfd29feb157b3a0af9be601eadab9".to_string(),
+        ],
+    }
 }
 
 #[test]
