@@ -20,12 +20,11 @@ pragma circom 2.1.9;
 
 template Addition() {
     signal input l[2];
-    signal input idx;
     signal input val;
-    l[idx] === val;
+    l[0] === val;
 }
 
-component main {public [l, idx, val]} = Addition();
+component main {public [l, val]} = Addition();
 "#
     .to_string()
 }

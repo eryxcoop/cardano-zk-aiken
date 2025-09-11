@@ -72,28 +72,21 @@ impl AikenZkCompiler {
             .unwrap();
 
         let vk_compressed_data = Self::extract_vk_compressed_data().unwrap();
-        let public_input_identifiers: Vec<String> = public_inputs
-            .iter()
-            .map(|token| {
-                let token = TokenWithCardinality::extract_single(token);
-                Self::extract_identifier_from_token(&token.unwrap())
-            })
-            .collect();
 
         Self::assert_equal_number_of_public_inputs(
             output_path,
             &circuit_name,
             circom_circuit,
-            &public_input_identifiers,
+            &public_inputs,
         );
 
         let mut aiken_zk_src =
-            Self::replace_range_of_offchain_keyword_by_verification_function_call_using_single_parameters(
+            Self::replace_range_of_offchain_keyword_by_verification_function_call_using_cardinality_parameters(
                 aiken_src,
                 offchain_token_span,
-                &public_input_identifiers,
+                &public_inputs,
             );
-        let public_input_count = public_input_identifiers.len();
+        let public_input_count = public_inputs.len();
         aiken_zk_src = Self::prepend_imports(&aiken_zk_src);
 
         Self::append_verify_function_declaration(
@@ -171,16 +164,27 @@ impl AikenZkCompiler {
         aiken_zk_src
     }
 
-    fn replace_range_of_offchain_keyword_by_verification_function_call_using_single_parameters(
+    fn replace_range_of_offchain_keyword_by_verification_function_call_using_cardinality_parameters(
         aiken_src: &str,
         offchain_token_span: Span,
-        public_input_identifiers: &Vec<String>,
+        public_inputs: &Vec<Box<TokenWithCardinality>>,
     ) -> String {
         let mut aiken_zk_src = aiken_src.to_string();
         let public_input_identifiers_wrapped_with_list_characteristics: Vec<String> =
-            public_input_identifiers
+            public_inputs
                 .iter()
-                .map(|identifier| "Single(".to_string() + identifier + ")")
+                .map(|token_with_cardinality| {
+                     match *token_with_cardinality.clone() {
+                         TokenWithCardinality::Single(token) => {
+                             let identifier = Self::extract_identifier_from_token(&token);
+                             "Single(".to_string() + &identifier + ")"
+                         }
+                         TokenWithCardinality::Multiple(token) => {
+                             let identifier = Self::extract_identifier_from_token(&token);
+                             "Many(".to_string() + &identifier + ")"
+                         }
+                     }
+                })
                 .collect();
 
         let replacement = format!(
@@ -198,7 +202,7 @@ impl AikenZkCompiler {
         output_path: &str,
         circuit_name: &str,
         circom_circuit: CircomCircuit,
-        public_input_identifiers: &Vec<String>,
+        public_inputs: &Vec<Box<TokenWithCardinality>>,
     ) {
         let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
         let r1cs_json_path = format!("{}.json", r1cs_path);
@@ -207,7 +211,7 @@ impl AikenZkCompiler {
         let json: Value = serde_json::from_str(&r1cs_json_str).unwrap();
         let public_inputs_amount = json["nPubInputs"].as_u64().unwrap();
         assert_eq!(
-            public_input_identifiers.len(),
+            public_inputs.len(),
             public_inputs_amount as usize,
             "Amount of public inputs doesnt match"
         );
