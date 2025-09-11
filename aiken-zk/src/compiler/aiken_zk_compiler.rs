@@ -212,7 +212,7 @@ impl AikenZkCompiler {
                     _ => false
                 }
         });
-        if has_list_variable.is_some() {
+        if has_list_variable.is_none() {
             // We anulate the validation in case there are list variables
             let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);
             let r1cs_json_path = format!("{}.json", r1cs_path);
