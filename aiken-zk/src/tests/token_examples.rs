@@ -15,8 +15,16 @@ pub fn int_token(n: u32) -> Option<Box<TokenWithCardinality>> {
     )))
 }
 
-pub fn variable_token(s: &str) -> Option<Box<TokenWithCardinality>> {
-    Some(Box::new(TokenWithCardinality::Single(
+pub fn single_variable_token(s: &str) -> Option<Box<TokenWithCardinality>> {
+    Some(Box::new(TokenWithCardinality::new_single(
+        token_zk::TokenZK::Name {
+            name: s.to_string(),
+        },
+    )))
+}
+
+pub fn multiple_variable_token(s: &str) -> Option<Box<TokenWithCardinality>> {
+    Some(Box::new(TokenWithCardinality::new_multiple(
         token_zk::TokenZK::Name {
             name: s.to_string(),
         },
@@ -28,7 +36,7 @@ pub fn addition_token_with_public_inputs() -> token_zk::TokenZK {
         example: ZkExample::Addition {
             lhs: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("c"),
+                token: single_variable_token("c"),
             },
             rhs: InputZK {
                 visibility: InputVisibility::Public,
@@ -51,11 +59,11 @@ pub fn addition_token_with_mixed_visibility() -> token_zk::TokenZK {
             },
             rhs: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("b"),
+                token: single_variable_token("b"),
             },
             res: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("n"),
+                token: single_variable_token("n"),
             },
         },
     }
@@ -87,7 +95,7 @@ pub fn subtraction_token_with_mixed_visibility() -> token_zk::TokenZK {
         example: ZkExample::Subtraction {
             lhs: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("c"),
+                token: single_variable_token("c"),
             },
             rhs: InputZK {
                 visibility: InputVisibility::Private,
@@ -95,7 +103,7 @@ pub fn subtraction_token_with_mixed_visibility() -> token_zk::TokenZK {
             },
             res: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("n"),
+                token: single_variable_token("n"),
             },
         },
     }
@@ -108,7 +116,7 @@ pub fn multiplication_token_with_mixed_visibility() -> token_zk::TokenZK {
         example: ZkExample::Multiplication {
             lhs: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("c"),
+                token: single_variable_token("c"),
             },
             rhs: InputZK {
                 visibility: InputVisibility::Private,
@@ -116,7 +124,7 @@ pub fn multiplication_token_with_mixed_visibility() -> token_zk::TokenZK {
             },
             res: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("n"),
+                token: single_variable_token("n"),
             },
         },
     }
@@ -129,7 +137,7 @@ pub fn fibonacci_token_with_mixed_visibility(n: usize) -> token_zk::TokenZK {
         example: ZkExample::Fibonacci {
             fib_0: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("c"),
+                token: single_variable_token("c"),
             },
             fib_1: InputZK {
                 visibility: InputVisibility::Private,
@@ -140,7 +148,7 @@ pub fn fibonacci_token_with_mixed_visibility(n: usize) -> token_zk::TokenZK {
             },
             res: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("n"),
+                token: single_variable_token("n"),
             },
         },
     }
@@ -153,7 +161,7 @@ pub fn if_token_with_mixed_visibility() -> token_zk::TokenZK {
         example: ZkExample::If {
             condition: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("a"),
+                token: single_variable_token("a"),
             },
             assigned: InputZK {
                 visibility: InputVisibility::Private,
@@ -161,11 +169,11 @@ pub fn if_token_with_mixed_visibility() -> token_zk::TokenZK {
             },
             true_branch: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("c"),
+                token: single_variable_token("c"),
             },
             false_branch: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("d"),
+                token: single_variable_token("d"),
             },
         },
     }
@@ -238,19 +246,19 @@ pub fn merkle_tree_checker_token_with_mixed_visibility(n: u32) -> token_zk::Toke
             },
             leaf: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("leaf"),
+                token: single_variable_token("leaf"),
             },
             root: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("root"),
+                token: single_variable_token("root"),
             },
             path_elements: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("pathElements"),
+                token: single_variable_token("pathElements"),
             },
             path_indices: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("pathIndices"),
+                token: single_variable_token("pathIndices"),
             },
         },
     }
@@ -266,18 +274,18 @@ pub fn polynomial_evaluations_token(grade: u32, amount_of_evaluations: u32) -> t
             },
             coefficients: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("coefficients")
+                token: single_variable_token("coefficients")
             },
             amount_of_evaluations: CircuitTemplateParameter {
                 token: Box::new(int_token(amount_of_evaluations).unwrap().extract_single().unwrap())
             },
             domain: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("domain")
+                token: single_variable_token("domain")
             },
             evaluations: InputZK {
                 visibility: InputVisibility::Public,
-                token: variable_token("evaluations")
+                token: single_variable_token("evaluations")
             }
         }
     }

@@ -7,8 +7,8 @@ use crate::compiler::token_zk::{TokenZK as Token, TokenZK};
 use crate::zk_examples::TokenWithCardinality::{Multiple, Single};
 use aiken_lang::parser::error::ParseError;
 use chumsky::{
-    Parser,
     prelude::{choice, just},
+    Parser,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -31,21 +31,14 @@ impl InputVisibility {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum TokenWithCardinality {
     Single(Token),
-    Multiple(Vec<Token>),
+    Multiple(Token),
 }
 
 impl fmt::Display for TokenWithCardinality {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Single(token) => write!(f, "{}", token),
-            Multiple(token_vector) => {
-                write!(f, "[")?;
-                for token in token_vector {
-                    write!(f, "{}", token)?;
-                }
-                write!(f, "]")?;
-                Ok(())
-            }
+            Multiple(token) => write!(f, "{}", token),
         }
     }
 }
@@ -55,8 +48,8 @@ impl TokenWithCardinality {
         Single(token)
     }
 
-    fn _new_multiple(token_vector: Vec<Token>) -> Self {
-        Multiple(token_vector)
+    pub fn new_multiple(token: Token) -> Self {
+        Multiple(token)
     }
 
     pub fn extract_single(&self) -> Option<TokenZK> {
@@ -201,6 +194,13 @@ pub enum ZkExample {
 impl ZkExample {
     fn name_parser() -> impl Parser<char, Token, Error = ParseError> {
         text::ident().map(|name| Token::Name { name }).padded()
+    }
+
+    fn name_parser_cardinality() -> impl Parser<char, TokenWithCardinality, Error = ParseError> {
+        choice((
+            Self::name_parser().map(|id| { TokenWithCardinality::new_single(id)}),
+            just("@").then(Self::name_parser()).map(|(_, id)|{TokenWithCardinality::new_multiple(id)})
+        ))
     }
 
     fn int_or_var()
@@ -350,7 +350,10 @@ impl ZkExample {
         let string_literal_parser = just('"')
             .ignore_then(filter(|c| *c != '"').repeated().collect::<String>())
             .then_ignore(just('"'));
-        let identifiers_parser = choice((int_parser(), Self::name_parser()));
+        let identifiers_parser = choice((
+            int_parser().map(|literal_token| TokenWithCardinality::new_single(literal_token)),
+            Self::name_parser_cardinality(),
+        ));
 
         let public_input_identifiers_list_parser = identifiers_parser
             .separated_by(just(",").padded())
@@ -372,7 +375,7 @@ impl ZkExample {
                     path,
                     public_inputs: public_input_identifiers
                         .iter()
-                        .map(|token| Box::new(TokenWithCardinality::new_single(token.clone())))
+                        .map(|token| Box::new(token.clone()))
                         .collect(),
                 },
             })

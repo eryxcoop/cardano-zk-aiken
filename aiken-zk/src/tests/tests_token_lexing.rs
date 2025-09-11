@@ -1,6 +1,6 @@
 use crate::compiler::lexer;
 use crate::compiler::token_zk::TokenZK as Token;
-use crate::tests::token_examples::{int_token, variable_token};
+use crate::tests::token_examples::{int_token, multiple_variable_token, single_variable_token};
 use crate::zk_examples::*;
 // --------- Addition --------- //
 
@@ -100,7 +100,7 @@ fn test_lexer_translates_addition_parameters_with_mixed_visibility_and_input_typ
                 },
                 res: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("olga")
+                    token: single_variable_token("olga")
                 },
             }
         },
@@ -206,7 +206,7 @@ fn test_lexer_translates_subtraction_parameters_with_mixed_visibility_and_input_
                 },
                 res: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("olga")
+                    token: single_variable_token("olga")
                 },
             }
         },
@@ -234,7 +234,7 @@ fn test_lexer_translates_multiplication_parameters_with_mixed_visibility_and_inp
                 },
                 res: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("olga")
+                    token: single_variable_token("olga")
                 },
             }
         },
@@ -258,7 +258,7 @@ fn test_lexer_translates_fibonacci_parameters_with_mixed_visibility_and_input_ty
                 },
                 fib_1: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("olga")
+                    token: single_variable_token("olga")
                 },
                 n: CircuitTemplateParameter {
                     token: Box::new(int_token(5).unwrap().extract_single().unwrap())
@@ -293,7 +293,7 @@ fn test_lexer_translates_if_parameters_with_mixed_visibility_and_input_types() {
                 },
                 true_branch: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("olga")
+                    token: single_variable_token("olga")
                 },
                 false_branch: InputZK {
                     visibility: InputVisibility::Public,
@@ -343,11 +343,11 @@ fn test_lexer_translates_poseidon_parameters() {
                 },
                 r#in: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("number_to_hash")
+                    token: single_variable_token("number_to_hash")
                 },
                 out: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("hashed_number")
+                    token: single_variable_token("hashed_number")
                 },
             }
         },
@@ -370,11 +370,11 @@ fn test_lexer_translates_sha256_parameters() {
                 },
                 r#in: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("number_to_hash")
+                    token: single_variable_token("number_to_hash")
                 },
                 out: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("hashed_number")
+                    token: single_variable_token("hashed_number")
                 },
             }
         },
@@ -401,7 +401,7 @@ fn test_lexer_translates_merkle_tree_checker_parameters() {
                 },
                 root: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("root")
+                    token: single_variable_token("root")
                 },
                 path_elements: InputZK {
                     visibility: InputVisibility::Private,
@@ -432,18 +432,18 @@ fn test_lexer_translates_polynomial_evaluations_parameters() {
                 },
                 coefficients: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("coefficients")
+                    token: single_variable_token("coefficients")
                 },
                 amount_of_evaluations: CircuitTemplateParameter {
                     token: Box::new(int_token(2).unwrap().extract_single().unwrap())
                 },
                 domain: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("domain")
+                    token: single_variable_token("domain")
                 },
                 evaluations: InputZK {
                     visibility: InputVisibility::Public,
-                    token: variable_token("evaluations")
+                    token: single_variable_token("evaluations")
                 }
             }
         },
@@ -462,7 +462,24 @@ fn test_lexer_translates_custom_circom() {
         Token::Offchain {
             example: ZkExample::CustomCircom {
                 path: String::from("path/to/circom/with/main.circom"),
-                public_inputs: vec![variable_token("a").unwrap(), int_token(5).unwrap()]
+                public_inputs: vec![single_variable_token("a").unwrap(), int_token(5).unwrap()]
+            },
+        },
+        *offchain_token
+    );
+}
+
+#[test]
+fn test_lexer_translates_custom_circom_with_list_variable() {
+    let program = r#"offchain custom("path/to/circom/with/main.circom", [ a, @b ])"#;
+    let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
+    let offchain_token = &tokens[0].0;
+    assert_eq!(
+        Token::Offchain {
+            example: ZkExample::CustomCircom {
+                path: String::from("path/to/circom/with/main.circom"),
+                public_inputs: vec![single_variable_token("a").unwrap(),
+                                    multiple_variable_token("b").unwrap()]
             },
         },
         *offchain_token
