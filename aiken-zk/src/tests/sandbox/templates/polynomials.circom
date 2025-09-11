@@ -6,7 +6,7 @@ pragma circom 2.1.9;
 // grade = 2
 // amountOfEvaluations = 2
 
-template Evaluations(grade, amountOfEvaluations) {
+template PolynomialEvaluations(grade, amountOfEvaluations) {
     signal input coefficients[grade+1];
     signal input domain[amountOfEvaluations];
     signal input evaluations[amountOfEvaluations];
@@ -14,14 +14,14 @@ template Evaluations(grade, amountOfEvaluations) {
     component evaluationCheckers[amountOfEvaluations];
     var i;
     for (i=0; i < amountOfEvaluations; i++) {
-        evaluationCheckers[i] = Evaluation(grade);
+        evaluationCheckers[i] = PolynomialEvaluation(grade);
         evaluationCheckers[i].coefficients <== coefficients;
         evaluationCheckers[i].x <== domain[i];
         evaluationCheckers[i].y === evaluations[i];
     }
 }
 
-template Evaluation(grade) {
+template PolynomialEvaluation(grade) {
     signal input coefficients[grade+1];
     signal input x;
     signal output y;
