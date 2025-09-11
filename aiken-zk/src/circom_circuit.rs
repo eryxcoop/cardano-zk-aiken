@@ -1,3 +1,4 @@
+use crate::compiler::BUILD_DIR;
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
 use std::fs;
 use std::io::{Error, ErrorKind};
@@ -6,25 +7,29 @@ use std::process::{Command, Stdio};
 
 pub struct CircomCircuit {
     circom_source_code_path: String,
+    filename: String,
 }
 
 impl CircomCircuit {
-    // constructor
-
     pub fn from(circom_source_code_path: String) -> Self {
         Self {
-            circom_source_code_path,
+            circom_source_code_path: circom_source_code_path.clone(),
+            filename: circom_source_code_path
+                .strip_suffix(".circom")
+                .unwrap()
+                .to_string(),
         }
+    }
+
+    pub fn filename(&self) -> String {
+        self.filename.clone()
     }
 
     // verification key generation
 
-    pub fn generate_verification_key(&mut self, rand: (&str, &str)) -> Result<(), Error> {
-        let circuit_name = self
-            .circom_source_code_path
-            .strip_suffix(".circom")
-            .unwrap();
-        let output_path = "build/";
+    pub fn generate_verification_key(&self, rand: (&str, &str)) -> Result<(), Error> {
+        let circuit_name = self.filename();
+        let output_path = BUILD_DIR;
 
         fs::create_dir_all(output_path).expect("Failed to create output directory");
 
@@ -60,7 +65,7 @@ impl CircomCircuit {
         verification_key_path: &str,
         inputs_path: &str,
     ) -> CompressedGroth16ProofBls12_381 {
-        let build_path = "build/".to_string();
+        let build_path = BUILD_DIR.to_string();
         self.create_directory_if_not_exists(&build_path);
 
         self.compile_witness_generator(&build_path);
@@ -159,6 +164,13 @@ impl CircomCircuit {
         );
     }
 
+    pub fn export_r1cs_to_json(&self, r1cs_path: &String, r1cs_json_path: &String) {
+        self.run_command_or_fail(
+            Command::new("snarkjs").args(["r1cs", "export", "json", &r1cs_path, &r1cs_json_path]),
+            "export r1cs",
+        );
+    }
+
     // private - proof generation
 
     fn compile_witness_generator(&self, output_path: &str) {
@@ -205,11 +217,7 @@ impl CircomCircuit {
     // file system
 
     fn filename_from_path(path: &String) -> &str {
-        Path::new(path)
-            .file_stem()
-            .unwrap()
-            .to_str()
-            .unwrap()
+        Path::new(path).file_stem().unwrap().to_str().unwrap()
     }
 
     fn create_directory_if_not_exists(&self, build_path: &str) {
@@ -224,7 +232,7 @@ impl CircomCircuit {
             .expect("Couldnt create directory");
     }
 
-    fn run_command_or_fail(&self, cmd: &mut Command, label: &str) {
+    pub fn run_command_or_fail(&self, cmd: &mut Command, label: &str) {
         let status = cmd
             .stdout(Stdio::null())
             .status()

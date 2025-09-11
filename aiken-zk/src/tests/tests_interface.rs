@@ -1,4 +1,5 @@
 use crate::circom_circuit::CircomCircuit;
+use crate::tests::circom_component_factory::addition_custom_circom_template_and_component;
 use crate::tests::utils::{create_sandbox_and_set_as_current_directory, manifest_path};
 use serial_test::serial;
 use std::fs::File;
@@ -28,12 +29,49 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
         .lines()
         .collect::<Result<_, _>>()
         .unwrap();
-    let expected_line_replacement = "zk_verify_or_fail(redeemer, [b, 10])";
+    let expected_line_replacement = "zk_verify_or_fail(redeemer, [Single(b), Single(10)])";
     let expected_line_declaration = "fn zk_verify_or_fail(";
     assert!(lines[19].contains(expected_line_replacement));
-    assert!(lines[28].contains(expected_line_declaration));
+    assert!(lines[33].contains(expected_line_declaration));
     assert!(Path::new("verification_key.zkey").exists());
     assert!(Path::new("output.circom").exists());
+
+    assert!(compilation_result.status.success());
+    assert!(Path::new("plutus.json").exists());
+}
+
+#[test]
+#[serial]
+fn test_user_can_convert_aiken_with_custom_circom_offchain_to_valid_aiken() {
+    let _temporal_directory = create_sandbox_and_set_as_current_directory();
+    let aiken_zk_binary_path = manifest_path() + "/target/debug/aiken-zk";
+    let output_path = "validators/output.ak";
+    fs::write(
+        "./addition.circom",
+        addition_custom_circom_template_and_component(),
+    )
+    .unwrap();
+    fs::write(
+        source_aiken_filename(),
+        original_aiken_code_with_custom_token(),
+    )
+    .expect("output file write failed");
+
+    Command::new(aiken_zk_binary_path)
+        .arg("build")
+        .arg(source_aiken_filename())
+        .arg(output_path)
+        .output()
+        .unwrap();
+
+    let compilation_result = Command::new("aiken").arg("build").output().unwrap();
+    let file = fs::read_to_string(output_path).unwrap();
+    let expected_line_replacement = "zk_verify_or_fail(redeemer, [Single(b), Single(5)])";
+    let expected_line_declaration = "fn zk_verify_or_fail(";
+    assert!(file.contains(expected_line_replacement));
+    assert!(file.contains(expected_line_declaration));
+    assert!(Path::new("verification_key.zkey").exists());
+    assert!(Path::new("addition.circom").exists());
 
     assert!(compilation_result.status.success());
     assert!(Path::new("plutus.json").exists());
@@ -109,7 +147,6 @@ fn test_user_can_generate_a_meshjs_proof() {
     assert_line_matches(&mut reader, "\t\t),\n");
 
     assert_text_matches(&mut reader, meshjs_file_suffix());
-
 }
 
 fn assert_line_matches(reader: &mut BufReader<File>, expected_line: &str) {
@@ -169,14 +206,14 @@ export function mZKRedeemer(redeemer: Data): ZKRedeemer {
 function proofs(): Proof[] {
     return [
 "#
-        .to_string()
+    .to_string()
 }
 
 fn meshjs_file_suffix() -> String {
     r#"    ];
 }
 "#
-        .to_string()
+    .to_string()
 }
 
 fn source_aiken_filename() -> &'static str {
@@ -190,7 +227,7 @@ fn create_original_aiken_file() {
 fn create_circom_and_inputs_file() {
     let circom_path = "my_program.circom";
     fs::write(circom_path, circom_file()).unwrap();
-    let mut circom_compiler = CircomCircuit::from(circom_path.to_string());
+    let circom_compiler = CircomCircuit::from(circom_path.to_string());
     circom_compiler
         .generate_verification_key(("a", "b"))
         .unwrap();
@@ -227,7 +264,37 @@ validator example {
     _self: Transaction,
   ) {
     expect Some(b) = datum
-    expect _zk_redeemer = offchain addition(priv a, b, 10)
+    expect _zk_redeemer = offchain addition(priv, b, 10)
+    True
+  }
+
+  else(_) {
+    fail
+  }
+}
+"#
+    .to_string()
+}
+
+fn original_aiken_code_with_custom_token() -> String {
+    r#"use cardano/transaction.{OutputReference, Transaction,}
+
+pub type ZK<redeemer_type> {
+  redeemer: redeemer_type,
+  proofs: List<Proof>,
+}
+
+type Redeemer = Void
+
+validator example {
+  spend(
+    datum: Option<Int>,
+    redeemer: ZK<Redeemer>,
+    _own_ref: OutputReference,
+    _self: Transaction,
+  ) {
+    expect Some(b) = datum
+    expect _zk_redeemer = offchain custom("addition.circom", [b, 5])
     True
   }
 

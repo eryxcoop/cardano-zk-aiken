@@ -30,25 +30,25 @@ export class Contract {
     const deployedTxHash = await this.deployTx(txHash);
 
     console.log(`1 tADA locked into the contract at Tx ID: ${deployedTxHash}`);
-    
+
     return deployedTxHash;
   }
 
   async spend(validatorScriptIndex: number, txHashFromDeposit: string, redeemer: Data, redeemerBudget?: { mem: number, steps: number }): Promise<string> {
     const validatorScriptAddr = this.getValidatorScriptAddress(validatorScriptIndex)
     const scriptUtxo = await this.blockchainProvider.getUtxoByTxHashAndAddress(txHashFromDeposit, validatorScriptAddr);
-    
+
     const collateralTryCount = 5;
     for (let i = 0; i < collateralTryCount; i++) {
       try {
         const txHash = await this.buildTxWithSpendUTxO(scriptUtxo, validatorScriptIndex, redeemer, redeemerBudget);
         const deployedTxHash = await this.deployTx(txHash);
-      
+
         console.log(`1 tADA unlocked from the contract at Tx ID: ${deployedTxHash}`);
 
         return deployedTxHash;
       } catch (error) {
-        if (error.search(/InsufficientCollateral/) === -1) {
+        if (!error.hasOwn(error, "search") || error.search(/InsufficientCollateral/) === -1) {
           throw("Spend failed: "+ error);
         }
       }

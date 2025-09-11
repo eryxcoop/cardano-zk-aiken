@@ -1,3 +1,3 @@
-pub mod meshjs_zk_redeemer_presenter;
 pub mod compressed_groth16_proof_bls12_381_to_aiken_presenter;
 mod compressed_groth16_proof_bls12_381_to_meshjs_presenter;
+pub mod meshjs_zk_redeemer_presenter;

@@ -1,4 +1,4 @@
-use aiken_zk::command_line_interface::CommandLineInterface;
+use aiken_zk::cli::command_line_interface::CommandLineInterface;
 
 fn main() {
     let command_line_interface = CommandLineInterface::new();

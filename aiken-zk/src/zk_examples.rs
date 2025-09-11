@@ -2,8 +2,9 @@ use chumsky::prelude::*;
 use std::fmt;
 use std::fmt::Formatter;
 
-use crate::parsers::int_parser;
-use crate::token_zk::TokenZK as Token;
+use crate::compiler::parsers::int_parser;
+use crate::compiler::token_zk::{TokenZK as Token, TokenZK};
+use crate::zk_examples::TokenWithCardinality::{Multiple, Single};
 use aiken_lang::parser::error::ParseError;
 use chumsky::{
     Parser,
@@ -17,33 +18,120 @@ pub enum InputVisibility {
 }
 
 impl InputVisibility {
-    pub fn from(keyword: &str) -> Self {
+    pub fn from(keyword: Option<&str>) -> Option<Self> {
         match keyword {
-            "pub" => Self::Public,
-            "priv" => Self::Private,
+            Some("pub") => Some(Self::Public),
+            Some("priv") => Some(Self::Private),
+            None => None,
             _ => panic!("Visibility not recognized"),
         }
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct InputZK {
+pub enum TokenWithCardinality {
+    Single(Token),
+    Multiple(Vec<Token>),
+}
+
+impl fmt::Display for TokenWithCardinality {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Single(token) => write!(f, "{}", token),
+            Multiple(token_vector) => {
+                write!(f, "[")?;
+                for token in token_vector {
+                    write!(f, "{}", token)?;
+                }
+                write!(f, "]")?;
+                Ok(())
+            }
+        }
+    }
+}
+
+impl TokenWithCardinality {
+    pub fn new_single(token: Token) -> Self {
+        Single(token)
+    }
+
+    fn _new_multiple(token_vector: Vec<Token>) -> Self {
+        Multiple(token_vector)
+    }
+
+    pub fn extract_single(&self) -> Option<TokenZK> {
+        match self {
+            Single(token) => Some(token.clone()),
+            Multiple(_) => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CircuitTemplateParameter {
     pub token: Box<Token>,
-    pub visibility: Option<InputVisibility>,
+}
+
+impl CircuitTemplateParameter {
+    pub fn from(visibility_token: (Option<InputVisibility>, Option<Token>)) -> Self {
+        let (maybe_input_visibility, maybe_token) = visibility_token;
+
+        if maybe_input_visibility.is_some() {
+            panic!("A circuit template parameter cannot have visibility");
+        }
+
+        let identifier_token = if let Some(Token::Int { value, base }) = maybe_token {
+            Box::new(TokenZK::Int { value, base })
+        } else {
+            panic!("A circuit template parameter must be constant");
+        };
+
+        Self {
+            token: identifier_token,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct InputZK {
+    pub visibility: InputVisibility,
+    pub token: Option<Box<TokenWithCardinality>>,
 }
 
 impl InputZK {
-    pub fn from(visibility_token: (Option<InputVisibility>, Token)) -> Self {
-        Self {
-            token: Box::new(visibility_token.1),
-            visibility: visibility_token.0,
+    pub fn from(visibility_token: (Option<InputVisibility>, Option<TokenZK>)) -> Self {
+        let (maybe_input_visibility, maybe_cardinality_token) = visibility_token;
+
+        match maybe_input_visibility {
+            None | Some(InputVisibility::Public) => {
+                if maybe_cardinality_token.is_none() {
+                    panic!("Public parameters must be followed by an identifier");
+                }
+
+                Self {
+                    visibility: InputVisibility::Public,
+                    token: Some(Box::new(TokenWithCardinality::new_single(
+                        maybe_cardinality_token.unwrap(),
+                    ))),
+                }
+            }
+            Some(InputVisibility::Private) => {
+                if maybe_cardinality_token.is_some() {
+                    panic!("Private parameters cannot be followed by an identifier");
+                }
+
+                Self {
+                    visibility: InputVisibility::Private,
+                    token: None,
+                }
+            }
         }
     }
 }
 
 impl fmt::Display for InputZK {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.token)
+        write!(f, "{}", self.token.clone().unwrap())
     }
 }
 
@@ -67,7 +155,7 @@ pub enum ZkExample {
     Fibonacci {
         fib_0: InputZK,
         fib_1: InputZK,
-        n: InputZK,
+        n: CircuitTemplateParameter,
         res: InputZK,
     },
     If {
@@ -80,6 +168,34 @@ pub enum ZkExample {
         lhs: InputZK,
         rhs: InputZK,
     },
+    Sha256 {
+        n_bits: CircuitTemplateParameter,
+        r#in: InputZK,
+        out: InputZK,
+    },
+    CustomCircom {
+        path: String,
+        public_inputs: Vec<Box<TokenWithCardinality>>,
+    },
+    Poseidon {
+        n_inputs: CircuitTemplateParameter,
+        r#in: InputZK,
+        out: InputZK,
+    },
+    MerkleTreeChecker {
+        levels: CircuitTemplateParameter,
+        leaf: InputZK,
+        root: InputZK,
+        path_elements: InputZK,
+        path_indices: InputZK,
+    },
+    PolynomialEvaluations {
+        grade: CircuitTemplateParameter,
+        coefficients: InputZK,
+        amount_of_evaluations: CircuitTemplateParameter,
+        domain: InputZK,
+        evaluations: InputZK,
+    },
 }
 
 impl ZkExample {
@@ -87,19 +203,20 @@ impl ZkExample {
         text::ident().map(|name| Token::Name { name }).padded()
     }
 
-    fn int_or_var() -> impl Parser<char, (Option<InputVisibility>, Token), Error = ParseError> {
-        Self::visibility_parser()
+    fn int_or_var()
+    -> impl Parser<char, (Option<InputVisibility>, Option<Token>), Error = ParseError> {
+        choice((just("priv"), just("pub")))
+            .padded()
             .or_not()
-            .then(choice((int_parser(), Self::name_parser())))
-    }
-
-    pub fn visibility_parser() -> impl Parser<char, InputVisibility, Error = ParseError> {
-        choice((just("pub").padded(), just("priv").padded())).map(InputVisibility::from)
+            .then(choice((int_parser(), Self::name_parser())).or_not())
+            .map(|(maybe_visibility, maybe_token)| {
+                (InputVisibility::from(maybe_visibility), maybe_token)
+            })
     }
 
     fn parameters(
         ammount_of_parameters: usize,
-    ) -> impl Parser<char, Vec<(Option<InputVisibility>, Token)>, Error = ParseError> {
+    ) -> impl Parser<char, Vec<(Option<InputVisibility>, Option<Token>)>, Error = ParseError> {
         Self::int_or_var()
             .separated_by(just(',').padded())
             .exactly(ammount_of_parameters)
@@ -156,7 +273,7 @@ impl ZkExample {
                 example: ZkExample::Fibonacci {
                     fib_0: InputZK::from(args[0].clone()),
                     fib_1: InputZK::from(args[1].clone()),
-                    n: InputZK::from(args[2].clone()),
+                    n: CircuitTemplateParameter::from(args[2].clone()),
                     res: InputZK::from(args[3].clone()),
                 },
             })
@@ -188,6 +305,79 @@ impl ZkExample {
             })
     }
 
+    fn sha256_parser() -> impl Parser<char, Token, Error = ParseError> {
+        just("sha256")
+            .padded()
+            .ignore_then(Self::parameters(3))
+            .map(|args| Token::Offchain {
+                example: ZkExample::Sha256 {
+                    n_bits: CircuitTemplateParameter::from(args[0].clone()),
+                    r#in: InputZK::from(args[1].clone()),
+                    out: InputZK::from(args[2].clone()),
+                },
+            })
+    }
+
+    fn poseidon_parser() -> impl Parser<char, Token, Error = ParseError> {
+        just("poseidon")
+            .padded()
+            .ignore_then(Self::parameters(3))
+            .map(|args| Token::Offchain {
+                example: ZkExample::Poseidon {
+                    n_inputs: CircuitTemplateParameter::from(args[0].clone()),
+                    r#in: InputZK::from(args[1].clone()),
+                    out: InputZK::from(args[2].clone()),
+                },
+            })
+    }
+
+    fn merkle_tree_checker_parser() -> impl Parser<char, Token, Error = ParseError> {
+        just("merkle_tree_checker")
+            .padded()
+            .ignore_then(Self::parameters(5))
+            .map(|args| Token::Offchain {
+                example: ZkExample::MerkleTreeChecker {
+                    levels: CircuitTemplateParameter::from(args[0].clone()),
+                    leaf: InputZK::from(args[1].clone()),
+                    root: InputZK::from(args[2].clone()),
+                    path_elements: InputZK::from(args[3].clone()),
+                    path_indices: InputZK::from(args[4].clone()),
+                },
+            })
+    }
+
+    fn custom_circom_parser() -> impl Parser<char, Token, Error = ParseError> {
+        let string_literal_parser = just('"')
+            .ignore_then(filter(|c| *c != '"').repeated().collect::<String>())
+            .then_ignore(just('"'));
+        let identifiers_parser = choice((int_parser(), Self::name_parser()));
+
+        let public_input_identifiers_list_parser = identifiers_parser
+            .separated_by(just(",").padded())
+            .delimited_by(just("[").padded(), just("]").padded());
+        let custom_circom_argument_parser = string_literal_parser
+            .padded()
+            .then_ignore(just(",").padded())
+            .then(public_input_identifiers_list_parser)
+            .delimited_by(
+                just("(").padded(),
+                just(")").padded_by(just(" ").repeated()),
+            );
+
+        just("custom")
+            .padded()
+            .ignore_then(custom_circom_argument_parser)
+            .map(|(path, public_input_identifiers)| Token::Offchain {
+                example: ZkExample::CustomCircom {
+                    path,
+                    public_inputs: public_input_identifiers
+                        .iter()
+                        .map(|token| Box::new(TokenWithCardinality::new_single(token.clone())))
+                        .collect(),
+                },
+            })
+    }
+
     pub fn parser() -> impl Parser<char, Token, Error = ParseError> {
         choice((
             Self::addition_parser(),
@@ -196,6 +386,26 @@ impl ZkExample {
             Self::fibonacci_parser(),
             Self::if_parser(),
             Self::assert_eq_parser(),
+            Self::sha256_parser(),
+            Self::poseidon_parser(),
+            Self::merkle_tree_checker_parser(),
+            Self::polynomial_evaluations(),
+            Self::custom_circom_parser(),
         ))
+    }
+
+    fn polynomial_evaluations() -> impl Parser<char, Token, Error = ParseError> {
+        just("polynomial_evaluations")
+            .padded()
+            .ignore_then(Self::parameters(5))
+            .map(|args| Token::Offchain {
+                example: ZkExample::PolynomialEvaluations {
+                    grade: CircuitTemplateParameter::from(args[0].clone()),
+                    coefficients: InputZK::from(args[1].clone()),
+                    amount_of_evaluations: CircuitTemplateParameter::from(args[2].clone()),
+                    domain: InputZK::from(args[3].clone()),
+                    evaluations: InputZK::from(args[4].clone()),
+                },
+            })
     }
 }

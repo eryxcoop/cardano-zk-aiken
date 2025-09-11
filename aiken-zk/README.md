@@ -72,28 +72,43 @@ the ```./start.sh``` command. To run the tests:
 ## Offchain statement
 
 It extends the Aiken language with a new ```offchain``` keyword. This means that a programmer can write an Aiken
-source code with **one** of the following new language tokens in the validator body:
+source code with **one** of the tokens presented below.
 
-* ```offchain addition(x, y, z)```: verifies that ```x + y == z```.
-* ```offchain subtraction(x, y, z)```: verifies that ```x - y == z```.
-* ```offchain multiplication(x, y, z)```: verifies that ```x * y == z```.
-* ```offchain fibonacci(x, y, z, w)```: verifies that the fibonacci sequence with initial values ```[x,y]``` and ```z```
-  elements ends with ```w```. In this case, ```z``` **must** be a literal number.
-* ```offchain if(x, y, z, w)```: verifies that ```y == z if (x == 1) | y == w if (x == 0)```. ```x``` must be 1 or 0.
-* ```offchain assert_eq(x, y)```: verifies that ```x == y```
+### Parameters convention
+* ```x```, ```y```, ```z```, ```w```: integer literal, integer variable name 
+* ```t```, ```r```: integer literal
+* ```A```, ```B```: list variable name
 
-```x```,```y```,```z``` and ```w``` must be
+#### Types description
+* **integer literal** such as ```4``` or ```0xa3```.
+* **integer variable name** such as ```my_number```.
+* **list variable name** such as ```my_list```. It cannot be a list literal as ```[1,2]```. 
 
-* **numeric literals** such as ```4``` or ```0xa3```.
-* **single variable names** such as ```my_number```.
+
+### Supported tokens
+* ```offchain addition(x, y, z)```: verifies that $x + y = z$.
+* ```offchain subtraction(x, y, z)```: verifies that $x - y = z$.
+* ```offchain multiplication(x, y, z)```: verifies that $x * y = z$.
+* ```offchain fibonacci(x, y, t, z)```: verifies that the fibonacci sequence with initial values $[x,y]$ and $t$
+  elements ends with $z$. In this case, $t$ **must** be a literal number.
+* ```offchain if(x, y, z, w)```: verifies that $y = z \,\,\,\rm{if} (x = 1)\, |\, y = w \,\,\,\rm{if} (x = 0)$. $x$ must be 1 or 0.
+* ```offchain assert_eq(x, y)```: verifies that $x = y$
+* ```offchain sha256(t, A, B)```: verifies that $sha256(A) = B$ with $size(A) = t$ and $size(B) = 256$. A and B being lists of **bits**.
+* ```offchain poseidon(t, A, x)```: verifies that $poseidon(A) = x$ with $size(A) = t$ and A being a list of integers and x being an integer.
+* ```offchain polynomial_evaluations(t, A, r, B, C)```: verifies that the polynomial $P$ with grade $t$ represented by the coefficients $A$ matches $\forall i \in [1\ldots r]$ $P(B[i]) = C[i]$.
+* ```offchain merkle_tree_checker(merklePathLength, leaf, merkleRoot , pathElements, pathIndices)```: verifies that the merkle path formed by $pathElements$, in which each element is on the left or the right (indicated by $0$s and $1$s respectively in $pathIndices$), where $leaf$ is the value of the leaf and $merkleRoot$ is the root of the tree, is correct. $merklePathLength$ is the length of the merkle path without the root and **must** be a constant in compilation time. **Warning: do not use in production since the hash function is being mocked for now.**
+
+
+* ```offchain custom(path/to/circom/component, [pi0, pi1, ...])``` allows you to use your own circom **components** in aiken code. You must provide a path to the circom file that includes the defined component, and pass a list for the public inputs (in the same order that are defined in the template, without the ```pub``` keyword, ignoring private parameters). The amount of public inputs must be the same in the aiken code and the component definition. 
+ 
 
 ### Public and private parameters
 
 This new addition to the language allows you to declare some of the arguments as private. Some examples are:
 
-* offchain addition(priv x, pub y, z)
-* offchain addition(priv x, priv y, priv z)
-* offchain assert_eq(priv x, y)
+* ```offchain addition(priv, pub y, z)```
+* ```offchain addition(priv, priv, priv)```
+* ```offchain assert_eq(priv, y)```
 
 Any visibility combination is possible. If the visibility modifier is not present, the argument is assumed to be
 **public**.

@@ -1,4 +1,4 @@
-use crate::aiken_zk_compiler::Groth16CompressedData;
+use crate::compiler::aiken_zk_compiler::Groth16CompressedData;
 
 pub fn aiken_template_with_body_and_verify_definition(
     header: &str,
@@ -45,9 +45,14 @@ pub fn verify_declaration(
 
     format!(
         r#"
+    type ZKInputType {{
+        Single(Int)
+        Many(List<Int>)
+    }}
+
     fn zk_verify_or_fail(
         zk_redeemer: ZK<Redeemer>,
-        public_inputs: List<Int>
+        public_inputs: List<ZKInputType>
     ) -> ZK<Redeemer> {{
 
         let vk: SnarkVerificationKey =
@@ -65,7 +70,14 @@ pub fn verify_declaration(
 
         expect Some(proof) = list.head(zk_redeemer.proofs)
 
-        if !groth_verify(vk, proof, public_inputs) {{
+        let flattened_public_inputs: List<Int> = list.flat_map(public_inputs, fn(item) {{
+            when item is {{
+              Single(x) -> [x]
+              Many(xs) -> xs
+            }}
+        }})
+
+        if !groth_verify(vk, proof, flattened_public_inputs) {{
           fail
           Void
         }} else {{
