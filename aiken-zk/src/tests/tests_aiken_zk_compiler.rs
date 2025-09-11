@@ -2,7 +2,7 @@ use crate::compiler::aiken_zk_compiler::{AikenZkCompiler, Groth16CompressedData}
 use crate::tests::aiken_program_factory::{
     aiken_template_with_body_and_verify_definition, verify_declaration,
 };
-use crate::tests::circom_component_factory::addition_custom_circom_template_and_component;
+use crate::tests::circom_component_factory::{addition_custom_circom_template_and_component, indexing_custom_circom_template_and_component};
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
 use std::fs;
@@ -182,6 +182,41 @@ fn test_replaces_custom_circom_by_the_corresponding_function_and_call() {
         import_header(),
         "zk_verify_or_fail(redeemer, [Single(a), Single(5)])",
         &verify_declaration(2, addition_custom_circom_vk_compressed()),
+    );
+
+    assert_eq!(
+        without_delta(expected_aiken_src),
+        without_delta(aiken_zk_src)
+    );
+}
+
+#[test]
+#[serial]
+fn test_replaces_custom_circom_with_list_variable_by_the_corresponding_function_and_call() {
+    let _temp_dir = create_sandbox_and_set_as_current_directory();
+    fs::write(
+        "./test.circom",
+        indexing_custom_circom_template_and_component(),
+    )
+    .unwrap();
+    let aiken_src = aiken_template_with_body_and_verify_definition(
+        "",
+        "offchain custom(\"test.circom\", [l, idx, val])",
+        "",
+    );
+    let output_filename = "my_program".to_string();
+    let random_seeds = ("asdasd", "dsadsa");
+
+    let aiken_zk_src = AikenZkCompiler::apply_modifications_to_src_for_token(
+        aiken_src,
+        output_filename,
+        random_seeds,
+    );
+
+    let expected_aiken_src = aiken_template_with_body_and_verify_definition(
+        import_header(),
+        "zk_verify_or_fail(redeemer, [Many(l), Single(idx), Single(val)])",
+        &verify_declaration(3, addition_custom_circom_vk_compressed()),
     );
 
     assert_eq!(
