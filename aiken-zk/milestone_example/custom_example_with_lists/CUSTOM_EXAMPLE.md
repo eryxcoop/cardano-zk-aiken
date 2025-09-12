@@ -43,6 +43,8 @@ The CompareHead parameters used to generate the proof are in the ```input_compar
 }
 ```
 
+These values will be used to generate the proof of the circom circuit, and the public ones must match with the values provided in aiken. In this case we don't have any private parameters, but if they exist, their values should be located here. These values will be used to resolve the Groth16 witnesses and ultimately generate the proof. 
+
 ### Aiken testing
 
 Execute the following command to generate the proof to use in the Aiken test:
