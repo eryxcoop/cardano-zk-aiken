@@ -122,7 +122,7 @@ Then, enter the subdirectory ```deployment``` and run:
 npx tsx lock_fibonacci.ts
 ```
 
-This will output the transaction hash, save it for the next step.
+This will output the transaction hash, save it for the next step and go back to the ```milestone_example``` directory.
 
 Now, it's time to unlock. For this task we provide the ```unlock_fibonacci.ts``` file, but it lacks the proof on the redeemer yet.
 
@@ -214,7 +214,7 @@ Then, enter the subdirectory ```deployment``` and run:
 npx tsx lock_complex_token.ts
 ```
 
-Save the output transaction hash for the next step.
+Save the output transaction hash for the next step and go back to the ```milestone_example``` directory.
 
 Time to unlock. Run the following command to generate the typescript library that contains the proof:
 
@@ -293,7 +293,7 @@ Then, enter the subdirectory ```deployment``` and run:
 npx tsx lock_complex_token.ts
 ```
 
-Save the output transaction hash for the next step.
+Save the output transaction hash for the next step and go back to the ```milestone_example``` directory.
 
 Time to unlock. Run the following command to generate the typescript library that contains the proof:
 
@@ -391,7 +391,7 @@ Then, enter the subdirectory ```deployment``` and run:
 npx tsx lock_complex_token.ts
 ```
 
-Save the output transaction hash for the next step.
+Save the output transaction hash for the next step and go back to the ```milestone_example``` directory.
 
 Time to unlock. Run the following command to generate the typescript library that contains the proof:
 
