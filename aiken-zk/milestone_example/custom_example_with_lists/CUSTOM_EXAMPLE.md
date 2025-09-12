@@ -1,5 +1,7 @@
 # Custom example using list inputs
-We'll walk through an use case of this tool using a custom circom circuit that takes a list as an input. 
+We'll walk through a use case of this tool using a custom circom circuit that takes a list as an input. 
+
+The following explanation assumes that you have installed all the dependencies as dictated in the root ```README.md``` file. 
 
 ## The source code
 The first step is creating the custom circom file. This can be found in the ```compare_head.circom``` file. As you can see, there are 2 input signals, one of which is an array. Remember that your custom circom file must contain a ```main``` component for the tool to work. 
@@ -14,7 +16,9 @@ Notice that we're using an extra ```@``` to indicate that the variable ```l``` i
 
 ## Building the source code with the Tool
 
-The next step is to build the aiken code in ```compare_head.ak```. Here, run the command
+The next step is to build the aiken code in ```compare_head.ak```. Right now, the tool depends on external typescript code to compress the Groth16 verification key in a format usefull for Aiken. This code is located in the ```curve_compress/``` directory. You should go to that directory, run ```npm i``` and then come back out. 
+
+Then, run the command
 
 ```bash
 cargo run -- build compare_head.ak validators/compare_head_final.ak
@@ -23,10 +27,11 @@ cargo run -- build compare_head.ak validators/compare_head_final.ak
 This will create a new aiken file in ```validators/compare_head_final.ak``` which has an embedded Groth16 verification key for the circom code we defined in ```compare_head.circom```. You can check it out if you want. 
 
 ## Building with Aiken
-Now we're going to use the original aiken tool to build the automatically generated code. For this, you just need to run 
+Now we're going to use the original Aiken tool to build the automatically generated code. For this, you just need to run 
 ```bash
 aiken build
 ```
 without changing your directory (meaning, in the same directory that the ```aiken.toml``` file is located, which should be the same one that contains the ```validators``` directory). If the build is successfull, we can move to the next steps. 
 
-## Locking funds using the 
+## Generate the proof
+We're going to continue with 
