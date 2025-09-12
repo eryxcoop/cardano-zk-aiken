@@ -45,24 +45,30 @@ The CompareHead parameters used to generate the proof are in the ```input_compar
 
 These values will be used to generate the proof of the circom circuit, and the public ones must match with the values provided in aiken. In this case we don't have any private parameters, but if they exist, their values should be located here. These values will be used to resolve the Groth16 witnesses and ultimately generate the proof. 
 
-### Aiken testing
+## Aiken testing
 
 Execute the following command to generate the proof to use in the Aiken test:
 
 ```bash
 cargo run -- prove aiken compare_head.circom verification_key.zkey inputs_compare_head.json proof.ak
 ```
-You could use the generated proof ```proof.ak``` on the Aiken test. Then, running an ```aiken check``` should execute successfully.
+You could use the generated proof ```proof.ak``` on the Aiken test. This means that you should copy the contents of ```proof.ak``` into the ```test_example```, replacing the placeholders. After that, run ```aiken check``` to verify that the test is passing.
 
-### MeshJS unlocking
+## MeshJS locking and unlocking
 
-Now that you've your aiken code built, you can enter to the subdirectory  ```deployment``` and run:
+Now that you've your aiken code built, you can enter to the subdirectory  ```deployment``` to deploy things to the preview network. We will lock and unlock 1 ADA, using the verification of the proof as a condition for unlocking.
+
+### Locking
+
+Let's start by running the following command to lock 1 ADA, that will only be unlocked when the proof verifies on-chain:
 
 ```shell
 npx tsx lock_complex_token.ts
 ```
 
-Save the output transaction hash for the next step and go back to the ```custom_example_with_list``` directory.
+Save the output transaction hash for the next step: you will need it to unlock the funds. Then, go back to the ```custom_example_with_list``` directory.
+
+### Unlocking
 
 Time to unlock. Run the following command to generate the typescript library that contains the proof:
 
