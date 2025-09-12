@@ -53,7 +53,7 @@ This means `a = fibonacci(1) = 2`, `b = fibonacci(2) = 3`, then `c = fibonacci(5
 Execute the following command to generate a proof ready to use in the mentioned Aiken test:
 
 ```shell
-cargo run -- prove aiken output.circom verification_key.zkey inputs_fibonacci.json proof.ak
+cargo run -- prove aiken output.circom verification_key.zkey circuit_inputs/inputs_fibonacci.json proof.ak
 ```
 
 The ```proof.ak``` file will look like:
@@ -131,7 +131,7 @@ To generate this proof, you can use the aiken-zk tool.
 To accomplish this task, go back and run:
 
 ```shell
-cargo run -- prove meshjs output.circom verification_key.zkey inputs_fibonacci.json deployment/zk_redeemer.ts
+cargo run -- prove meshjs output.circom verification_key.zkey circuit_inputs/inputs_fibonacci.json deployment/zk_redeemer.ts
 ```
 
 Go to ```deployment/unlock_fibonacci.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
@@ -194,7 +194,7 @@ This means `sha256("Coffe") = "0xBFB424E48235A63C27A22610243DC4E0B217B0B604358A9
 Execute the following command to generate the proof to use in the Aiken test:
 
 ```shell
-cargo run -- prove aiken output.circom verification_key.zkey inputs_sha256.json proof.ak
+cargo run -- prove aiken output.circom verification_key.zkey circuit_inputs/inputs_sha256.json proof.ak
 ```
 
 You could use the generated proof ```proof.ak``` on the Aiken test. Then, running an ```aiken check``` should execute
@@ -219,7 +219,7 @@ Save the output transaction hash for the next step and go back to the ```milesto
 Time to unlock. Run the following command to generate the typescript library that contains the proof:
 
 ```shell
-cargo run -- prove meshjs output.circom verification_key.zkey inputs_sha256.json deployment/zk_redeemer.ts
+cargo run -- prove meshjs output.circom verification_key.zkey circuit_inputs/inputs_sha256.json deployment/zk_redeemer.ts
 ```
 
 Go to ```deployment/unlock_complex_token.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
@@ -273,7 +273,7 @@ The MerkleTreeChecker parameters used to generate the proof are in the input_mer
 Execute the following command to generate the proof to use in the Aiken test:
 
 ```shell
-cargo run -- prove aiken output.circom verification_key.zkey inputs_merkle_tree_checker.json proof.ak
+cargo run -- prove aiken output.circom verification_key.zkey circuit_inputs/inputs_merkle_tree_checker.json proof.ak
 ```
 
 You could use the generated proof ```proof.ak``` on the Aiken test. Then, running an ```aiken check``` should execute
@@ -298,7 +298,7 @@ Save the output transaction hash for the next step and go back to the ```milesto
 Time to unlock. Run the following command to generate the typescript library that contains the proof:
 
 ```shell
-cargo run -- prove meshjs output.circom verification_key.zkey inputs_merkle_tree_checker.json deployment/zk_redeemer.ts
+cargo run -- prove meshjs output.circom verification_key.zkey circuit_inputs/inputs_merkle_tree_checker.json deployment/zk_redeemer.ts
 ```
 
 Go to ```deployment/unlock_complex_token.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
@@ -371,7 +371,7 @@ The CustomCircuit parameters used to generate the proof are in the input_custom_
 Execute the following command to generate the proof to use in the Aiken test:
 
 ```shell
-cargo run -- prove aiken my_custom_circuit.circom verification_key.zkey inputs_custom_circuit.json proof.ak
+cargo run -- prove aiken my_custom_circuit.circom verification_key.zkey circuit_inputs/inputs_custom_circuit.json proof.ak
 ```
 
 You could use the generated proof ```proof.ak``` on the Aiken test. Then, running an ```aiken check``` should execute
@@ -396,7 +396,7 @@ Save the output transaction hash for the next step and go back to the ```milesto
 Time to unlock. Run the following command to generate the typescript library that contains the proof:
 
 ```shell
-cargo run -- prove meshjs my_custom_circuit.circom verification_key.zkey inputs_custom_circuit.json deployment/zk_redeemer.ts
+cargo run -- prove meshjs custom_circuits/my_custom_circuit.circom verification_key.zkey circuit_inputs/inputs_custom_circuit.json deployment/zk_redeemer.ts
 ```
 
 Go to ```deployment/unlock_complex_token.ts``` and import the exported function ```mZKRedeemer``` from the generated library:

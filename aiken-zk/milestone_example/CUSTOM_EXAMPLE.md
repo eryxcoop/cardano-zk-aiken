@@ -4,27 +4,27 @@ We'll walk through a use case of this tool using a custom circom circuit that ta
 The following explanation assumes that you have installed all the dependencies as dictated in the root ```README.md``` file. 
 
 ## The source code
-The first step is creating the custom circom file. This can be found in the ```compare_head.circom``` file. As you can see, there are 2 input signals, one of which is an array. Remember that your custom circom file must contain a ```main``` component for the tool to work. 
+The first step is creating the custom circom file. This can be found in the ```custom_circuits/compare_head.circom``` file. As you can see, there are 2 input signals, one of which is an array. Remember that your custom circom file must contain a ```main``` component for the tool to work. 
 
-The next step is to reference the circom file within our aiken code. The file we're using for this is the ```compare_head.ak```, and the line is
+The next step is to reference the circom file within our aiken code. The file we're using for this is the ```validators_with_offchain/compare_head.ak```, and the line is
 
 ```rust
-expect _redeemer = offchain custom("./compare_head.circom", [@l, val])
+expect _redeemer = offchain custom("./custom_circuits/compare_head.circom", [@l, val])
 ```
 
 Notice that we're using an extra ```@``` to indicate that the variable ```l``` is, in fact, a variable containing a list. We're not using this in the variable ```val``` since it's a single number. In general, you should make sure that the amount of public inputs in the aiken file matches with the amount in the main circom component.  
 
 ## Building the source code with the Tool
 
-The next step is to build the aiken code in ```compare_head.ak```. Right now, the tool depends on external typescript code to compress the Groth16 verification key in a format usefull for Aiken. This code is located in the ```curve_compress/``` directory. You should go to that directory, run ```npm i``` and then come back out. 
+The next step is to build the aiken code in ```custom_circuits/compare_head.ak```. Right now, the tool depends on external typescript code to compress the Groth16 verification key in a format usefull for Aiken. This code is located in the ```curve_compress/``` directory. You should go to that directory, run ```npm i``` and then come back out. 
 
 Then, run the command
 
 ```bash
-cargo run -- build compare_head.ak validators/compare_head_final.ak
+cargo run -- build custom_circuits/compare_head.ak validators/compare_head_final.ak
 ```
 
-This will create a new aiken file in ```validators/compare_head_final.ak``` which has an embedded Groth16 verification key for the circom code we defined in ```compare_head.circom```. You can check it out if you want. 
+This will create a new aiken file in ```validators/compare_head_final.ak``` which has an embedded Groth16 verification key for the circom code we defined in ```custom_circuits/compare_head.circom```. You can check it out if you want. 
 
 ## Building with Aiken
 Now we're going to use the original Aiken tool to build the automatically generated code. For this, you just need to run 
@@ -34,7 +34,7 @@ aiken build
 without changing your directory (meaning, in the same directory that the ```aiken.toml``` file is located, which should be the same one that contains the ```validators``` directory). If the build is successfull, we can move to the next steps.
 
 ## Generate the proof
-The CompareHead parameters used to generate the proof are in the ```input_compare_head.json``` file:
+The CompareHead parameters used to generate the proof are in the ```circuit_inputs/input_compare_head.json``` file:
 
 ```json
 {
@@ -50,9 +50,9 @@ These values will be used to generate the proof of the circom circuit, and the p
 Execute the following command to generate the proof to use in the Aiken test:
 
 ```bash
-cargo run -- prove aiken compare_head.circom verification_key.zkey inputs_compare_head.json proof.ak
+cargo run -- prove aiken custom_circuits/compare_head.circom verification_key.zkey circuit_inputs/inputs_compare_head.json proof.ak
 ```
-You could use the generated proof ```proof.ak``` on the Aiken test. This means that you should copy the contents of ```proof.ak``` into the ```test_example```, replacing the placeholders. After that, run ```aiken check``` to verify that the test is passing.
+You could use the generated proof ```proof.ak``` on the Aiken test. This means that you should copy the contents of ```proof.ak``` into the ```test_example``` method of ```validators/compare_head_final.ak```, replacing the placeholders. After that, run ```aiken check``` to verify that the test is passing.
 
 ## MeshJS locking and unlocking
 
@@ -74,7 +74,7 @@ Save the output transaction hash for the next step: you will need it to unlock t
 Time to unlock. Run the following command to generate the typescript library that contains the proof:
 
 ```shell
-cargo run -- prove meshjs compare_head.circom verification_key.zkey inputs_compare_head.json deployment/zk_redeemer.ts
+cargo run -- prove meshjs custom_circuits/compare_head.circom verification_key.zkey circuit_inputs/inputs_compare_head.json deployment/zk_redeemer.ts
 ```
 
 Go to ```deployment/unlock_complex_token.ts``` and import the exported function ```mZKRedeemer``` from the generated library (meaning, add the following line at the top of ```deployment/unlock_complex_token.ts```):
