@@ -4,6 +4,7 @@ use clap::{ArgMatches, Command};
 use std::fs;
 use std::io::ErrorKind;
 use std::path::PathBuf;
+use crate::entropy_generator::EntropyGenerator;
 
 pub struct BuildCommand {}
 
@@ -37,10 +38,11 @@ impl BuildCommand {
     fn execute_command(source_path: &PathBuf, output_path: &PathBuf) {
         let source_offchain_aiken = fs::read_to_string(source_path).unwrap();
 
+        let entropy_generator = EntropyGenerator::new();
         let output_zk_aiken = AikenZkCompiler::apply_modifications_to_src_for_token(
             source_offchain_aiken,
             "output".to_string(),
-            ("sergito27", "tomtom"),
+            (&entropy_generator.generate(), &entropy_generator.generate()),
         );
 
         fs::write(output_path, output_zk_aiken).expect("output file write failed");

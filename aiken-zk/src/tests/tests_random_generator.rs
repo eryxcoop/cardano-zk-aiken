@@ -1,5 +1,16 @@
+use crate::entropy_generator::EntropyGenerator;
+
 #[test]
-fn test_xxx_minimum_length_of_random_pindonga() {
-    let random_string = "fds894njvfg3e54455b6rt564re6b654654eh654r56e4halsdfklkajsdlkñjhsdlñkjasn34987erj452897g45y8f245h723f835re5gsd";
-    assert!(random_string.len() > 100);
+fn test_minimum_length_of_random_for_verification_key_entropy() {
+    let entropy_generator = EntropyGenerator::new();
+    let entropy = entropy_generator.generate();
+    assert!(entropy.len() >= 200);
+    assert!(entropy.chars().all(|character| character.is_alphanumeric()));
+}
+
+#[test]
+fn test_random_for_verification_key_entropy_is_alphanumeric() {
+    let entropy_generator = EntropyGenerator::new();
+    let entropy = entropy_generator.generate();
+    assert!(entropy.chars().all(|character| character.is_alphanumeric()));
 }
