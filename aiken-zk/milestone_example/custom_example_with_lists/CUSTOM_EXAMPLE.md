@@ -31,7 +31,57 @@ Now we're going to use the original Aiken tool to build the automatically genera
 ```bash
 aiken build
 ```
-without changing your directory (meaning, in the same directory that the ```aiken.toml``` file is located, which should be the same one that contains the ```validators``` directory). If the build is successfull, we can move to the next steps. 
+without changing your directory (meaning, in the same directory that the ```aiken.toml``` file is located, which should be the same one that contains the ```validators``` directory). If the build is successfull, we can move to the next steps.
 
 ## Generate the proof
-We're going to continue with 
+The CompareHead parameters used to generate the proof are in the ```input_compare_head.json``` file:
+
+```json
+{
+  "l": [1, 2],
+  "val": 1
+}
+```
+
+### Aiken testing
+
+Execute the following command to generate the proof to use in the Aiken test:
+
+```bash
+cargo run -- prove aiken compare_head.circom verification_key.zkey inputs_compare_head.json proof.ak
+```
+You could use the generated proof ```proof.ak``` on the Aiken test. Then, running an ```aiken check``` should execute successfully.
+
+### MeshJS unlocking
+
+Now that you've your aiken code built, you can enter to the subdirectory  ```deployment``` and run:
+
+```shell
+npx tsx lock_complex_token.ts
+```
+
+Save the output transaction hash for the next step and go back to the ```custom_example_with_list``` directory.
+
+Time to unlock. Run the following command to generate the typescript library that contains the proof:
+
+```shell
+cargo run -- prove meshjs compare_head.circom verification_key.zkey inputs_compare_head.json deployment/zk_redeemer.ts
+```
+
+Go to ```deployment/unlock_complex_token.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
+
+```javascript
+ import {mZKRedeemer} from "./zk_redeemer";
+```
+
+Use the exported function to wrap the redeemer. The spend should look like:
+
+```javascript
+await contract.spend(validatorScriptIndex, txHashFromDeposit, mZKRedeemer(mVoid()))
+```
+
+Finally, unlock the contract running the following command. Replace `lockTxHash` with the hash that you copied in the lock step:
+
+```shell
+npx tsx unlock_complex_token.ts lockTxHash
+```
