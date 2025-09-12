@@ -99,7 +99,15 @@ source code with **one** of the tokens presented below.
 * ```offchain merkle_tree_checker(merklePathLength, leaf, merkleRoot , pathElements, pathIndices)```: verifies that the merkle path formed by $pathElements$, in which each element is on the left or the right (indicated by $0$s and $1$s respectively in $pathIndices$), where $leaf$ is the value of the leaf and $merkleRoot$ is the root of the tree, is correct. $merklePathLength$ is the length of the merkle path without the root and **must** be a constant in compilation time. **Warning: do not use in production since the hash function is being mocked for now.**
 
 
-* ```offchain custom(path/to/circom/component, [pi0, pi1, ...])``` allows you to use your own circom **components** in aiken code. You must provide a path to the circom file that includes the defined component, and pass a list for the public inputs (in the same order that are defined in the template, without the ```pub``` keyword, ignoring private parameters). The amount of public inputs must be the same in the aiken code and the component definition. 
+* ```offchain custom(path/to/circom/component.circom, [pi0, pi1, ...])``` allows you to use your own circom **components** in aiken code. You must provide a path to a circom file with a ```main``` component. Then, as you can see in the definition, you must pass a list of public inputs (in the same order that are defined in the template, without the ```pub``` keyword, ignoring private parameters). **The amount of public inputs must be the same in the aiken code and the component definition**. By default, the tool will assume that each public input is a single number, but what if you know that some aiken variable is storing a list of numbers instead of a number? Well, in that case you must prepend the symbol ```@``` to the variable. 
+ 
+Let's see an example: 
+```rust
+let array = [1,2,3,4,5]
+let num = 3
+offchain custom("path/to/circom/component.circom", [@array, num])
+```
+This will let our compiler know that the ```array``` variable contains a list, which is something that in the general case we can't know statically (for example, if that variable comes from the datum). If the path is well-defined, the workflow for custom circuits will now follow the same steps as the example.
  
 
 ### Public and private parameters
