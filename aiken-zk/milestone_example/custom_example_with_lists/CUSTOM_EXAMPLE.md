@@ -65,6 +65,7 @@ Let's start by running the following command to lock 1 ADA, that will only be un
 ```shell
 npx tsx lock_complex_token.ts
 ```
+> It can happen sometimes that you must run this command a few times until it works
 
 Save the output transaction hash for the next step: you will need it to unlock the funds. Then, go back to the ```custom_example_with_list``` directory.
 
@@ -76,7 +77,7 @@ Time to unlock. Run the following command to generate the typescript library tha
 cargo run -- prove meshjs compare_head.circom verification_key.zkey inputs_compare_head.json deployment/zk_redeemer.ts
 ```
 
-Go to ```deployment/unlock_complex_token.ts``` and import the exported function ```mZKRedeemer``` from the generated library:
+Go to ```deployment/unlock_complex_token.ts``` and import the exported function ```mZKRedeemer``` from the generated library (meaning, add the following line at the top of ```deployment/unlock_complex_token.ts```):
 
 ```javascript
  import {mZKRedeemer} from "./zk_redeemer";
@@ -93,3 +94,6 @@ Finally, unlock the contract running the following command. Replace `lockTxHash`
 ```shell
 npx tsx unlock_complex_token.ts lockTxHash
 ```
+> It can happen sometimes that you must run this command a few times until it works
+
+If everything went as planned, the address you used should've recovered the locked ADA.
