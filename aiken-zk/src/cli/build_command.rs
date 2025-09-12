@@ -40,7 +40,7 @@ impl BuildCommand {
         let output_zk_aiken = AikenZkCompiler::apply_modifications_to_src_for_token(
             source_offchain_aiken,
             "output".to_string(),
-            ("random1", "random2"),
+            ("sergito27", "tomtom"),
         );
 
         fs::write(output_path, output_zk_aiken).expect("output file write failed");

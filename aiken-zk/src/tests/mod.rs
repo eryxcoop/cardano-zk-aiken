@@ -18,3 +18,4 @@ mod circom_component_factory;
 mod tests_presenters;
 mod token_examples;
 mod utils;
+mod tests_random_generator;
