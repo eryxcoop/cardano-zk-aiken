@@ -64,7 +64,11 @@ impl NewCommand {
             fs::create_dir_all(root.join(dir))?;
         }
 
-        for file in ProjectTemplate::iter().filter(|f| !empty_directories.contains(&f.split('/').next().unwrap())) {
+        for file in ProjectTemplate::iter().filter(|f| {
+            !empty_directories.contains(&f.split('/').next().unwrap()) &&
+            !f.split('/').collect::<Vec<&str>>().contains(&"node_modules") &&
+            !f.split('/').collect::<Vec<&str>>().contains(&"examples")
+        }) {
             println!("{file:?}");
 
             let file_path = Path::new(file.as_ref());
