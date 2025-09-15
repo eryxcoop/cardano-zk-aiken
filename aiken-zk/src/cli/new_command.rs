@@ -35,18 +35,12 @@ impl NewCommand {
         // Run [npm i | yarn i | ...] over the desired subdirectories
         // Check for the global installation of aiken, circom, snarkjs. Warn the user if they're not installed
 
-
-        let new_dir_name = fs::read_to_string(project_name).unwrap();
-        Self::create_new_dir_if_non_existent(&new_dir_name)
+        fs::create_dir(&project_name)
             .expect("Unable to create working directory");
 
     }
 
     fn get_arguments(subcommand_matches: &ArgMatches) -> &PathBuf {
         Self::get_argument_value(subcommand_matches, Self::NEW_COMMAND_PROJECT_NAME_ARG_NAME)
-    }
-
-    pub fn create_new_dir_if_non_existent(dir_name: &str) -> Result<(), Error>{
-        fs::create_dir(dir_name)
     }
 }

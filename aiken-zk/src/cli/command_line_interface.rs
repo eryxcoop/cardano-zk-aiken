@@ -2,6 +2,7 @@ use crate::cli::build_command::BuildCommand;
 use crate::cli::prove_command::ProveCommand;
 use crate::cli::subcommand::Subcommand;
 use clap::Command;
+use crate::cli::new_command::NewCommand;
 
 pub struct CommandLineInterface {
     main_command: Command,
@@ -33,7 +34,8 @@ impl CommandLineInterface {
         let main_command = Command::new("aiken-zk")
             .subcommand_required(true)
             .subcommand(BuildCommand::create_subcommand())
-            .subcommand(ProveCommand::create_subcommand());
+            .subcommand(ProveCommand::create_subcommand())
+            .subcommand(NewCommand::create_subcommand());
         Self { main_command }
     }
 
@@ -41,7 +43,7 @@ impl CommandLineInterface {
         let main_command_matches = self.main_command.clone().get_matches();
         match main_command_matches.subcommand() {
             Some(subcommand) => {
-                execute_subcommand!(subcommand, [BuildCommand, ProveCommand]);
+                execute_subcommand!(subcommand, [BuildCommand, ProveCommand, NewCommand]);
             }
             None => {
                 panic!("No command given");
