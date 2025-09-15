@@ -36,16 +36,17 @@ impl NewCommand {
 
         // Create a directory called [project_name]
         // Copy the static template tree structure in the directory
-        // -------------------------------------------------
         // Run [npm i | yarn i | ...] over the desired subdirectories
-
         // Check for the global installation of aiken, circom, snarkjs. Warn the user if they're not installed
+        // -------------------------------------------------
+
         // Change aiken.toml to match the project name
 
         fs::create_dir(&project_name).expect("Unable to create working directory");
         Self::copy_embedded_dir(project_name).expect("Failed to populate working directory");
         Self::move_to_working_dir(project_name).expect("Failed to jump into working directory");
         Self::install_javascript_dependencies();
+        Self::check_presence_of_dependencies();
 
     }
 
@@ -96,9 +97,12 @@ impl NewCommand {
         }
 
         for file in ProjectTemplate::iter().filter(|f| {
+            let splitted_path = f.split('/').collect::<Vec<&str>>();
             !empty_directories.contains(&f.split('/').next().unwrap()) &&
-            !f.split('/').collect::<Vec<&str>>().contains(&"node_modules") &&
-            !f.split('/').collect::<Vec<&str>>().contains(&"examples")
+            !splitted_path.contains(&"node_modules") &&
+            !splitted_path.contains(&"examples") &&
+            !splitted_path.contains(&"CUSTOM_EXAMPLE.md") &&
+            !splitted_path.contains(&"EXAMPLE.md")
         }) {
             let file_path = Path::new(file.as_ref());
             let out_path = root.join(file_path);
@@ -116,5 +120,19 @@ impl NewCommand {
 
     fn move_to_working_dir(working_directory_path: &PathBuf) -> Result<(), io::Error> {
         env::set_current_dir(working_directory_path)
+    }
+
+    fn check_presence_of_dependencies() {
+        if std::process::Command::new("aiken").arg("--version").output().is_err() {
+            eprintln!("aiken is not installed or accessible from path. Please follow the instructions in https://aiken-lang.org/installation-instructions")
+        }
+
+        if std::process::Command::new("circom").arg("--version").output().is_err() {
+            eprintln!("circom is not installed or accessible from path. Please follow the instructions in https://docs.circom.io/getting-started/installation/")
+        }
+
+        if std::process::Command::new("snarkjs").arg("--version").output().is_err() {
+            eprintln!("snarkjs is not installed or accessible from path. Please install it globally: npm i -g snarkjs")
+        }
     }
 }
