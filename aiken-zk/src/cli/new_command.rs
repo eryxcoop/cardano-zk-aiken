@@ -1,11 +1,8 @@
-use std::fs;
-use std::io::{Error, ErrorKind};
-use std::path::PathBuf;
-use clap::{ArgMatches, Command};
-use crate::cli::build_command::BuildCommand;
 use crate::cli::subcommand::Subcommand;
-use crate::compiler::aiken_zk_compiler::AikenZkCompiler;
-use crate::entropy_generator::EntropyGenerator;
+use clap::{ArgMatches, Command};
+use std::fs;
+use std::io::Error;
+use std::path::PathBuf;
 
 pub struct NewCommand;
 
