@@ -50,33 +50,32 @@ impl NewCommand {
     }
 
     fn install_javascript_dependencies() {
+        let usable_manager = Self::obtain_system_usable_package_manager();
+        Self::install_dependencies_in_directory(usable_manager, "curve_compress");
+        Self::install_dependencies_in_directory(usable_manager, "deployment");
+
+    }
+
+    fn obtain_system_usable_package_manager() -> &'static str {
         let managers = ["npm", "yarn"];
-        let usable_manager = managers.iter().find_map(|manager| {
+        managers.iter().find_map(|manager| {
             let result = std::process::Command::new(manager).arg("--version").output();
             match result {
                 Ok(_) => Some(manager),
                 _ => None
             }
-        }).expect("You need to install npm or yarn to start an aiken-zk project");
+        }).expect("You need to install npm or yarn to start an aiken-zk project")
+    }
 
+    fn install_dependencies_in_directory(usable_manager: &str, directory: &str) {
         let package_manager_status_curve_compress = std::process::Command::new(usable_manager)
             .arg("install")
-            .current_dir(Path::new("./curve_compress"))
+            .current_dir(Path::new(directory))
             .status()
-            .expect("Unable to install dependencies in curve_compress");
+            .expect(&format!("Unable to install dependencies in {directory}"));
         if !package_manager_status_curve_compress.success() {
-            println!("{usable_manager} installation failed, you need to install manually")
+            eprintln!("{usable_manager} installation failed in {directory}, you need to install manually")
         }
-
-        let package_manager_status_deployment = std::process::Command::new(usable_manager)
-            .arg("install")
-            .current_dir(Path::new("./deployment"))
-            .status()
-            .expect("Unable to install dependencies in deployment");
-        if !package_manager_status_deployment.success() {
-            println!("{usable_manager} installation failed, you need to install manually")
-        }
-
     }
 
     fn get_arguments(subcommand_matches: &ArgMatches) -> &PathBuf {
