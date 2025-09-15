@@ -35,10 +35,12 @@ impl NewCommand {
     fn execute_command(project_name: &PathBuf) {
 
         // Create a directory called [project_name]
-        // -------------------------------------------------
         // Copy the static template tree structure in the directory
+        // -------------------------------------------------
         // Run [npm i | yarn i | ...] over the desired subdirectories
+
         // Check for the global installation of aiken, circom, snarkjs. Warn the user if they're not installed
+        // Change aiken.toml to match the project name
 
         fs::create_dir(&project_name).expect("Unable to create working directory");
         Self::copy_embedded_dir(project_name).expect("Failed to populate working directory");
@@ -50,7 +52,21 @@ impl NewCommand {
     }
 
     fn copy_embedded_dir(root: &Path) -> Result<(), std::io::Error> {
-        for file in ProjectTemplate::iter() {
+
+        let empty_directories = [
+            "circuit_inputs",
+            "custom_circuits",
+            "validators",
+            "validators_with_offchain"
+        ];
+
+        for dir in empty_directories {
+            fs::create_dir_all(root.join(dir))?;
+        }
+
+        for file in ProjectTemplate::iter().filter(|f| !empty_directories.contains(&f.split('/').next().unwrap())) {
+            println!("{file:?}");
+
             let file_path = Path::new(file.as_ref());
             let out_path = root.join(file_path);
 
