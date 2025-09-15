@@ -1,6 +1,6 @@
 use crate::cli::subcommand::Subcommand;
 use clap::{ArgMatches, Command};
-use std::fs;
+use std::{env, fs, io};
 use std::path::{PathBuf, Path};
 use rust_embed::RustEmbed;
 
@@ -44,6 +44,38 @@ impl NewCommand {
 
         fs::create_dir(&project_name).expect("Unable to create working directory");
         Self::copy_embedded_dir(project_name).expect("Failed to populate working directory");
+        Self::move_to_working_dir(project_name).expect("Failed to jump into working directory");
+        Self::install_javascript_dependencies();
+
+    }
+
+    fn install_javascript_dependencies() {
+        let managers = ["npm", "yarn"];
+        let usable_manager = managers.iter().find_map(|manager| {
+            let result = std::process::Command::new(manager).arg("--version").output();
+            match result {
+                Ok(_) => Some(manager),
+                _ => None
+            }
+        }).expect("You need to install npm or yarn to start an aiken-zk project");
+
+        let package_manager_status_curve_compress = std::process::Command::new(usable_manager)
+            .arg("install")
+            .current_dir(Path::new("./curve_compress"))
+            .status()
+            .expect("Unable to install dependencies in curve_compress");
+        if !package_manager_status_curve_compress.success() {
+            println!("{usable_manager} installation failed, you need to install manually")
+        }
+
+        let package_manager_status_deployment = std::process::Command::new(usable_manager)
+            .arg("install")
+            .current_dir(Path::new("./deployment"))
+            .status()
+            .expect("Unable to install dependencies in deployment");
+        if !package_manager_status_deployment.success() {
+            println!("{usable_manager} installation failed, you need to install manually")
+        }
 
     }
 
@@ -69,8 +101,6 @@ impl NewCommand {
             !f.split('/').collect::<Vec<&str>>().contains(&"node_modules") &&
             !f.split('/').collect::<Vec<&str>>().contains(&"examples")
         }) {
-            println!("{file:?}");
-
             let file_path = Path::new(file.as_ref());
             let out_path = root.join(file_path);
 
@@ -83,5 +113,9 @@ impl NewCommand {
         }
 
         Ok(())
+    }
+
+    fn move_to_working_dir(working_directory_path: &PathBuf) -> Result<(), io::Error> {
+        env::set_current_dir(working_directory_path)
     }
 }
