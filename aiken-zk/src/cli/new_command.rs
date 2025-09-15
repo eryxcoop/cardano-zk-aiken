@@ -83,8 +83,7 @@ impl NewCommand {
         Self::get_argument_value(subcommand_matches, Self::NEW_COMMAND_PROJECT_NAME_ARG_NAME)
     }
 
-    fn copy_embedded_dir(root: &Path) -> Result<(), std::io::Error> {
-
+    fn copy_embedded_dir(root: &Path) -> Result<(), io::Error> {
         let empty_directories = [
             "circuit_inputs",
             "custom_circuits",
@@ -96,13 +95,16 @@ impl NewCommand {
             fs::create_dir_all(root.join(dir))?;
         }
 
+        fs::write(root.join(Path::new("aiken.toml")), Self::aiken_toml_for_project_with_name(root.to_str().unwrap())).expect("Couldn't create aiken.toml");
+
         for file in ProjectTemplate::iter().filter(|f| {
             let splitted_path = f.split('/').collect::<Vec<&str>>();
             !empty_directories.contains(&f.split('/').next().unwrap()) &&
             !splitted_path.contains(&"node_modules") &&
             !splitted_path.contains(&"examples") &&
             !splitted_path.contains(&"CUSTOM_EXAMPLE.md") &&
-            !splitted_path.contains(&"EXAMPLE.md")
+            !splitted_path.contains(&"EXAMPLE.md") &&
+            !splitted_path.contains(&"aiken.toml")
         }) {
             let file_path = Path::new(file.as_ref());
             let out_path = root.join(file_path);
@@ -134,5 +136,32 @@ impl NewCommand {
         if std::process::Command::new("snarkjs").arg("--version").output().is_err() {
             eprintln!("snarkjs is not installed or accessible from path. Please install it globally: npm i -g snarkjs")
         }
+    }
+
+    fn aiken_toml_for_project_with_name(project_name: &str) -> String {
+        format!(r#"name = "aiken-lang/{project_name}"
+version = "0.0.0"
+compiler = "v1.1.17"
+plutus = "v3"
+license = "Apache-2.0"
+description = "Aiken contracts for project 'aiken-lang/{project_name}'"
+
+[repository]
+user = "aiken-lang"
+project = "{project_name}"
+platform = "github"
+
+[[dependencies]]
+name = "aiken-lang/stdlib"
+version = "v2.2.0"
+source = "github"
+
+[[dependencies]]
+name = "modulo-p/ak-381"
+version = "v0.1"
+source = "github"
+
+[config]
+"#)
     }
 }
