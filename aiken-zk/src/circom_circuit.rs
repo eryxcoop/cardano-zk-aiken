@@ -233,15 +233,17 @@ impl CircomCircuit {
     }
 
     pub fn run_command_or_fail(&self, cmd: &mut Command, label: &str) {
-        let status = cmd
+        let command_output = cmd
             .stdout(Stdio::null())
-            .status()
+            .output()
             .unwrap_or_else(|_| panic!("Failed to start command '{}'", label));
-        if !status.success() {
+        if !command_output.status.success() {
             panic!(
-                "Command '{}' failed with exit code {:?}",
+                "Command '{}' failed with exit code {:?}. The error is {}. The stdout is {}",
                 label,
-                status.code()
+                command_output.status.code(),
+                String::from_utf8_lossy(&command_output.stderr).trim().to_string(),
+                String::from_utf8_lossy(&command_output.stdout).trim().to_string(),
             );
         }
     }
