@@ -14,12 +14,14 @@ validator example {
     _own_ref: OutputReference,
     _self: Transaction,
   ) {
-    // string "Coffe" as binary
-    // let in = [0,1,0,0,0,0,1,1,0,1,1,0,1,1,1,1,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,0,1]
-    // sha256("Coffe") = "0xBFB424E48235A63C27A22610243DC4E0B217B0B604358A93072E1FBA35637435"
+    // string "Coffee" as binary
+    // let in = [0,1,0,0,0,0,1,1,0,1,1,0,1,1,1,1,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,0,1,0,1,1,0,0,1,0,1]
+    // sha256("Coffee") = "0xB0E1F06CF1E7D466EE3048EBEF45D85B2D1D31D6164A9B92A6FD0887BA8FFE89"
+
     // out encoding as 2 integers
-    let out = [0xBFB424E48235A63C27A22610243DC4E0, 0xB217B0B604358A93072E1FBA35637435]
-    expect _redeemer = offchain sha256(40, priv, pub out)
+    let out = [0xB0E1F06CF1E7D466EE3048EBEF45D85B, 0x2D1D31D6164A9B92A6FD0887BA8FFE89]
+
+    expect _redeemer = offchain sha256(48, priv, pub out)
     True
   }
 
