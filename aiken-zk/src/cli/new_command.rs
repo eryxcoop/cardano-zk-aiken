@@ -86,7 +86,6 @@ impl NewCommand {
     fn copy_embedded_dir(root: &Path) -> Result<(), io::Error> {
         let empty_directories = [
             "circuit_inputs",
-            "custom_circuits",
             "validators",
             "validators_with_offchain"
         ];
@@ -104,7 +103,8 @@ impl NewCommand {
             !splitted_path.contains(&"examples") &&
             !splitted_path.contains(&"CUSTOM_EXAMPLE.md") &&
             !splitted_path.contains(&"EXAMPLE.md") &&
-            !splitted_path.contains(&"aiken.toml")
+            !splitted_path.contains(&"aiken.toml") &&
+            !splitted_path.contains(&"custom_circuits")
         }) {
             let file_path = Path::new(file.as_ref());
             let out_path = root.join(file_path);
