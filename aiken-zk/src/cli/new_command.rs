@@ -3,6 +3,7 @@ use clap::{ArgMatches, Command};
 use std::{env, fs, io};
 use std::path::{PathBuf, Path};
 use rust_embed::RustEmbed;
+use colored::Colorize;
 
 #[derive(RustEmbed)]
 #[folder = "milestone_example/"]
@@ -65,7 +66,7 @@ impl NewCommand {
                 Ok(_) => Some(manager),
                 _ => None
             }
-        }).expect("You need to install npm or yarn to start an aiken-zk project")
+        }).expect(&format!("{}", "You need to install npm or yarn to start an aiken-zk project".red()))
     }
 
     fn install_dependencies_in_directory(usable_manager: &str, directory: &str) {
@@ -126,15 +127,15 @@ impl NewCommand {
 
     fn check_presence_of_dependencies() {
         if std::process::Command::new("aiken").arg("--version").output().is_err() {
-            eprintln!("aiken is not installed or accessible from path. Please follow the instructions in https://aiken-lang.org/installation-instructions")
+            eprintln!("{}", "aiken is not installed or accessible from path. Please follow the instructions in https://aiken-lang.org/installation-instructions".red())
         }
 
         if std::process::Command::new("circom").arg("--version").output().is_err() {
-            eprintln!("circom is not installed or accessible from path. Please follow the instructions in https://docs.circom.io/getting-started/installation/")
+            eprintln!("{}", "circom is not installed or accessible from path. Please follow the instructions in https://docs.circom.io/getting-started/installation/".red())
         }
 
         if std::process::Command::new("snarkjs").arg("--version").output().is_err() {
-            eprintln!("snarkjs is not installed or accessible from path. Please install it globally: npm i -g snarkjs")
+            eprintln!("{}", "snarkjs is not installed or accessible from path. Please install it globally: npm i -g snarkjs".red())
         }
     }
 
