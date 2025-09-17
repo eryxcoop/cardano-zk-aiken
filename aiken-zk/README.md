@@ -1,16 +1,22 @@
 # Aiken-zk
 
 This repo contains a tool that facilitates the integration of Aiken validators with Zero Knowledge proofs. It allows the
-user to write Aiken programs that contain some offchain block. This creates a new source code so that instead of being
+user to write Aiken programs that contain some offchain block of code. This creates a new source code so that instead of being
 executed on-chain, the program will receive a proof of that execution and validate it. This is useful to move
 computation out of the chain and/or to hide information.
 
 The compilation of the code will also create a circom component that represents the desired computation, compile and
 execute it and generate a verifying key. This verifying key will be included in the new source code, along with some
-code to verify a proof for that specific program. This proof has to be generated in order to invoque/execute this Aiken
+code to verify a proof for that specific program. This proof has to be generated in order to validate this Aiken
 program onchain.
 
 The proving system used for this process is Groth16.
+
+## Installation
+Step on the ```aiken-zk``` subfolder and run ```cargo install --path .``` (dot included). This will install ```aiken-zk``` globally so you can use it from anywhere. The available commands are 
+* ```aiken-zk new <project_name>``` --> Use this to create a new project
+* ```aiken-zk build <args>```
+* ```aiken-zk prove <args>```
 
 ## Development cycle
 
