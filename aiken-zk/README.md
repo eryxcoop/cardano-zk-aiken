@@ -12,33 +12,6 @@ program onchain.
 
 The proving system used for this process is Groth16.
 
-## Installation
-Step on the ```aiken-zk``` subfolder and run ```cargo install --path .``` (dot included). This will install ```aiken-zk``` globally so you can use it from anywhere. The available commands are 
-* ```aiken-zk new <project_name>``` --> Use this to create a new project
-* ```aiken-zk build <args>```
-* ```aiken-zk prove <args>```
-
-## Development cycle
-
-To take advantage of this new added capability, the following development cycle can be used:
-
-- Code your Aiken validator including the new offchain keyword.
-
-- Convert that code, this will generate both an Aiken code as well as a circuit and a verification key
-  which will be used to execute and verify the offchain portion of your computation.
-
-- Compile the aiken code and deploy it to the chain, so it is available to be unlocked.
-
-- Distribute the code with offchain, the circuit and the verification key to users so they can perform
-  the offchain computation and generate the zk-proof necessary to unlock the on-chain validator.
-
-- Now, as someone who wants to use the onchain code:
-    - Take the offchain portion, perform the computation you need. This is when you will use your private parameters
-      along
-      the public ones. As a product of this task you will have a proof file.
-
-    - This file will be added to the usual execution/testing/unlocking of the onchain validator.
-
 # Prerequisites
 
 To run the aiken-zk compiler you must have the following tools:
@@ -49,7 +22,30 @@ To run the aiken-zk compiler you must have the following tools:
 * Circom = 2.1.9 - https://docs.circom.io/getting-started/installation/ (```git checkout v2.1.9```)
 * Aiken >= 1.1.17 - https://aiken-lang.org/installation-instructions
 
-The idea in the future is to reduce the amount of dependencies.
+## Installation
+Step on the ```aiken-zk``` subfolder and run ```cargo install --path .``` command (dot included). This will install 
+```aiken-zk``` globally so you can use it from anywhere. The available commands are 
+* ```aiken-zk new <project_name>``` --> Use this to create a new project
+* ```aiken-zk build <args described below>```
+* ```aiken-zk prove <args described below>```
+
+## Development cycle
+To take advantage of this new added capability, the following development cycle can be used:
+
+1. Code your Aiken validator including the new ```offchain``` keyword.
+
+2. Build that code using ```aiken-zk```, this will generate an Aiken code, a circuit and a verification key
+  which will be used to execute and verify the offchain portion of your computation.
+
+3. Compile the aiken code and deploy it to the chain, so it is available to be unlocked.
+
+4. Distribute the code with offchain, the circuit and the verification key to users, so they can perform
+  the offchain computation and generate the zk-proof necessary to unlock the on-chain validator.
+
+5. Now, as someone who wants to use the onchain code:
+   * Perform the offchain computation you need. This is when you will use your private parameters along the public ones. As a product of this task you will have a proof file.
+
+   * This file will be added to the usual execution/testing/unlocking of the onchain validator.
 
 ## Alternative: use docker
 
