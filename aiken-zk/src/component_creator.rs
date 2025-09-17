@@ -109,7 +109,7 @@ impl ComponentCreator {
                 let template_file_name = "fibonacci";
                 let template_name = "Fibonacci";
 
-                let inputs_to_identifiers = [(fib_0, "a"), (fib_1, "b"), (res, "c")];
+                let inputs_to_identifiers = [(fib_0, "first_fibonacci"), (fib_1, "second_fibonacci"), (res, "nth_fibonacci")];
                 let template_parameters = &[value.as_str()];
 
                 Self::process_component_inputs_and_template_parameters(template_file_name, template_name, inputs_to_identifiers, template_parameters)
@@ -137,7 +137,7 @@ impl ComponentCreator {
                 let template_file_name = "assert_eq";
                 let template_name = "AssertEq";
 
-                let inputs_to_identifiers = [(lhs, "a"), (rhs, "b")];
+                let inputs_to_identifiers = [(lhs, "lhs"), (rhs, "rhs")];
                 let template_parameters = &[];
 
                 Self::process_component_inputs_and_template_parameters(template_file_name, template_name, inputs_to_identifiers, template_parameters)
