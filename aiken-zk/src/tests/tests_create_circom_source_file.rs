@@ -18,7 +18,7 @@ fn test_component_creator_can_create_addition_component_with_all_public_inputs()
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"pragma circom 2.1.9;
 include "templates/addition.circom";
-component main { public [a,b,c] } = Addition();"#;
+component main { public [first_addend,second_addend,sum] } = Addition();"#;
     assert_eq!(expected_program, component_creator.create())
 }
 
@@ -38,7 +38,7 @@ fn test_component_creator_can_create_addition_component_with_mixed_visibilities(
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"pragma circom 2.1.9;
 include "templates/addition.circom";
-component main { public [b,c] } = Addition();"#;
+component main { public [second_addend,sum] } = Addition();"#;
     assert_eq!(expected_program, component_creator.create())
 }
 

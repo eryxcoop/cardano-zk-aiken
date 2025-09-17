@@ -73,7 +73,7 @@ impl ComponentCreator {
                 let template_file_name = "addition";
                 let template_name = "Addition";
 
-                let input_to_identifiers = [(lhs, "a"), (rhs, "b"), (res, "c")];
+                let input_to_identifiers = [(lhs, "first_addend"), (rhs, "second_addend"), (res, "sum")];
                 let template_parameters = &[];
 
                 Self::process_component_inputs_and_template_parameters(template_file_name, template_name, input_to_identifiers, template_parameters)
