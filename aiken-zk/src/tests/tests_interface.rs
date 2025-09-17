@@ -238,12 +238,12 @@ fn create_circom_and_inputs_file() {
 fn circom_file() -> String {
     r#"pragma circom 2.1.9;
 include "templates/addition.circom";
-component main { public [a,b,c] } = Addition();"#
+component main { public [first_addend,second_addend,sum] } = Addition();"#
         .to_string()
 }
 
 fn inputs_json() -> String {
-    r#"{"a": "3", "b": "7", "c": "10"}"#.to_string()
+    r#"{"first_addend": "3", "second_addend": "7", "sum": "10"}"#.to_string()
 }
 
 fn original_aiken_code() -> String {

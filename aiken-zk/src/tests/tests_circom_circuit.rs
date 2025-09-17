@@ -28,7 +28,7 @@ fn test_circuit_can_generate_a_proof() {
     let _temp_dir = create_sandbox_and_set_as_current_directory();
     let circom_program_filename = circom_path.to_string();
     fs::write(&circom_program_filename, source_code_addition()).unwrap();
-    fs::write("inputs.json", "{\"a\":\"1\", \"b\":\"2\", \"c\":\"3\"}").unwrap();
+    fs::write("inputs.json", "{\"first_addend\":\"1\", \"second_addend\":\"2\", \"sum\":\"3\"}").unwrap();
     let circom_circuit = CircomCircuit::from(circom_path.to_string());
 
     let proof = circom_circuit.generate_groth16_proof("my_verification_key.zkey", "inputs.json");
@@ -69,6 +69,6 @@ fn assert_proof_is_valid(proof: CompressedGroth16ProofBls12_381) {
 fn source_code_addition() -> String {
     r#"pragma circom 2.1.9;
 include "templates/addition.circom";
-component main { public [a,b,c] } = Addition();"#
+component main { public [first_addend,second_addend,sum] } = Addition();"#
         .to_string()
 }

@@ -18,7 +18,7 @@ fn test_component_creator_can_create_addition_component_with_all_public_inputs()
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"pragma circom 2.1.9;
 include "templates/addition.circom";
-component main { public [a,b,c] } = Addition();"#;
+component main { public [first_addend,second_addend,sum] } = Addition();"#;
     assert_eq!(expected_program, component_creator.create())
 }
 
@@ -38,7 +38,7 @@ fn test_component_creator_can_create_addition_component_with_mixed_visibilities(
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"pragma circom 2.1.9;
 include "templates/addition.circom";
-component main { public [b,c] } = Addition();"#;
+component main { public [second_addend,sum] } = Addition();"#;
     assert_eq!(expected_program, component_creator.create())
 }
 
@@ -50,7 +50,7 @@ fn test_component_creator_can_create_subtraction_component_with_mixed_visibiliti
     let component_creator = ComponentCreator::from_token(token_public_addition);
     let expected_program = r#"pragma circom 2.1.9;
 include "templates/subtraction.circom";
-component main { public [a,c] } = Subtraction();"#;
+component main { public [minuend,difference] } = Subtraction();"#;
     assert_eq!(expected_program, component_creator.create())
 }
 
@@ -62,7 +62,7 @@ fn test_component_creator_can_create_multiplication_component_with_mixed_visibil
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"pragma circom 2.1.9;
 include "templates/multiplication.circom";
-component main { public [a,c] } = Multiplication();"#;
+component main { public [multiplicand,product] } = Multiplication();"#;
     assert_eq!(expected_program, component_creator.create())
 }
 
@@ -75,7 +75,7 @@ fn test_component_creator_can_create_fibonacci_component_with_mixed_visibilities
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = format!(r#"pragma circom 2.1.9;
 include "templates/fibonacci.circom";
-component main {{ public [a,c] }} = Fibonacci({length_of_fibonacci_series});"#);
+component main {{ public [first_fibonacci,nth_fibonacci] }} = Fibonacci({length_of_fibonacci_series});"#);
     assert_eq!(expected_program, component_creator.create())
 }
 
@@ -99,7 +99,7 @@ fn test_component_creator_can_create_assert_eq_component_with_mixed_visibilities
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"pragma circom 2.1.9;
 include "templates/assert_eq.circom";
-component main { public [b] } = AssertEq();"#;
+component main { public [rhs] } = AssertEq();"#;
     assert_eq!(expected_program, component_creator.create())
 }
 
