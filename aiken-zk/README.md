@@ -47,34 +47,20 @@ To take advantage of this new added capability, the following development cycle 
 
    * This file will be added to the usual execution/testing/unlocking of the onchain validator.
 
-## Alternative: use docker
+## Testing
 
-To avoid installing all the dependencies listed above, you can use docker. Run
-
-```docker pull bweisz/aiken-zk:latest```
-
-then run
-
-```docker run -it bweisz/aiken-zk:latest``` to create a container and start running bash commands inside it.
-
-Inside the container, run ```./start.sh``` to install some dependencies and build the tool.
-Then, you can proceed to automated or manual testing.
-
-## Testing setup
-
-You can avoid the first 2 steps if you are going with the Docker version, since they've been done in
-the ```./start.sh``` command. To run the tests:
-
-1. Go to the ```src/tests/sandbox/curve_compress``` and run ```npm install```. You'll only have to do this once.
-2. Run ```cargo build```.
-3. Run ```cargo test```.
+To run the tests just go to the ```aiken-zk``` sub-directory and run 
+```bash
+./test.sh
+```  
+This will install the javascript dependencies, build the code and run the tests. 
 
 # Capabilities description
 
 ## Offchain statement
 
-It extends the Aiken language with a new ```offchain``` keyword. This means that a programmer can write an Aiken
-source code with **one** of the tokens presented below.
+This tool extends the Aiken language with a new ```offchain``` keyword. This means that a programmer can write an Aiken
+source code with **one** (and **only** one) of the tokens presented below.
 
 ### Parameters convention
 * ```x```, ```y```, ```z```, ```w```: integer literal, integer variable name 
@@ -109,7 +95,7 @@ let array = [1,2,3,4,5]
 let num = 3
 offchain custom("path/to/circom/component.circom", [@array, num])
 ```
-This will let our compiler know that the ```array``` variable contains a list, which is something that in the general case we can't know statically (for example, if that variable comes from the datum). If the path is well-defined, the workflow for custom circuits will now follow the same steps as the example.
+This will let our compiler know that the ```array``` variable contains a list. If the path is defined correctly, the workflow for custom circuits will now follow the same steps as the example. When using custom circuits, you must provide an array with the public inputs alone. 
  
 
 ### Public and private parameters
@@ -134,21 +120,18 @@ pub type ZK<redeemer_type> {
 }
 ```
 
-And the redeemer variable must be named as ```zk_redeemer```.
+Also, the redeemer variable **must** be named ```redeemer```.
 
 ## Convertion to Aiken
 
-A written source code that includes an offchain statement is not compilable by an Aiken compiler.
-
-So, in order to compile the Aiken code for testing or deployment purposes we provide a tool to generate valid Aiken
-code.
-
-This step replaces the offchain code with a ZK Groth16 verifier. In a later step, a proof will be needed to prove
-the onchain execution of the piece of code executed offchain.
+A written source code that includes an offchain statement is not compilable by an Aiken compiler. So, in order to compile
+the Aiken code for testing or deployment purposes we provide a tool to generate valid Aiken code. This step replaces the 
+offchain code with a ZK Groth16 verifier. In a later step, a proof will be needed to prove on-chain the execution of the
+piece of code (executed offchain).
 
 The tool provides the following command for this convertion:
 
-```cargo run -- build code_with_offchain.ak aiken_code.ak```
+```aiken-zk build code_with_offchain.ak aiken_code.ak```
 
 This command will generate a modified aiken file in ```aiken_code.ak```. This is the final source code, over which
 you can use the main aiken compiler either to run the tests or deploy to blockchain.
@@ -163,9 +146,10 @@ it would definitively fail. The ```aiken-zk``` performs a pre-compilation phase.
 The compilation output includes additional files needed for proof generation (that will be used on testing and
 deployment steps):
 
-- circom circuit: generated circuit that matches the function behaviour (```addition``` in the example)
-- verification key: the blueprint of the zk circuit generated that it's also included on the output aiken program. Be
-  careful, different compilations from the same program generates different verification keys
+- **circom circuit**: generated circuit that matches the function behaviour (```addition``` in the example). If you're using
+    a custom Circom circuit, ```aiken-zk``` won't generate this artifact automatically and will use yours instead.
+- **verification key**: the blueprint of the zk circuit generated that it's also included on the output aiken program. Be
+  careful, different compilations from the same program generates different verification keys.
 
 ## Proof generation
 
@@ -173,25 +157,26 @@ The tool supports code generation for Aiken testing and MeshJS unlocking. It hid
 contract consumer.
 
 Aiken-zk provides a ```prove``` command, with variants ```prove aiken``` and ```prove meshJS``` depending on how do you
-need
-to present it.
+need to present it.
 
 Any command asks for the same parameters ir order:
 
-- circom circuit: from building step
-- verification key: from building step
-- inputs: the inputs for the function provided by the user. For example, inputs a,b,c for the offchain addition
-  statement where a+b should be equal to c
+* **circom circuit**: from building step.
+* **verification key**: from building step.
+* **inputs**: the inputs for the function provided by the user. For example, inputs a,b,c for the offchain addition
+  statement where a+b should be equal to c. This is a json file that you as a user have to create in order to feed
+  the proof generation algorithm. This file can contain sensitive data, so if you're thinking about putting the pre-image
+  of a hash in this file, you are correct.
 
 ### Aiken testing
 
-As the redeemer has type ZK<Redeemer>, a proof is needed to complete the variable values on testing.
+Since we defined a type ZK<Redeemer> for the redeemer, a proof is needed to complete the variable values on testing.
 
 So, if you run the following:
 
-```cargo run -- prove aiken output.circom verification_key.zkey inputs.json proof.ak```
+```aiken-zk prove aiken output.circom verification_key.zkey inputs.json proof.ak```
 
-You'll get a proof.ak ready to be copy&paste on the Aiken test.
+You'll get a proof.ak ready to be copy&pasted on the Aiken test.
 
 For example, a redeemer could be:
 
@@ -215,13 +200,12 @@ This step assumes that you made a contract deployment and you have its transacti
 Once you have a script for unlocking purposes, run the following command to generate a library
 to be used on it:
 
-```cargo run -- prove meshjs output.circom verification_key.zkey inputs.json zk_redeemer.ts```
+```aiken-zk prove meshjs output.circom verification_key.zkey inputs.json zk_redeemer.ts```
 
 Your unlocking code script might look like:
 
 ```javascript
-txBuilder
-    .spendingPlutusScript("V3")
+txBuilder.spendingPlutusScript("V3")
 ...
 .
 txInRedeemerValue(REDEEMER_WITHOUT_ZK)
@@ -239,8 +223,7 @@ Then import the exported function ```mZKRedeemer``` from the generated library:
 And use the exported function.
 
 ```javascript
-txBuilder
-    .spendingPlutusScript("V3")
+txBuilder.spendingPlutusScript("V3");
 ...
 .
 txInRedeemerValue(mZKRedeemer(REDEEMER_WITHOUT_ZK))
