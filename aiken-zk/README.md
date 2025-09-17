@@ -1,4 +1,4 @@
-# Explanation (so far)
+# Aiken-zk
 
 This repo contains a tool that facilitates the integration of Aiken validators with Zero Knowledge proofs. It allows the
 user to write Aiken programs that contain some offchain block. This creates a new source code so that instead of being
