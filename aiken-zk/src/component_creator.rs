@@ -82,7 +82,7 @@ impl ComponentCreator {
                 let template_file_name= "subtraction";
                 let template_name= "Subtraction";
                 
-                let input_to_identifiers = [(lhs, "a"), (rhs, "b"), (res, "c")];
+                let input_to_identifiers = [(lhs, "minuend"), (rhs, "subtrahend"), (res, "difference")];
                 let template_parameters = &[];
                 
                 Self::process_component_inputs_and_template_parameters(template_file_name, template_name, input_to_identifiers, template_parameters)
@@ -91,7 +91,7 @@ impl ComponentCreator {
                 let template_file_name = "multiplication";
                 let template_name = "Multiplication";
 
-                let input_to_identifiers = [(lhs, "a"), (rhs, "b"), (res, "c")];
+                let input_to_identifiers = [(lhs, "multiplicand"), (rhs, "multiplier"), (res, "product")];
                 let template_parameters = &[];
 
                 Self::process_component_inputs_and_template_parameters(template_file_name, template_name, input_to_identifiers, template_parameters)

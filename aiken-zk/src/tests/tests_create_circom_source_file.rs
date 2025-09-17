@@ -50,7 +50,7 @@ fn test_component_creator_can_create_subtraction_component_with_mixed_visibiliti
     let component_creator = ComponentCreator::from_token(token_public_addition);
     let expected_program = r#"pragma circom 2.1.9;
 include "templates/subtraction.circom";
-component main { public [a,c] } = Subtraction();"#;
+component main { public [minuend,difference] } = Subtraction();"#;
     assert_eq!(expected_program, component_creator.create())
 }
 
@@ -62,7 +62,7 @@ fn test_component_creator_can_create_multiplication_component_with_mixed_visibil
     let component_creator = ComponentCreator::from_token(token);
     let expected_program = r#"pragma circom 2.1.9;
 include "templates/multiplication.circom";
-component main { public [a,c] } = Multiplication();"#;
+component main { public [multiplicand,product] } = Multiplication();"#;
     assert_eq!(expected_program, component_creator.create())
 }
 
