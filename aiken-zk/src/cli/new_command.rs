@@ -53,20 +53,25 @@ impl NewCommand {
 
     fn install_javascript_dependencies() {
         let usable_manager = Self::obtain_system_usable_package_manager();
-        Self::install_dependencies_in_directory(usable_manager, "curve_compress");
-        Self::install_dependencies_in_directory(usable_manager, "deployment");
-
+        if let Some(usable_manager_name) = usable_manager {
+            Self::install_dependencies_in_directory(usable_manager_name, "curve_compress");
+            Self::install_dependencies_in_directory(usable_manager_name, "deployment");
+        } else {
+            eprintln!("{}", "You don't have npm nor yarn installed or accesible from path. \
+            You need to manually install the sub-directories curve_compress/ and deployment/ \
+            using your typescript package manager".red())
+        }
     }
 
-    fn obtain_system_usable_package_manager() -> &'static str {
+    fn obtain_system_usable_package_manager() -> Option<&'static str> {
         let managers = ["npm", "yarn"];
-        managers.iter().find_map(|manager| {
+        managers.iter().find_map(|&manager| {
             let result = std::process::Command::new(manager).arg("--version").output();
             match result {
                 Ok(_) => Some(manager),
                 _ => None
             }
-        }).expect(&format!("{}", "You need to install npm or yarn to start an aiken-zk project".red()))
+        })
     }
 
     fn install_dependencies_in_directory(usable_manager: &str, directory: &str) {
