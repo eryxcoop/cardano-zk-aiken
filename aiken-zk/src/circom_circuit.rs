@@ -189,13 +189,14 @@ impl CircomCircuit {
 
     fn generate_witness(&self, inputs_path: &str, build_path: &str) {
         let circuit_filename = self.circuit_filename();
-        Command::new("node")
+        let mut binding = Command::new("node");
+        let cmd = binding
             .arg(build_path.to_string() + circuit_filename + "_js/generate_witness.js")
             .arg(build_path.to_string() + circuit_filename + "_js/" + circuit_filename + ".wasm")
             .arg(inputs_path)
-            .arg(build_path.to_string() + "witness.wtns")
-            .output()
-            .unwrap();
+            .arg(build_path.to_string() + "witness.wtns");
+        self.run_command_or_fail(cmd, "Generate witnesses");
+
     }
 
     fn generate_groth16_proof_from_witness(&self, verification_key_path: &str, build_path: &str) {
