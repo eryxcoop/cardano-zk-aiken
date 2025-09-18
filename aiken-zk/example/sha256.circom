@@ -8,4 +8,4 @@ include "templates/hash.circom";
 // ...
 // }
 
-component main {public [out]} = Sha256(6*8);
+component main {public [out]} = Sha256(48);
