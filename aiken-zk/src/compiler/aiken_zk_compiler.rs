@@ -296,7 +296,7 @@ impl AikenZkCompiler {
         tokens
             .iter()
             .find(|(token, _span)| matches!(token, Token::Offchain { .. }))
-            .unwrap()
+            .unwrap_or_else(||panic!("Offchain function not present, or present but it is not one of the supported functions"))
             .clone()
     }
 
