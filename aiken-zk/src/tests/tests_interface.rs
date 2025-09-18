@@ -86,7 +86,7 @@ fn test_user_can_generate_an_aiken_proof() {
     let verification_key_path = "verification_key.zkey";
     let inputs_path = "inputs.json";
     let output_path = "proof.ak";
-    create_circom_and_inputs_file();
+    create_circom_and_inputs_file(inputs_path);
 
     Command::new(aiken_zk_binary_path)
         .arg("prove")
@@ -121,7 +121,7 @@ fn test_user_can_generate_a_meshjs_proof() {
     let verification_key_path = "verification_key.zkey";
     let inputs_path = "inputs.json";
     let output_path = "zk_redeemer.ts";
-    create_circom_and_inputs_file();
+    create_circom_and_inputs_file(inputs_path);
 
     Command::new(aiken_zk_binary_path)
         .arg("prove")
@@ -224,7 +224,7 @@ fn create_original_aiken_file() {
     fs::write(source_aiken_filename(), original_aiken_code()).expect("output file write failed");
 }
 
-fn create_circom_and_inputs_file() {
+fn create_circom_and_inputs_file(inputs_path: &str) {
     let circom_path = "my_program.circom";
     fs::write(circom_path, circom_file()).unwrap();
     let circom_compiler = CircomCircuit::from(circom_path.to_string());
@@ -232,7 +232,7 @@ fn create_circom_and_inputs_file() {
         .generate_verification_key(("a", "b"))
         .unwrap();
 
-    fs::write("inputs.json", inputs_json()).expect("output file write failed");
+    fs::write(inputs_path, inputs_json()).expect("output file write failed");
 }
 
 fn circom_file() -> String {
