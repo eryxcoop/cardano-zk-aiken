@@ -8,6 +8,9 @@ use std::path::Path;
 use std::process::Command;
 use std::{fs, io};
 
+pub const BUILD_COMMAND: &str = "build";
+
+
 #[test]
 #[serial]
 fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
@@ -17,13 +20,13 @@ fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {
     create_original_aiken_file();
 
     Command::new(aiken_zk_binary_path)
-        .arg("build")
+        .arg(BUILD_COMMAND)
         .arg(source_aiken_filename())
         .arg(output_path)
         .output()
         .unwrap();
 
-    let compilation_result = Command::new("aiken").arg("build").output().unwrap();
+    let compilation_result = Command::new("aiken").arg(BUILD_COMMAND).output().unwrap();
     let file = File::open(output_path).unwrap();
     let lines: Vec<String> = io::BufReader::new(file)
         .lines()
@@ -58,13 +61,13 @@ fn test_user_can_convert_aiken_with_custom_circom_offchain_to_valid_aiken() {
     .expect("output file write failed");
 
     Command::new(aiken_zk_binary_path)
-        .arg("build")
+        .arg(BUILD_COMMAND)
         .arg(source_aiken_filename())
         .arg(output_path)
         .output()
         .unwrap();
 
-    let compilation_result = Command::new("aiken").arg("build").output().unwrap();
+    let compilation_result = Command::new("aiken").arg(BUILD_COMMAND).output().unwrap();
     let file = fs::read_to_string(output_path).unwrap();
     let expected_line_replacement = "zk_verify_or_fail(redeemer, [Single(b), Single(5)])";
     let expected_line_declaration = "fn zk_verify_or_fail(";
