@@ -70,7 +70,7 @@ impl CircuitTemplateParameter {
         let (maybe_input_visibility, maybe_token) = visibility_token;
 
         if maybe_input_visibility.is_some() {
-            panic!("A circuit template parameter cannot have visibility");
+            panic!("A circuit template parameter cannot have visibility (pub or priv)");
         }
 
         let identifier_token = if let Some(Token::Int { value, base }) = maybe_token {
