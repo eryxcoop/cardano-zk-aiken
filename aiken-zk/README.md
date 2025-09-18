@@ -12,7 +12,7 @@ program onchain.
 
 The proving system used for this process is Groth16.
 
-# Prerequisites
+## Prerequisites
 
 To run the aiken-zk compiler you must have the following tools:
 
@@ -28,6 +28,9 @@ Step on the ```aiken-zk``` subfolder and run ```cargo install --path .``` comman
 * ```aiken-zk new <project_name>``` --> Use this to create a new project
 * ```aiken-zk build <args described below>```
 * ```aiken-zk prove <args described below>```
+
+## Tutorial
+You can find a full-workflow tutorial for this tool in [this medium post](https://medium.com/eryxcoop/aiken-zk-tutorial-d11b440a7d1a).
 
 ## Development cycle
 To take advantage of this new added capability, the following development cycle can be used:
