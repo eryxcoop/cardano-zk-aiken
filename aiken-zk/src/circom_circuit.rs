@@ -240,11 +240,15 @@ impl CircomCircuit {
             .unwrap_or_else(|_| panic!("Failed to start command '{}'", label));
         if !command_output.status.success() {
             panic!(
-                "Command '{}' failed with exit code {:?}. The error is {}. The stdout is {}",
+                "Command '{}' failed with exit code {:?}{}{}",
                 label,
                 command_output.status.code(),
-                String::from_utf8_lossy(&command_output.stderr).trim().to_string(),
-                String::from_utf8_lossy(&command_output.stdout).trim().to_string(),
+                ". The error is ".to_string() + &String::from_utf8_lossy(&command_output.stderr).trim().to_string(),
+                if command_output.stdout.len() > 0 {
+                    ". The stdout is ".to_string() + &String::from_utf8_lossy(&command_output.stdout).trim().to_string()
+                }  else {
+                    "".to_string()
+                },
             );
         }
     }
