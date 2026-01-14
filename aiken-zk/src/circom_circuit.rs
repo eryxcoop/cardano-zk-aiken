@@ -14,11 +14,15 @@ impl CircomCircuit {
     pub fn from(circom_source_code_path: String) -> Self {
         Self {
             circom_source_code_path: circom_source_code_path.clone(),
-            filename: circom_source_code_path
-                .strip_suffix(".circom")
-                .unwrap()
-                .to_string(),
+            filename: Self::filename_without_extension(circom_source_code_path).unwrap()
         }
+    }
+
+    fn filename_without_extension(path: String) -> Option<String> {
+        Path::new(&path)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .map(String::from)
     }
 
     pub fn filename(&self) -> String {
