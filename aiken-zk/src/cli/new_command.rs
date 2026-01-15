@@ -1,9 +1,9 @@
 use crate::cli::subcommand::Subcommand;
 use clap::{ArgMatches, Command};
-use std::{env, fs, io};
-use std::path::{PathBuf, Path};
-use rust_embed::RustEmbed;
 use colored::Colorize;
+use rust_embed::RustEmbed;
+use std::path::{Path, PathBuf};
+use std::{env, fs, io};
 
 #[derive(RustEmbed)]
 #[folder = "milestone_example/"]
@@ -15,7 +15,8 @@ impl Subcommand for NewCommand {
     const SUBCOMMAND_NAME: &'static str = "new";
 
     fn create_subcommand() -> Command {
-        let project_name = Self::create_required_argument_with_id(Self::NEW_COMMAND_PROJECT_NAME_ARG_NAME);
+        let project_name =
+            Self::create_required_argument_with_id(Self::NEW_COMMAND_PROJECT_NAME_ARG_NAME);
 
         Command::new(Self::SUBCOMMAND_NAME).arg(project_name.clone())
     }
@@ -34,7 +35,6 @@ impl NewCommand {
     const NEW_COMMAND_PROJECT_NAME_ARG_NAME: &'static str = "project_name";
 
     fn execute_command(project_name: &PathBuf) {
-
         // Create a directory called [project_name]
         // Copy the static template tree structure in the directory
         // Run [npm i | yarn i | ...] over the desired subdirectories
@@ -48,7 +48,6 @@ impl NewCommand {
         Self::move_to_working_dir(project_name).expect("Failed to jump into working directory");
         Self::install_javascript_dependencies();
         Self::check_presence_of_dependencies();
-
     }
 
     fn install_javascript_dependencies() {
@@ -57,19 +56,25 @@ impl NewCommand {
             Self::install_dependencies_in_directory(usable_manager_name, "curve_compress");
             Self::install_dependencies_in_directory(usable_manager_name, "deployment");
         } else {
-            eprintln!("{}", "You don't have npm nor yarn installed or accesible from path. \
+            eprintln!(
+                "{}",
+                "You don't have npm nor yarn installed or accesible from path. \
             You need to manually install the sub-directories curve_compress/ and deployment/ \
-            using your typescript package manager".red())
+            using your typescript package manager"
+                    .red()
+            )
         }
     }
 
     fn obtain_system_usable_package_manager() -> Option<&'static str> {
         let managers = ["npm", "yarn"];
         managers.iter().find_map(|&manager| {
-            let result = std::process::Command::new(manager).arg("--version").output();
+            let result = std::process::Command::new(manager)
+                .arg("--version")
+                .output();
             match result {
                 Ok(_) => Some(manager),
-                _ => None
+                _ => None,
             }
         })
     }
@@ -81,7 +86,9 @@ impl NewCommand {
             .status()
             .expect(&format!("Unable to install dependencies in {directory}"));
         if !package_manager_status_curve_compress.success() {
-            eprintln!("{usable_manager} installation failed in {directory}, you need to install manually")
+            eprintln!(
+                "{usable_manager} installation failed in {directory}, you need to install manually"
+            )
         }
     }
 
@@ -90,27 +97,27 @@ impl NewCommand {
     }
 
     fn copy_embedded_dir(root: &Path) -> Result<(), io::Error> {
-        let empty_directories = [
-            "circuit_inputs",
-            "validators",
-            "validators_with_offchain"
-        ];
+        let empty_directories = ["circuit_inputs", "validators", "validators_with_offchain"];
 
         for dir in empty_directories {
             fs::create_dir_all(root.join(dir))?;
         }
 
-        fs::write(root.join(Path::new("aiken.toml")), Self::aiken_toml_for_project_with_name(root.to_str().unwrap())).expect("Couldn't create aiken.toml");
+        fs::write(
+            root.join(Path::new("aiken.toml")),
+            Self::aiken_toml_for_project_with_name(root.to_str().unwrap()),
+        )
+        .expect("Couldn't create aiken.toml");
 
         for file in ProjectTemplate::iter().filter(|f| {
             let splitted_path = f.split('/').collect::<Vec<&str>>();
-            !empty_directories.contains(&f.split('/').next().unwrap()) &&
-            !splitted_path.contains(&"node_modules") &&
-            !splitted_path.contains(&"examples") &&
-            !splitted_path.contains(&"CUSTOM_EXAMPLE.md") &&
-            !splitted_path.contains(&"EXAMPLE.md") &&
-            !splitted_path.contains(&"aiken.toml") &&
-            !splitted_path.contains(&"custom_circuits")
+            !empty_directories.contains(&f.split('/').next().unwrap())
+                && !splitted_path.contains(&"node_modules")
+                && !splitted_path.contains(&"examples")
+                && !splitted_path.contains(&"CUSTOM_EXAMPLE.md")
+                && !splitted_path.contains(&"EXAMPLE.md")
+                && !splitted_path.contains(&"aiken.toml")
+                && !splitted_path.contains(&"custom_circuits")
         }) {
             let file_path = Path::new(file.as_ref());
             let out_path = root.join(file_path);
@@ -131,21 +138,34 @@ impl NewCommand {
     }
 
     fn check_presence_of_dependencies() {
-        if std::process::Command::new("aiken").arg("--version").output().is_err() {
+        if std::process::Command::new("aiken")
+            .arg("--version")
+            .output()
+            .is_err()
+        {
             eprintln!("{}", "aiken is not installed or accessible from path. Please follow the instructions in https://aiken-lang.org/installation-instructions".red())
         }
 
-        if std::process::Command::new("circom").arg("--version").output().is_err() {
+        if std::process::Command::new("circom")
+            .arg("--version")
+            .output()
+            .is_err()
+        {
             eprintln!("{}", "circom is not installed or accessible from path. Please follow the instructions in https://docs.circom.io/getting-started/installation/".red())
         }
 
-        if std::process::Command::new("snarkjs").arg("--version").output().is_err() {
+        if std::process::Command::new("snarkjs")
+            .arg("--version")
+            .output()
+            .is_err()
+        {
             eprintln!("{}", "snarkjs is not installed or accessible from path. Please install it globally: npm i -g snarkjs".red())
         }
     }
 
     fn aiken_toml_for_project_with_name(project_name: &str) -> String {
-        format!(r#"name = "aiken-lang/{project_name}"
+        format!(
+            r#"name = "aiken-lang/{project_name}"
 version = "0.0.0"
 compiler = "v1.1.17"
 plutus = "v3"
@@ -168,6 +188,7 @@ version = "v0.1"
 source = "github"
 
 [config]
-"#)
+"#
+        )
     }
 }

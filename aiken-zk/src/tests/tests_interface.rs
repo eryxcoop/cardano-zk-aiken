@@ -10,7 +10,6 @@ use std::{fs, io};
 
 pub const BUILD_COMMAND: &str = "build";
 
-
 #[test]
 #[serial]
 fn test_user_can_convert_aiken_with_offchain_to_valid_aiken() {

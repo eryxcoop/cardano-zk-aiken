@@ -141,9 +141,7 @@ impl AikenZkCompiler {
                     _ => panic!("Invalid MerkleTreeChecker identifier"),
                 })
                 .collect(),
-            ZkExample::PolynomialEvaluations {
-                ..
-            } => public_input_identifiers
+            ZkExample::PolynomialEvaluations { .. } => public_input_identifiers
                 .iter()
                 .map(|identifier| "Many(".to_string() + identifier + ")")
                 .collect(),
@@ -170,22 +168,21 @@ impl AikenZkCompiler {
         public_inputs: &Vec<Box<TokenWithCardinality>>,
     ) -> String {
         let mut aiken_zk_src = aiken_src.to_string();
-        let public_input_identifiers_wrapped_with_list_characteristics: Vec<String> =
-            public_inputs
-                .iter()
-                .map(|token_with_cardinality| {
-                     match *token_with_cardinality.clone() {
-                         TokenWithCardinality::Single(token) => {
-                             let identifier = Self::extract_identifier_from_token(&token);
-                             "Single(".to_string() + &identifier + ")"
-                         }
-                         TokenWithCardinality::Multiple(token) => {
-                             let identifier = Self::extract_identifier_from_token(&token);
-                             "Many(".to_string() + &identifier + ")"
-                         }
-                     }
-                })
-                .collect();
+        let public_input_identifiers_wrapped_with_list_characteristics: Vec<String> = public_inputs
+            .iter()
+            .map(
+                |token_with_cardinality| match *token_with_cardinality.clone() {
+                    TokenWithCardinality::Single(token) => {
+                        let identifier = Self::extract_identifier_from_token(&token);
+                        "Single(".to_string() + &identifier + ")"
+                    }
+                    TokenWithCardinality::Multiple(token) => {
+                        let identifier = Self::extract_identifier_from_token(&token);
+                        "Many(".to_string() + &identifier + ")"
+                    }
+                },
+            )
+            .collect();
 
         let replacement = format!(
             "zk_verify_or_fail(redeemer, [{}])",
@@ -205,13 +202,12 @@ impl AikenZkCompiler {
         public_inputs: &Vec<Box<TokenWithCardinality>>,
     ) {
         let bind = public_inputs.clone();
-        let has_list_variable = bind.iter()
-            .find(|&token_with_cardinality|{
-                match **token_with_cardinality {
+        let has_list_variable =
+            bind.iter()
+                .find(|&token_with_cardinality| match **token_with_cardinality {
                     TokenWithCardinality::Multiple(_) => true,
-                    _ => false
-                }
-        });
+                    _ => false,
+                });
         if has_list_variable.is_none() {
             // We anulate the validation in case there are list variables
             let r1cs_path = format!("{}{}.r1cs", output_path, circuit_name);

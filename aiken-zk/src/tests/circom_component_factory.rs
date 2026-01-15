@@ -28,5 +28,3 @@ component main {public [l, val]} = Indexing();
 "#
     .to_string()
 }
-
-

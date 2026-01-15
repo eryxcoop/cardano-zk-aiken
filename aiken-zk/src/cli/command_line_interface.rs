@@ -1,8 +1,8 @@
 use crate::cli::build_command::BuildCommand;
+use crate::cli::new_command::NewCommand;
 use crate::cli::prove_command::ProveCommand;
 use crate::cli::subcommand::Subcommand;
 use clap::Command;
-use crate::cli::new_command::NewCommand;
 
 pub struct CommandLineInterface {
     main_command: Command,

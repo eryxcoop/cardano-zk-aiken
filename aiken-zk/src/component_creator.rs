@@ -11,7 +11,12 @@ impl ComponentCreator {
     }
     const USED_CIRCOM_VERSION: &'static str = "2.1.9";
 
-    fn process_component_inputs_and_template_parameters<const N: usize>(template_file_name: &str, template_name: &str, input_to_identifiers: [(&InputZK, &str); N], template_parameters: &[&str]) -> String {
+    fn process_component_inputs_and_template_parameters<const N: usize>(
+        template_file_name: &str,
+        template_name: &str,
+        input_to_identifiers: [(&InputZK, &str); N],
+        template_parameters: &[&str],
+    ) -> String {
         let public_inputs_identifiers = Self::process_inputs_visibility(input_to_identifiers);
 
         Self::generate_circom_component(
@@ -35,7 +40,8 @@ impl ComponentCreator {
 
         let visibility_line = Self::generate_inputs_visibility(public_inputs_identifiers);
 
-        let component_parameters = Self::process_and_generate_template_arguments(circuit_template_parameters);
+        let component_parameters =
+            Self::process_and_generate_template_arguments(circuit_template_parameters);
 
         let instantiation = format!(
             "component main {}= {}{};",
@@ -73,28 +79,46 @@ impl ComponentCreator {
                 let template_file_name = "addition";
                 let template_name = "Addition";
 
-                let input_to_identifiers = [(lhs, "first_addend"), (rhs, "second_addend"), (res, "sum")];
+                let input_to_identifiers =
+                    [(lhs, "first_addend"), (rhs, "second_addend"), (res, "sum")];
                 let template_parameters = &[];
 
-                Self::process_component_inputs_and_template_parameters(template_file_name, template_name, input_to_identifiers, template_parameters)
+                Self::process_component_inputs_and_template_parameters(
+                    template_file_name,
+                    template_name,
+                    input_to_identifiers,
+                    template_parameters,
+                )
             }
             ZkExample::Subtraction { lhs, rhs, res } => {
-                let template_file_name= "subtraction";
-                let template_name= "Subtraction";
-                
-                let input_to_identifiers = [(lhs, "minuend"), (rhs, "subtrahend"), (res, "difference")];
+                let template_file_name = "subtraction";
+                let template_name = "Subtraction";
+
+                let input_to_identifiers =
+                    [(lhs, "minuend"), (rhs, "subtrahend"), (res, "difference")];
                 let template_parameters = &[];
-                
-                Self::process_component_inputs_and_template_parameters(template_file_name, template_name, input_to_identifiers, template_parameters)
+
+                Self::process_component_inputs_and_template_parameters(
+                    template_file_name,
+                    template_name,
+                    input_to_identifiers,
+                    template_parameters,
+                )
             }
             ZkExample::Multiplication { lhs, rhs, res } => {
                 let template_file_name = "multiplication";
                 let template_name = "Multiplication";
 
-                let input_to_identifiers = [(lhs, "multiplicand"), (rhs, "multiplier"), (res, "product")];
+                let input_to_identifiers =
+                    [(lhs, "multiplicand"), (rhs, "multiplier"), (res, "product")];
                 let template_parameters = &[];
 
-                Self::process_component_inputs_and_template_parameters(template_file_name, template_name, input_to_identifiers, template_parameters)
+                Self::process_component_inputs_and_template_parameters(
+                    template_file_name,
+                    template_name,
+                    input_to_identifiers,
+                    template_parameters,
+                )
             }
             ZkExample::Fibonacci {
                 fib_0,
@@ -109,10 +133,19 @@ impl ComponentCreator {
                 let template_file_name = "fibonacci";
                 let template_name = "Fibonacci";
 
-                let inputs_to_identifiers = [(fib_0, "first_fibonacci"), (fib_1, "second_fibonacci"), (res, "nth_fibonacci")];
+                let inputs_to_identifiers = [
+                    (fib_0, "first_fibonacci"),
+                    (fib_1, "second_fibonacci"),
+                    (res, "nth_fibonacci"),
+                ];
                 let template_parameters = &[value.as_str()];
 
-                Self::process_component_inputs_and_template_parameters(template_file_name, template_name, inputs_to_identifiers, template_parameters)
+                Self::process_component_inputs_and_template_parameters(
+                    template_file_name,
+                    template_name,
+                    inputs_to_identifiers,
+                    template_parameters,
+                )
             }
             ZkExample::If {
                 condition,
@@ -131,7 +164,12 @@ impl ComponentCreator {
                 ];
                 let template_parameters = &[];
 
-                Self::process_component_inputs_and_template_parameters(template_file_name, template_name, inputs_to_identifiers, template_parameters)
+                Self::process_component_inputs_and_template_parameters(
+                    template_file_name,
+                    template_name,
+                    inputs_to_identifiers,
+                    template_parameters,
+                )
             }
             ZkExample::AssertEq { lhs, rhs } => {
                 let template_file_name = "assert_eq";
@@ -140,7 +178,12 @@ impl ComponentCreator {
                 let inputs_to_identifiers = [(lhs, "lhs"), (rhs, "rhs")];
                 let template_parameters = &[];
 
-                Self::process_component_inputs_and_template_parameters(template_file_name, template_name, inputs_to_identifiers, template_parameters)
+                Self::process_component_inputs_and_template_parameters(
+                    template_file_name,
+                    template_name,
+                    inputs_to_identifiers,
+                    template_parameters,
+                )
             }
             ZkExample::CustomCircom { .. } => {
                 panic!("You shouldn't be here")
@@ -155,7 +198,12 @@ impl ComponentCreator {
                 let inputs_to_identifiers = [(r#in, "in"), (out, "out")];
                 let template_parameters = &[value.as_str()];
 
-                Self::process_component_inputs_and_template_parameters(template_file_name, template_name, inputs_to_identifiers, template_parameters)
+                Self::process_component_inputs_and_template_parameters(
+                    template_file_name,
+                    template_name,
+                    inputs_to_identifiers,
+                    template_parameters,
+                )
             }
             ZkExample::Poseidon {
                 n_inputs,
@@ -171,7 +219,12 @@ impl ComponentCreator {
                 let inputs_to_identifiers = [(r#in, "in"), (out, "out")];
                 let template_parametrs = &[value.as_str()];
 
-                Self::process_component_inputs_and_template_parameters(template_file_name, template_name, inputs_to_identifiers, template_parametrs)
+                Self::process_component_inputs_and_template_parameters(
+                    template_file_name,
+                    template_name,
+                    inputs_to_identifiers,
+                    template_parametrs,
+                )
             }
             ZkExample::MerkleTreeChecker {
                 levels,
@@ -194,7 +247,12 @@ impl ComponentCreator {
                 ];
                 let template_parameters = &[value.as_str()];
 
-                Self::process_component_inputs_and_template_parameters(template_file_name, template_name, inputs_to_identifiers, template_parameters)
+                Self::process_component_inputs_and_template_parameters(
+                    template_file_name,
+                    template_name,
+                    inputs_to_identifiers,
+                    template_parameters,
+                )
             }
             ZkExample::PolynomialEvaluations {
                 grade,
@@ -203,10 +261,18 @@ impl ComponentCreator {
                 domain,
                 evaluations,
             } => {
-                let Token::Int { value: polynomial_grade, base: _ } = *grade.token.clone() else {
+                let Token::Int {
+                    value: polynomial_grade,
+                    base: _,
+                } = *grade.token.clone()
+                else {
                     panic!("Not expected kind of token")
                 };
-                let Token::Int { value: amount_of_evaluations, base: _ } = *amount_of_evaluations.token.clone() else {
+                let Token::Int {
+                    value: amount_of_evaluations,
+                    base: _,
+                } = *amount_of_evaluations.token.clone()
+                else {
                     panic!("Not expected kind of token")
                 };
                 let template_file_name = "polynomials";
@@ -217,9 +283,15 @@ impl ComponentCreator {
                     (domain, "domain"),
                     (evaluations, "evaluations"),
                 ];
-                let template_parameters = &[polynomial_grade.as_str(), amount_of_evaluations.as_str()];
+                let template_parameters =
+                    &[polynomial_grade.as_str(), amount_of_evaluations.as_str()];
 
-                Self::process_component_inputs_and_template_parameters(template_file_name, template_name, inputs_to_identifiers, template_parameters)
+                Self::process_component_inputs_and_template_parameters(
+                    template_file_name,
+                    template_name,
+                    inputs_to_identifiers,
+                    template_parameters,
+                )
             }
         }
     }

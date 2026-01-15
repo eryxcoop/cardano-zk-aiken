@@ -14,7 +14,7 @@ impl CircomCircuit {
     pub fn from(circom_source_code_path: String) -> Self {
         Self {
             circom_source_code_path: circom_source_code_path.clone(),
-            filename: Self::filename_without_extension(circom_source_code_path).unwrap()
+            filename: Self::filename_without_extension(circom_source_code_path).unwrap(),
         }
     }
 
@@ -200,7 +200,6 @@ impl CircomCircuit {
             .arg(inputs_path)
             .arg(build_path.to_string() + "witness.wtns");
         self.run_command_or_fail(cmd, "Generate witnesses");
-
     }
 
     fn generate_groth16_proof_from_witness(&self, verification_key_path: &str, build_path: &str) {
@@ -247,10 +246,16 @@ impl CircomCircuit {
                 "Command '{}' failed with exit code {:?}{}{}",
                 label,
                 command_output.status.code(),
-                ". The error is ".to_string() + &String::from_utf8_lossy(&command_output.stderr).trim().to_string(),
+                ". The error is ".to_string()
+                    + &String::from_utf8_lossy(&command_output.stderr)
+                        .trim()
+                        .to_string(),
                 if command_output.stdout.len() > 0 {
-                    ". The stdout is ".to_string() + &String::from_utf8_lossy(&command_output.stdout).trim().to_string()
-                }  else {
+                    ". The stdout is ".to_string()
+                        + &String::from_utf8_lossy(&command_output.stdout)
+                            .trim()
+                            .to_string()
+                } else {
                     "".to_string()
                 },
             );

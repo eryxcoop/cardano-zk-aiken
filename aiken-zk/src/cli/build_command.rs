@@ -1,10 +1,10 @@
 use crate::cli::subcommand::Subcommand;
 use crate::compiler::aiken_zk_compiler::AikenZkCompiler;
+use crate::entropy_generator::EntropyGenerator;
 use clap::{ArgMatches, Command};
 use std::fs;
 use std::io::ErrorKind;
 use std::path::PathBuf;
-use crate::entropy_generator::EntropyGenerator;
 
 pub struct BuildCommand {}
 

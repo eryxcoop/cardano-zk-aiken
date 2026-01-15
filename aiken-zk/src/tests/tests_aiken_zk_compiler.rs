@@ -2,7 +2,9 @@ use crate::compiler::aiken_zk_compiler::{AikenZkCompiler, Groth16CompressedData}
 use crate::tests::aiken_program_factory::{
     aiken_template_with_body_and_verify_definition, verify_declaration,
 };
-use crate::tests::circom_component_factory::{addition_custom_circom_template_and_component, indexing_custom_circom_template_and_component};
+use crate::tests::circom_component_factory::{
+    addition_custom_circom_template_and_component, indexing_custom_circom_template_and_component,
+};
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
 use std::fs;
@@ -452,8 +454,7 @@ fn get_compressed_verification_key_from_merkle_tree_checker_circuit_with_mixed_v
     }
 }
 
-fn get_compressed_verification_key_from_polynomial_evaluations()
--> Groth16CompressedData {
+fn get_compressed_verification_key_from_polynomial_evaluations() -> Groth16CompressedData {
     Groth16CompressedData {
         vk_alpha_1: "85e3f8a13a670514351a68677ea0e2fc51150daeea496b85a34d97751695e26b2ae4f1a5a3b60e17bb7bfd6d474154c5".to_string(),
         vk_beta_2: "b1abf58f58af5981cd24f996e53626a4157eeed4aa814498885b3a547c35d5efb877834602508255c030708552b353e21631f16475e35b977e39a068ac9fb5bc4c25d383139b721da0a878b663c4df52c94a51f7c06a019bb40324713d2bbf0f".to_string(),

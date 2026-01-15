@@ -7,8 +7,8 @@ use crate::compiler::token_zk::{TokenZK as Token, TokenZK};
 use crate::zk_examples::TokenWithCardinality::{Multiple, Single};
 use aiken_lang::parser::error::ParseError;
 use chumsky::{
-    prelude::{choice, just},
     Parser,
+    prelude::{choice, just},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -348,7 +348,9 @@ impl ZkExample {
     }
 
     fn name_parser_multiple() -> impl Parser<char, TokenWithCardinality, Error = ParseError> {
-        just("@").then(Self::name_parser()).map(|(_, id)| TokenWithCardinality::new_multiple(id) )
+        just("@")
+            .then(Self::name_parser())
+            .map(|(_, id)| TokenWithCardinality::new_multiple(id))
     }
 
     fn custom_circom_parser() -> impl Parser<char, Token, Error = ParseError> {

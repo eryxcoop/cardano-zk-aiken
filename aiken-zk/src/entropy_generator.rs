@@ -1,5 +1,5 @@
-use rand::rng;
 use rand::distr::{Alphanumeric, SampleString};
+use rand::rng;
 
 pub struct EntropyGenerator {}
 

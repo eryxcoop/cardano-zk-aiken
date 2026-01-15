@@ -421,7 +421,8 @@ fn test_lexer_translates_merkle_tree_checker_parameters() {
 fn test_lexer_translates_polynomial_evaluations_parameters() {
     // First 2: grade of polynomial
     // Second 2: amount of evaluations
-    let program = "offchain polynomial_evaluations(2, coefficients, 2, pub domain, pub evaluations)";
+    let program =
+        "offchain polynomial_evaluations(2, coefficients, 2, pub domain, pub evaluations)";
     let lexer::LexInfo { tokens, .. } = lexer::Lexer::new().run(program).unwrap();
     let offchain_token = &tokens[0].0;
     assert_eq!(
@@ -478,8 +479,10 @@ fn test_lexer_translates_custom_circom_with_list_variable() {
         Token::Offchain {
             example: ZkExample::CustomCircom {
                 path: String::from("path/to/circom/with/main.circom"),
-                public_inputs: vec![single_variable_token("a").unwrap(),
-                                    multiple_variable_token("b").unwrap()]
+                public_inputs: vec![
+                    single_variable_token("a").unwrap(),
+                    multiple_variable_token("b").unwrap()
+                ]
             },
         },
         *offchain_token

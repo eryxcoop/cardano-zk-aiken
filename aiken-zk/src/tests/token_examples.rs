@@ -270,23 +270,28 @@ pub fn polynomial_evaluations_token(grade: u32, amount_of_evaluations: u32) -> t
     token_zk::TokenZK::Offchain {
         example: ZkExample::PolynomialEvaluations {
             grade: CircuitTemplateParameter {
-                token: Box::new(int_token(grade).unwrap().extract_single().unwrap())
+                token: Box::new(int_token(grade).unwrap().extract_single().unwrap()),
             },
             coefficients: InputZK {
                 visibility: InputVisibility::Public,
-                token: single_variable_token("coefficients")
+                token: single_variable_token("coefficients"),
             },
             amount_of_evaluations: CircuitTemplateParameter {
-                token: Box::new(int_token(amount_of_evaluations).unwrap().extract_single().unwrap())
+                token: Box::new(
+                    int_token(amount_of_evaluations)
+                        .unwrap()
+                        .extract_single()
+                        .unwrap(),
+                ),
             },
             domain: InputZK {
                 visibility: InputVisibility::Public,
-                token: single_variable_token("domain")
+                token: single_variable_token("domain"),
             },
             evaluations: InputZK {
                 visibility: InputVisibility::Public,
-                token: single_variable_token("evaluations")
-            }
-        }
+                token: single_variable_token("evaluations"),
+            },
+        },
     }
 }
