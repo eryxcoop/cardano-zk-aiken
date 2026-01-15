@@ -1,5 +1,6 @@
 use crate::compiler::BUILD_DIR;
 use crate::compressed_groth16_proof_bls12_381::CompressedGroth16ProofBls12_381;
+use super::{filename_without_extension_nor_path};
 use std::fs;
 use std::io::{Error, ErrorKind};
 use std::path::Path;
@@ -14,15 +15,8 @@ impl CircomCircuit {
     pub fn from(circom_source_code_path: String) -> Self {
         Self {
             circom_source_code_path: circom_source_code_path.clone(),
-            filename: Self::filename_without_extension(circom_source_code_path).unwrap(),
+            filename: filename_without_extension_nor_path(circom_source_code_path).unwrap(),
         }
-    }
-
-    fn filename_without_extension(path: String) -> Option<String> {
-        Path::new(&path)
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .map(String::from)
     }
 
     pub fn filename(&self) -> String {

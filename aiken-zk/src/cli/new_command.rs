@@ -1,4 +1,5 @@
 use crate::cli::subcommand::Subcommand;
+use crate::filename_without_extension_nor_path;
 use clap::{ArgMatches, Command};
 use colored::Colorize;
 use rust_embed::RustEmbed;
@@ -103,9 +104,12 @@ impl NewCommand {
             fs::create_dir_all(root.join(dir))?;
         }
 
+        let project_name =
+            filename_without_extension_nor_path(String::from(root.to_str().unwrap())).unwrap();
+
         fs::write(
             root.join(Path::new("aiken.toml")),
-            Self::aiken_toml_for_project_with_name(root.to_str().unwrap()),
+            Self::aiken_toml_for_project_with_name(&project_name),
         )
         .expect("Couldn't create aiken.toml");
 
