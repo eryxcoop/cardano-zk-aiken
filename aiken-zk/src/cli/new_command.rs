@@ -54,13 +54,12 @@ impl NewCommand {
     fn install_javascript_dependencies() {
         let usable_manager = Self::obtain_system_usable_package_manager();
         if let Some(usable_manager_name) = usable_manager {
-            Self::install_dependencies_in_directory(usable_manager_name, "curve_compress");
-            Self::install_dependencies_in_directory(usable_manager_name, "deployment");
+            Self::install_dependencies_in_directory(usable_manager_name, ".");
         } else {
             eprintln!(
                 "{}",
                 "You don't have npm nor yarn installed or accesible from path. \
-            You need to manually install the sub-directories curve_compress/ and deployment/ \
+            You need to manually install the dependencies / \
             using your typescript package manager"
                     .red()
             )

@@ -1,11 +1,18 @@
 {
-  "name": "deployment",
+  "name": "conversion",
   "version": "1.0.0",
+  "description": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
+    "bigint-buffer": "^1.1.5",
+    "ffjavascript": "^0.2.63",
     "@meshsdk/core": "^1.8.14",
     "tsx": "^4.19.3"
   },
