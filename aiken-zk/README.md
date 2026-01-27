@@ -19,7 +19,7 @@ To run the aiken-zk compiler you must have the following tools:
 * Rust > 1.87.0 - https://www.rust-lang.org/tools/install
 * Node >= 20.10.0 - https://nodejs.org/en/download
 * Snark.js >= 0.7.5 - https://www.npmjs.com/package/snarkjs
-* Circom = 2.1.9 - https://docs.circom.io/getting-started/installation/ (```git checkout v2.1.9```)
+* Circom = 2.2.3 - https://docs.circom.io/getting-started/installation/ (```git checkout v2.2.3```)
 * Aiken >= 1.1.17 - https://aiken-lang.org/installation-instructions
 
 ## Installation
