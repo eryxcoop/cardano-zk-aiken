@@ -23,7 +23,7 @@ To run the aiken-zk compiler you must have the following tools:
 * Aiken >= 1.1.17 - https://aiken-lang.org/installation-instructions
 
 ## Installation
-Step on the ```aiken-zk``` subfolder and run ```cargo install --path .``` command (dot included). This will install 
+Step on the ```aiken-zk``` subfolder and run ```cargo install --locked --path .``` command (dot included). This will install 
 ```aiken-zk``` globally so you can use it from anywhere. The available commands are 
 * ```aiken-zk new <project_name>``` --> Use this to create a new project
 * ```aiken-zk build <args described below>```
