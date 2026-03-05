@@ -30,6 +30,12 @@ impl Subcommand for ProveCommand {
                 &inputs_path,
                 &output_path,
             ))
+            .subcommand(Self::create_json_proof_command(
+                &circom_path,
+                &verification_key_path,
+                &inputs_path,
+                &output_path,
+            ))
             .subcommand(Self::create_library_for_meshjs_command(
                 circom_path,
                 verification_key_path,
@@ -92,6 +98,19 @@ impl ProveCommand {
         output_path: &Arg,
     ) -> Command {
         Command::new("aiken")
+            .arg(circom_path.clone())
+            .arg(verification_key_path.clone())
+            .arg(inputs_path.clone())
+            .arg(output_path.clone())
+    }
+
+    fn create_json_proof_command(
+        circom_path: &Arg,
+        verification_key_path: &Arg,
+        inputs_path: &Arg,
+        output_path: &Arg,
+    ) -> Command {
+        Command::new("json")
             .arg(circom_path.clone())
             .arg(verification_key_path.clone())
             .arg(inputs_path.clone())

@@ -13,9 +13,9 @@ impl CompressedGroth16ProofBls12_381ToJsonPresenter {
 
     pub fn present(&self) -> String {
         format!("{{
-\tpiA: \"{}\",
-\tpiB: \"{}\",
-\tpiC: \"{}\",
+\t\"piA\": \"{}\",
+\t\"piB\": \"{}\",
+\t\"piC\": \"{}\"
 }}",
             &self.proof.pi_a_as_byte_string(),
             &self.proof.pi_b_as_byte_string(),

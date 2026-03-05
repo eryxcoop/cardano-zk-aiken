@@ -89,9 +89,9 @@ fn test_json_proof_is_correctly_presented() {
 
     let json_proof = json_presenter.present();
     let expected_presented_proof = format!("{{
-\tpiA: \"{}\",
-\tpiB: \"{}\",
-\tpiC: \"{}\",
+\t\"piA\": \"{}\",
+\t\"piB\": \"{}\",
+\t\"piC\": \"{}\"
 }}",
         &proof.pi_a_as_byte_string(),
         &proof.pi_b_as_byte_string(),
