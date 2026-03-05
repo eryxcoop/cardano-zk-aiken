@@ -5,6 +5,7 @@ use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
 use clap::{Arg, ArgMatches, Command};
 use std::fs;
 use std::path::{Path, PathBuf};
+use crate::presenter::compressed_groth16_proof_bls12_381_to_json_presenter::CompressedGroth16ProofBls12_381ToJsonPresenter;
 
 pub struct ProveCommand {}
 
@@ -57,6 +58,13 @@ impl Subcommand for ProveCommand {
                     );
                 } else if match_name == "meshjs" {
                     Self::execute_meshjs_prove_command(
+                        circom_path,
+                        verification_key_path,
+                        inputs_path,
+                        output_path,
+                    );
+                } else if match_name == "json" {
+                    Self::execute_json_prove_command(
                         circom_path,
                         verification_key_path,
                         inputs_path,
@@ -154,6 +162,27 @@ impl ProveCommand {
             circuit.generate_groth16_proof(verification_key_path_string, inputs_path_string);
 
         let mesh_js_presenter = MeshJsZKRedeemerPresenter::new_for_proof(proof);
+        let zk_redeemer = mesh_js_presenter.present();
+
+        fs::write(output_path_string, zk_redeemer).expect("output file write failed");
+    }
+
+    fn execute_json_prove_command(
+        circom_path: &PathBuf,
+        verification_key_path: &PathBuf,
+        inputs_path: &PathBuf,
+        output_path: &PathBuf,
+    ) {
+        let circom_path_string = circom_path.to_str().unwrap();
+        let verification_key_path_string = verification_key_path.to_str().unwrap();
+        let inputs_path_string = inputs_path.to_str().unwrap();
+        let output_path_string = output_path.to_str().unwrap();
+
+        let circuit = CircomCircuit::from(circom_path_string.to_string());
+        let proof =
+            circuit.generate_groth16_proof(verification_key_path_string, inputs_path_string);
+
+        let mesh_js_presenter = CompressedGroth16ProofBls12_381ToJsonPresenter::new(proof);
         let zk_redeemer = mesh_js_presenter.present();
 
         fs::write(output_path_string, zk_redeemer).expect("output file write failed");

@@ -4,6 +4,7 @@ use crate::presenter::meshjs_zk_redeemer_presenter::MeshJsZKRedeemerPresenter;
 use crate::tests::utils::create_sandbox_and_set_as_current_directory;
 use serial_test::serial;
 use std::fs;
+use crate::presenter::compressed_groth16_proof_bls12_381_to_json_presenter::CompressedGroth16ProofBls12_381ToJsonPresenter;
 
 #[test]
 #[serial]
@@ -69,6 +70,35 @@ fn test_meshjs_library_is_correctly_presented() {
     );
 
     assert_eq!(expected_presented_meshjs_library, presented_meshjs_library);
+}
+
+#[test]
+#[serial]
+fn test_json_proof_is_correctly_presented() {
+    let _temporal_directory = create_sandbox_and_set_as_current_directory();
+    let circom_path = "my_program.circom";
+    let verification_key_path = "my_verification_key.zkey";
+    let inputs_path = "inputs.json";
+
+    create_circom_and_inputs_file();
+
+    let circuit = CircomCircuit::from(circom_path.to_string());
+    let proof = circuit.generate_groth16_proof(verification_key_path, inputs_path);
+
+    let json_presenter = CompressedGroth16ProofBls12_381ToJsonPresenter::new(proof.clone());
+
+    let json_proof = json_presenter.present();
+    let expected_presented_proof = format!("{{
+\tpiA: \"{}\",
+\tpiB: \"{}\",
+\tpiC: \"{}\",
+}}",
+        &proof.pi_a_as_byte_string(),
+        &proof.pi_b_as_byte_string(),
+        &proof.pi_c_as_byte_string()
+    );
+
+    assert_eq!(expected_presented_proof, json_proof);
 }
 
 fn create_circom_and_inputs_file() {
